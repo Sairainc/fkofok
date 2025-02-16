@@ -47,10 +47,17 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
 
       // LIFF初期化を修正
       try {
+        console.log('LIFF ID before trim:', LIFF_ID)
+        const trimmedLiffId = LIFF_ID?.trim()
+        console.log('LIFF ID after trim:', trimmedLiffId)
+
         if (!liff.ready) {
           console.log('Initializing LIFF...')
+          if (!trimmedLiffId) {
+            throw new Error('LIFF ID is empty after trimming')
+          }
           await liff.init({
-            liffId: LIFF_ID.trim(), // 空白を除去
+            liffId: trimmedLiffId,
             withLoginOnExternalBrowser: true
           })
         }
@@ -59,16 +66,24 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
         // ログイン処理
         if (!liff.isLoggedIn()) {
           console.log('User not logged in, starting login process')
+          const trimmedRedirectUrl = REDIRECT_URL.trim()
+          console.log('Redirect URL after trim:', trimmedRedirectUrl)
           liff.login({
-            redirectUri: REDIRECT_URL.trim() // 空白を除去
+            redirectUri: trimmedRedirectUrl
           })
         } else {
           console.log('User already logged in, redirecting...')
-          window.location.href = REDIRECT_URL.trim() // 空白を除去
+          window.location.href = REDIRECT_URL.trim()
         }
       } catch (error) {
         console.error('LIFF initialization/login error:', error)
-        throw new Error('LIFF initialization failed')
+        if (error instanceof Error) {
+          console.error('Error details:', {
+            message: error.message,
+            stack: error.stack
+          })
+        }
+        throw error // 元のエラーをそのまま投げる
       }
       
     } catch (error) {
