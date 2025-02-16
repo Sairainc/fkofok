@@ -6,8 +6,8 @@ import { testSupabaseConnection } from '@/lib/supabase'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'マッチングサービス | 安心・安全な出会いを',
-  description: '厳選されたマッチングサービス。プロフィール審査済みの会員同士で、安心・安全な出会いを提供します。',
+  title: '合コンマッチングサービス',
+  description: 'あなたにぴったりの合コンを見つけましょう',
   keywords: 'マッチング,婚活,恋活,出会い,安心,安全',
   openGraph: {
     title: 'マッチングサービス | 安心・安全な出会いを',
