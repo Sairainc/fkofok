@@ -11,7 +11,7 @@ type CallToActionProps = {
 export const CallToAction = ({ userType }: CallToActionProps) => {
   const LINE_URL = process.env.NEXT_PUBLIC_LINE_ADD_FRIEND_URL!
   const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID
-  const REDIRECT_URL = process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL || '/auth/line/callback'
+  const REDIRECT_URL = process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL || 'https://gogochdlfbd.com/auth/line/callback'
 
   // Add URL validation
   const isValidUrl = (url: string) => {
@@ -38,7 +38,7 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
       console.log('LIFF ID:', LIFF_ID)
 
       // リダイレクトURLの検証
-      if (!REDIRECT_URL || !isValidUrl(REDIRECT_URL)) {
+      if (!isValidUrl(REDIRECT_URL)) {
         console.error('Invalid redirect URL:', REDIRECT_URL)
         throw new Error('Redirect URL is not properly configured')
       }

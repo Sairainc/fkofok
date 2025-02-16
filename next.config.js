@@ -5,6 +5,7 @@ const nextConfig = {
     domains: [
       'rlwfhcyhusvihctzaqfn.supabase.co', // Supabase Storage
       'vercel.com', // Vercel
+      'profile.line-scdn.net', // LINE Profile Images
     ],
   },
   env: {
@@ -14,7 +15,7 @@ const nextConfig = {
     NEXT_PUBLIC_LINE_ADD_FRIEND_URL: process.env.NEXT_PUBLIC_LINE_ADD_FRIEND_URL,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
-    NEXT_PUBLIC_LIFF_REDIRECT_URL: process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL,
+    NEXT_PUBLIC_LIFF_REDIRECT_URL: process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL || 'https://gogochdlfbd.com/auth/line/callback',
   },
 }
 

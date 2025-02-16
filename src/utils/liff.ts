@@ -1,28 +1,8 @@
 import liff from '@line/liff';
 import type { Profile } from '@liff/get-profile';
-import { supabase } from '@/lib/supabase'; // 既存のSupabaseクライアントを使用
 
 // **[修正] import の後にログを移動**
 console.log('[DEBUG] liff.ts is loaded!');
-
-interface LogDetails {
-  [key: string]: unknown;
-}
-
-// **ログ送信用のヘルパー関数**
-const sendLog = async (event: string, details: LogDetails) => {
-  try {
-    console.log(`\n=== ${event} ===`)
-    console.log('Details:', details)
-    await fetch('/api/line-login-log', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event, details }),
-    });
-  } catch (error) {
-    console.error('[ERROR] Error sending log:', error);
-  }
-};
 
 // LIFF初期化
 export const initializeLiff = async (liffId?: string) => {
