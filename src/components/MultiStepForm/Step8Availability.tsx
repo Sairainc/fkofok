@@ -1,19 +1,14 @@
+import React from 'react'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-
-type Step8Props = {
-  register: any
-  userType: 'men' | 'women'
-  onNext: () => void
-  onPrev: () => void
-}
+import { FormProps } from '@/types/form'
 
 type AvailabilityCount = {
   datetime: string
   count: number
 }
 
-const Step8Availability = ({ register, userType, onNext, onPrev }: Step8Props) => {
+const Step8Availability = ({ register, userType, onNext, onPrev }: FormProps) => {
   const [availabilityCounts, setAvailabilityCounts] = useState<AvailabilityCount[]>([])
   const [availableDates, setAvailableDates] = useState<string[]>([])
 
