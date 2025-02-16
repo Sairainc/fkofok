@@ -2,18 +2,14 @@ import React from 'react'
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { FormProps } from '@/types/form'
+import { UseFormRegister } from 'react-hook-form'
 
 type Step7Props = {
-  register: any
+  register: UseFormRegister<FormProps>
   userType: 'men' | 'women'
   onNext: () => void
   onPrev: () => void
   lineId: string
-}
-
-type PhotoUploadProps = FormProps & {
-  onFileChange: (files: FileList) => void;
-  previewUrls: string[];
 }
 
 const Step7Photos = ({ register, userType, onNext, onPrev, lineId }: Step7Props) => {

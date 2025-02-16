@@ -1,5 +1,8 @@
+import { UseFormRegister } from 'react-hook-form'
+import { FormData } from '@/types/form'
+
 type Step6Props = {
-  register: any
+  register: UseFormRegister<FormData>
   _userType: 'men' | 'women'
   onNext: () => void
   onPrev: () => void

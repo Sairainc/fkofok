@@ -1,7 +1,9 @@
 import { useWatch } from 'react-hook-form'
+import { UseFormRegister } from 'react-hook-form'
+import { FormData } from '@/types/form'
 
 type Step0Props = {
-  register: any
+  register: UseFormRegister<FormData>
   onNext: (gender: 'men' | 'women') => void
 }
 
