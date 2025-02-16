@@ -36,7 +36,7 @@ export default function MenLP() {
           imageUrl="/images/men-hero.jpg"
         />
         <Features features={features} />
-        <CallToAction userType="men" />
+        <CallToAction />
       </main>
     </>
   )

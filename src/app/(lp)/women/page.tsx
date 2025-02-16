@@ -36,7 +36,7 @@ export default function WomenLP() {
           imageUrl="/images/women-hero.jpg"
         />
         <Features features={features} />
-        <CallToAction userType="women" />
+        <CallToAction />
       </main>
     </>
   )

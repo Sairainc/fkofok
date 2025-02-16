@@ -3,7 +3,7 @@
 
 import { useRouter } from 'next/navigation'
 
-export const CallToAction = ({ userType }: { userType: 'men' | 'women' }) => {
+export const CallToAction = () => {
   const router = useRouter()
 
   return (
