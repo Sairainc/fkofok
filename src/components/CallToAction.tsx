@@ -10,10 +10,10 @@ type CallToActionProps = {
 
 export const CallToAction = ({ userType }: CallToActionProps) => {
   const LINE_URL = process.env.NEXT_PUBLIC_LINE_ADD_FRIEND_URL!
-  const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID
+  const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID || "2006882585-DMX89WMb"; // デフォルト値を設定
   const REDIRECT_URL = process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL || 'https://gogochdlfbd.com/auth/line/callback'
 
-  // Add URL validation
+  // URLが有効かを確認する関数
   const isValidUrl = (url: string) => {
     try {
       new URL(url)
@@ -33,75 +33,63 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
       
       // LIFF IDの検証
       if (!LIFF_ID) {
-        console.error('LIFF ID is missing:', LIFF_ID)
+        console.error('[ERROR] LIFF ID is missing:', LIFF_ID)
         throw new Error('LIFF ID is not configured')
       }
-      console.log('LIFF ID:', LIFF_ID)
+      console.log('[DEBUG] LIFF ID:', LIFF_ID)
 
       // リダイレクトURLの検証
       if (!REDIRECT_URL || !isValidUrl(REDIRECT_URL)) {
-        console.error('Invalid redirect URL:', REDIRECT_URL)
+        console.error('[ERROR] Invalid redirect URL:', REDIRECT_URL)
         throw new Error('Redirect URL is not properly configured')
       }
-      console.log('Redirect URL:', REDIRECT_URL)
+      console.log('[DEBUG] Redirect URL:', REDIRECT_URL)
 
-      // LIFF初期化を修正
+      // LIFF初期化の前にIDをログ出力
+      const trimmedLiffId = LIFF_ID.trim()
+      console.log('[DEBUG] LIFF ID before init:', trimmedLiffId)
+
       try {
-        console.log('LIFF ID before trim:', LIFF_ID)
-        const trimmedLiffId = LIFF_ID?.trim()
-        console.log('LIFF ID after trim:', trimmedLiffId)
-
-        // LIFF初期化の前にステータスをチェック
-        if (!liff.ready) {
-          console.log('Initializing LIFF...')
+        // すでにLIFFが初期化されているか確認
+        if (!liff.getAccessToken()) { 
+          console.log('[DEBUG] Initializing LIFF...')
           if (!trimmedLiffId) {
             throw new Error('LIFF ID is empty after trimming')
           }
 
-          // 初期化を試みる
+          // LIFF初期化
           await liff.init({
             liffId: trimmedLiffId,
             withLoginOnExternalBrowser: true
           })
-          console.log('LIFF initialization successful')
+          console.log('[DEBUG] LIFF initialization successful')
         } else {
-          console.log('LIFF is already initialized')
-        }
-
-        // ログイン処理を実行する前に再度初期化状態を確認
-        if (!liff.ready) {
-          throw new Error('LIFF is not ready after initialization')
+          console.log('[DEBUG] LIFF is already initialized')
         }
 
         // ログイン処理
         if (!liff.isLoggedIn()) {
-          console.log('User not logged in, starting login process')
+          console.log('[DEBUG] User not logged in, starting login process')
           const trimmedRedirectUrl = REDIRECT_URL.trim()
-          console.log('Redirect URL after trim:', trimmedRedirectUrl)
-          
+          console.log('[DEBUG] Redirect URL after trim:', trimmedRedirectUrl)
+
           // ログイン処理を実行
           liff.login({
             redirectUri: trimmedRedirectUrl
           })
         } else {
-          console.log('User already logged in, redirecting...')
+          console.log('[DEBUG] User already logged in, redirecting...')
           window.location.href = REDIRECT_URL.trim()
         }
       } catch (error) {
-        console.error('LIFF initialization/login error:', error)
-        if (error instanceof Error) {
-          console.error('Error details:', {
-            message: error.message,
-            stack: error.stack
-          })
-        }
+        console.error('[ERROR] LIFF initialization/login error:', error)
         throw new Error('LIFF initialization failed: ' + (error instanceof Error ? error.message : 'Unknown error'))
       }
       
     } catch (error) {
       console.error('\n=== LINE Login Error in CallToAction ===')
-      console.error('Error details:', error)
-      
+      console.error('[ERROR] Details:', error)
+
       let errorMessage = 'LINEログインに失敗しました。'
       if (error instanceof Error) {
         if (error.message.includes('LIFF ID')) {
@@ -111,7 +99,6 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
         } else if (error.message.includes('Redirect URL')) {
           errorMessage = 'リダイレクトURLの設定が正しくありません。'
         }
-        console.error('Error message:', error.message)
       }
       alert(`${errorMessage}\nもう一度お試しください。`)
     }
@@ -119,11 +106,8 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
 
   return (
     <div className="sticky bottom-0 w-full z-50 group">
-      {/* ホバー時に表示される背景オーバーレイ */}
       <div className="fixed inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
-
       <div className="relative bg-[#B8860B] transform translate-y-[calc(100%-60px)] group-hover:translate-y-0 transition-transform duration-300">
-        {/* タブ部分 */}
         <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#B8860B] text-white px-6 py-2 rounded-t-lg flex items-center gap-2">
           <Image
             src="/line-icon.png"
@@ -134,18 +118,10 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
           />
           <span className="font-bold">今すぐ登録</span>
         </div>
-
-        {/* メインコンテンツ */}
         <div className="p-6 text-center text-white">
           <h2 className="text-2xl font-bold mb-4">
             {userType === 'men' ? '理想の出会いを見つけよう' : '素敵な出会いを見つけよう'}
           </h2>
-          <p className="mb-6">
-            {userType === 'men' 
-              ? '厳選された女性会員があなたをお待ちしています'
-              : '信頼できる男性会員との出会いをお届けします'}
-          </p>
-          
           <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
             <button
               onClick={handleLineClick}
@@ -168,12 +144,8 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
               プロフィール登録
             </button>
           </div>
-          
-          <p className="mt-4 text-sm opacity-80">
-            ※ LINE友だち追加後、プロフィール登録ができます
-          </p>
         </div>
       </div>
     </div>
   )
-} 
+}
