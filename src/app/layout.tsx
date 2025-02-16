@@ -6,6 +6,8 @@ import { testSupabaseConnection } from '@/lib/supabase'
 const inter = Inter({ 
   subsets: ['latin'],
   display: 'swap',
+  preload: true,
+  fallback: ['Helvetica', 'Arial', 'sans-serif']
 })
 
 export const metadata: Metadata = {
