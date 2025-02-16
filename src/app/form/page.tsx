@@ -40,6 +40,9 @@ export default function Form(): React.ReactNode {
         // utils/liffの初期化関数を使用
         await initializeLiff(liffId)
 
+        // ログイン状態を確認する前に少し待機
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         // ログイン状態を確認
         if (!liff.isLoggedIn()) {
           console.log('[DEBUG] User not logged in, redirecting to login')
