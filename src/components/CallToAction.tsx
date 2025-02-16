@@ -11,7 +11,7 @@ type CallToActionProps = {
 export const CallToAction = ({ userType }: CallToActionProps) => {
   const LINE_URL = process.env.NEXT_PUBLIC_LINE_ADD_FRIEND_URL!
   const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID
-  const REDIRECT_URL = process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL
+  const REDIRECT_URL = process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL || '/auth/line/callback'
 
   // Add URL validation
   const isValidUrl = (url: string) => {
