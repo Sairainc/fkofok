@@ -17,30 +17,64 @@ export default function LineCallback() {
         // LIFF IDの検証
         const liffId = process.env.NEXT_PUBLIC_LIFF_ID
         if (!liffId) {
+          console.error('LIFF ID is missing')
           throw new Error('LIFF ID is not configured')
         }
+        console.log('LIFF ID:', liffId)
         
         // LIFF初期化
         if (!liff.ready) {
-          await liff.init({ liffId })
+          try {
+            console.log('Initializing LIFF...')
+            await liff.init({
+              liffId: liffId,
+              withLoginOnExternalBrowser: true
+            })
+            console.log('LIFF initialization successful')
+          } catch (initError) {
+            console.error('LIFF initialization error:', initError)
+            throw new Error('LIFF initialization failed')
+          }
         }
-        console.log('LIFF initialization successful')
+
+        // ログイン状態の確認
+        if (!liff.isLoggedIn()) {
+          console.error('User is not logged in at callback')
+          throw new Error('User is not logged in')
+        }
 
         // プロフィール取得
-        const profile = await getLiffProfile()
-        if (!profile) {
+        try {
+          const profile = await getLiffProfile()
+          if (!profile) {
+            throw new Error('Failed to get LINE profile')
+          }
+          console.log('Profile retrieved successfully:', profile)
+
+          // フォームページへリダイレクト
+          router.push('/form')
+        } catch (profileError) {
+          console.error('Profile retrieval error:', profileError)
           throw new Error('Failed to get LINE profile')
         }
-        console.log('Profile retrieved successfully')
-
-        // フォームページへリダイレクト
-        router.push('/form')
 
       } catch (error) {
         console.error('\n=== LINE Login Callback Error ===')
         console.error('Error details:', error)
         
-        setError('ログインに失敗しました。もう一度お試しください。')
+        let errorMessage = 'ログインに失敗しました。'
+        if (error instanceof Error) {
+          if (error.message.includes('LIFF ID')) {
+            errorMessage = 'LIFF IDの設定が正しくありません。'
+          } else if (error.message.includes('initialization failed')) {
+            errorMessage = 'LIFFの初期化に失敗しました。'
+          } else if (error.message.includes('not logged in')) {
+            errorMessage = 'LINEログインが完了していません。'
+          } else if (error.message.includes('LINE profile')) {
+            errorMessage = 'プロフィール情報の取得に失敗しました。'
+          }
+        }
+        setError(`${errorMessage}\nもう一度お試しください。`)
       }
     }
 
