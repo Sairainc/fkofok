@@ -22,8 +22,8 @@ export const MultiStepForm = ({ lineId }: MultiStepFormProps) => {
   const { 
     register, 
     handleSubmit, 
-    watch, 
-    setValue,
+    watch: _watch, 
+    setValue: _setValue,
     formState: { errors },
     trigger
   } = useForm({
