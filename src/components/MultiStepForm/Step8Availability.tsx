@@ -8,7 +8,7 @@ type AvailabilityCount = {
   count: number
 }
 
-const Step8Availability = ({ register, userType, onNext, onPrev }: FormProps) => {
+const Step8Availability = ({ register, onPrev }: FormProps) => {
   const [availabilityCounts, setAvailabilityCounts] = useState<AvailabilityCount[]>([])
   const [availableDates, setAvailableDates] = useState<string[]>([])
 
