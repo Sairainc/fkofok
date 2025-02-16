@@ -17,7 +17,7 @@ type MultiStepFormProps = {
   lineId: string
 }
 
-export const MultiStepForm = ({ lineId }: MultiStepFormProps) => {
+const MultiStepForm = ({ lineId }: MultiStepFormProps) => {
   const [currentStep, setCurrentStep] = useState(0)
   const [userType, setUserType] = useState<'men' | 'women' | null>(null)
   const { 
@@ -209,3 +209,5 @@ export const MultiStepForm = ({ lineId }: MultiStepFormProps) => {
     </form>
   )
 }
+
+export default MultiStepForm

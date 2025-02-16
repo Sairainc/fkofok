@@ -1,10 +1,12 @@
 'use client'
 
-import { MultiStepForm } from '@/components/MultiStepForm'
+import dynamic from 'next/dynamic'
+
+const DynamicMultiStepForm = dynamic(() => import('@/components/MultiStepForm'), {
+  ssr: false,
+})
 
 export default function Form(): React.ReactNode {
-  // Hardcoded LINE ID for testing or get it from a different source
-  const testLineId = "test_user_123" // TODO: Replace with actual LINE ID source
-
-  return <MultiStepForm lineId={testLineId} />
+  const testLineId = "test_user_123"
+  return <DynamicMultiStepForm lineId={testLineId} />
 }
