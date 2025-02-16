@@ -7,50 +7,60 @@ import type { Profile } from '@liff/get-profile'
 import { MultiStepForm } from '@/components/MultiStepForm'
 import { initializeLiff } from '@/utils/liff'
 
-console.log('[DEBUG] Form page loaded');
+console.log('Form page loaded')
 
 export default function Form(): React.ReactNode {
-  const router = useRouter();
-  const [lineProfile, setLineProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter()
+  const [lineProfile, setLineProfile] = useState<Profile | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (typeof window === 'undefined') {
+      console.warn('[WARN] Skipping LIFF initialization on server-side.');
+      return;
+    }
+
     const initialize = async () => {
       try {
-        console.log('[DEBUG] Form page - Starting initialization');
+        console.log('[DEBUG] Form page - Starting initialization')
 
-        await initializeLiff(); // ここでは `liffId` を渡さない
+        const liffId = process.env.NEXT_PUBLIC_LIFF_ID
+        console.log('[DEBUG] ENV LIFF ID:', liffId)
 
-        // ログイン状態を確認
-        if (!liff.isLoggedIn()) {
-          console.log('[DEBUG] User not logged in, redirecting to login');
-
-          const redirectUrl = process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL;
-          if (!redirectUrl) {
-            throw new Error('Redirect URL is not configured');
-          }
-
-          console.log('[DEBUG] Redirect URL:', redirectUrl.trim());
-          liff.login({ redirectUri: redirectUrl.trim() });
-          return;
+        if (!liffId) {
+          console.error('[ERROR] LIFF ID is not configured in environment')
+          throw new Error('LIFF ID is not configured')
         }
 
-        // プロフィール取得
-        const profile = await liff.getProfile();
-        console.log('[DEBUG] Profile retrieved:', profile);
-        setLineProfile(profile);
+        await initializeLiff(liffId)
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        if (!liff.isLoggedIn()) {
+          console.log('[DEBUG] User not logged in, redirecting to login')
+          const redirectUrl = process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL
+          if (!redirectUrl) {
+            throw new Error('Redirect URL is not configured')
+          }
+          liff.login({ redirectUri: redirectUrl.trim() })
+          return
+        }
+
+        const profile = await liff.getProfile()
+        console.log('[DEBUG] Profile retrieved:', profile)
+        setLineProfile(profile)
 
       } catch (error) {
-        console.error('[ERROR] Form page initialization error:', error);
-        setError(error instanceof Error ? error.message : 'An error occurred');
+        console.error('[ERROR] Form page initialization error:', error)
+        setError(error instanceof Error ? error.message : 'An error occurred')
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    initialize();
-  }, [router]);
+    initialize()
+  }, [router])
 
   if (isLoading) {
     return (
@@ -60,7 +70,7 @@ export default function Form(): React.ReactNode {
           <p className="mt-4">Loading...</p>
         </div>
       </div>
-    );
+    )
   }
 
   if (error) {
@@ -77,7 +87,7 @@ export default function Form(): React.ReactNode {
           </button>
         </div>
       </div>
-    );
+    )
   }
 
   if (!lineProfile) {
@@ -93,8 +103,8 @@ export default function Form(): React.ReactNode {
           </button>
         </div>
       </div>
-    );
+    )
   }
 
-  return <MultiStepForm lineId={lineProfile.userId} />;
+  return <MultiStepForm lineId={lineProfile.userId} />
 }
