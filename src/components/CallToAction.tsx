@@ -3,17 +3,15 @@
 import React from 'react'
 import Image from 'next/image'
 import liff from '@line/liff'
-import getConfig from 'next/config'
 
 type CallToActionProps = {
   userType: 'men' | 'women'
 }
 
 export const CallToAction = ({ userType }: CallToActionProps) => {
-  const { publicRuntimeConfig } = getConfig()
   const LINE_URL = process.env.NEXT_PUBLIC_LINE_ADD_FRIEND_URL!
   const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID
-  const REDIRECT_URL = publicRuntimeConfig.NEXT_PUBLIC_LIFF_REDIRECT_URL || process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL
+  const REDIRECT_URL = process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL
 
   const handleLineClick = () => {
     window.open(LINE_URL, '_blank')
@@ -34,13 +32,6 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
         throw new Error('Redirect URL is not configured')
       }
       console.log('Redirect URL:', REDIRECT_URL)
-
-      // LIFF初期化前の状態確認
-      if (liff.isLoggedIn()) {
-        console.log('User is already logged in, proceeding with redirect...')
-        window.location.href = REDIRECT_URL
-        return
-      }
 
       // LIFF初期化
       await liff.init({ liffId: LIFF_ID })
