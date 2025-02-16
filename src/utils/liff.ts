@@ -3,7 +3,7 @@ import liff from '@line/liff';
 console.log('[DEBUG] liff.ts is loaded!');
 
 export const initializeLiff = async (liffId?: string): Promise<void> => {
-  console.log('[DEBUG] Starting LIFF initialization...')
+  console.log('[DEBUG] Starting LIFF initialization...');
   console.log('[DEBUG] Raw LIFF ID:', liffId);
 
   if (!liffId) {
@@ -20,8 +20,9 @@ export const initializeLiff = async (liffId?: string): Promise<void> => {
   }
 
   try {
-    // `liff.getAccessToken()` で初期化済みかどうかを判定
-    if (!liff.getAccessToken()) {
+    console.log('[DEBUG] Checking if LIFF is already initialized...');
+    
+    if (!liff.isLoggedIn() && !liff.getAccessToken()) {  
       console.log('[DEBUG] Initializing LIFF with ID:', trimmedLiffId);
       await liff.init({
         liffId: trimmedLiffId,
@@ -29,7 +30,7 @@ export const initializeLiff = async (liffId?: string): Promise<void> => {
       });
       console.log('[DEBUG] LIFF initialization successful');
     } else {
-      console.log('[DEBUG] LIFF is already initialized');
+      console.log('[DEBUG] LIFF is already initialized or user is logged in');
     }
   } catch (error) {
     console.error('[ERROR] LIFF initialization failed:', error);
@@ -37,8 +38,8 @@ export const initializeLiff = async (liffId?: string): Promise<void> => {
   }
 };
 
-// 環境変数から LIFF ID を取得（環境変数がない場合はデフォルト値を使用）
-const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID?.trim() || "2006882585-DMX89WMb";
+// 環境変数の取得とデバッグログ
+const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID || "2006882585-DMX89WMb";
 console.log("[DEBUG] Final LIFF ID:", LIFF_ID);
 
 // LIFFの初期化を実行

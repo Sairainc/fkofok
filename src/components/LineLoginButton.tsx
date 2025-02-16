@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect } from 'react'
-import { initializeLiff, login } from '@/utils/liff'
+import { initializeLiff } from '@/utils/liff'
+import liff from '@line/liff'
 import { Button } from './Button'
 import { useRouter } from 'next/navigation'
 
@@ -21,10 +22,8 @@ export const LineLoginButton = () => {
 
   const handleLogin = async () => {
     try {
-      // login 関数を使用してLINEログインとプロフィール取得を行う
-      await login()
-      // ログイン成功後にsignupページに遷移
-      router.push('/signup')
+      await liff.login()
+      router.push('/form')
     } catch (error) {
       console.error('Login error:', error)
     }
