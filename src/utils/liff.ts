@@ -7,13 +7,17 @@ console.log('[DEBUG] liff.ts is loaded!');
 // LIFF初期化の改善
 export const initializeLiff = async (liffId?: string): Promise<void> => {
   console.log('[DEBUG] Starting LIFF initialization...');
+  console.log('[DEBUG] Raw LIFF ID:', liffId);
   
   if (!liffId) {
-    console.error('[ERROR] LIFF ID is missing');
+    console.error('[ERROR] LIFF ID is missing or undefined');
     throw new Error('LIFF ID is required');
   }
 
   const trimmedLiffId = liffId.trim();
+  console.log('[DEBUG] Trimmed LIFF ID:', trimmedLiffId);
+  console.log('[DEBUG] Trimmed LIFF ID length:', trimmedLiffId.length);
+
   if (!trimmedLiffId) {
     console.error('[ERROR] LIFF ID is empty after trimming');
     throw new Error('Invalid LIFF ID');
@@ -35,10 +39,11 @@ export const initializeLiff = async (liffId?: string): Promise<void> => {
     if (error instanceof Error) {
       console.error('[ERROR] Details:', {
         message: error.message,
-        stack: error.stack
+        stack: error.stack,
+        liffId: trimmedLiffId
       });
     }
-    throw new Error('LIFF initialization failed. Please try again.');
+    throw new Error(`LIFF initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
 

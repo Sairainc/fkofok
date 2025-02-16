@@ -23,8 +23,18 @@ export default function Form(): React.ReactNode {
         
         // LIFF初期化
         const liffId = process.env.NEXT_PUBLIC_LIFF_ID
+        console.log('[DEBUG] Environment LIFF ID:', liffId)
+        
         if (!liffId) {
+          console.error('[ERROR] LIFF ID is not configured in environment')
           throw new Error('LIFF ID is not configured')
+        }
+
+        // 環境変数の値を検証
+        if (liffId === '2006882585-DMX89WMb') {
+          console.log('[DEBUG] LIFF ID matches expected value')
+        } else {
+          console.warn('[WARN] LIFF ID does not match expected value')
         }
         
         // utils/liffの初期化関数を使用
