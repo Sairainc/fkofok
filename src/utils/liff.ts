@@ -24,16 +24,12 @@ export const initializeLiff = async (liffId?: string): Promise<void> => {
   }
 
   try {
-    if (!liff.ready) {
-      console.log('[DEBUG] Initializing LIFF with ID:', trimmedLiffId);
-      await liff.init({
-        liffId: trimmedLiffId,
-        withLoginOnExternalBrowser: true
-      });
-      console.log('[DEBUG] LIFF initialization successful');
-    } else {
-      console.log('[DEBUG] LIFF is already initialized');
-    }
+    console.log('[DEBUG] Initializing LIFF with ID:', trimmedLiffId);
+    await liff.init({
+      liffId: trimmedLiffId,
+      withLoginOnExternalBrowser: true
+    });
+    console.log('[DEBUG] LIFF initialization successful');
   } catch (error) {
     console.error('[ERROR] LIFF initialization failed:', error);
     if (error instanceof Error) {
