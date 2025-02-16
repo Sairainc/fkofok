@@ -22,7 +22,7 @@ export const initializeLiff = async (liffId?: string): Promise<void> => {
   try {
     console.log('[DEBUG] Checking if LIFF is already initialized...');
     
-    if (!liff.isLoggedIn() && !liff.getAccessToken()) {  
+    if (!liff.isLoggedIn() && !liff.getOS()) {
       console.log('[DEBUG] Initializing LIFF with ID:', trimmedLiffId);
       await liff.init({
         liffId: trimmedLiffId,
@@ -39,10 +39,13 @@ export const initializeLiff = async (liffId?: string): Promise<void> => {
 };
 
 // 環境変数の取得とデバッグログ
-const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID || "2006882585-DMX89WMb";
-console.log("[DEBUG] Final LIFF ID:", LIFF_ID);
+const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID;
+console.log("[DEBUG] Final LIFF ID from env:", LIFF_ID);
 
-// LIFFの初期化を実行
-initializeLiff(LIFF_ID).catch((err) => {
-  console.error("[ERROR] Failed to initialize LIFF:", err);
-});
+if (!LIFF_ID) {
+  console.error("[ERROR] LIFF ID is undefined in environment variables");
+} else {
+  initializeLiff(LIFF_ID).catch((err) => {
+    console.error("[ERROR] Failed to initialize LIFF:", err);
+  });
+}

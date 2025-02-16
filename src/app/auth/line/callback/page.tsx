@@ -13,23 +13,22 @@ export default function LineCallback() {
       try {
         console.log('\n=== LINE Login Callback Started ===')
 
-        const liffId = process.env.NEXT_PUBLIC_LIFF_ID
+        const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
         if (!liffId) {
           console.error('[ERROR] LIFF ID is missing')
           throw new Error('LIFF ID is not configured')
         }
         console.log('[DEBUG] LIFF ID:', liffId)
 
-        try {
+        if (!liff.isLoggedIn() && !liff.getOS()) {
           console.log('[DEBUG] Initializing LIFF...')
           await liff.init({
             liffId: liffId.trim(),
             withLoginOnExternalBrowser: true
           })
           console.log('[DEBUG] LIFF initialization successful')
-        } catch (initError) {
-          console.error('[ERROR] LIFF initialization failed:', initError)
-          throw new Error('LIFF initialization failed')
+        } else {
+          console.log('[DEBUG] LIFF is already initialized or user is logged in')
         }
 
         if (!liff.isLoggedIn()) {
