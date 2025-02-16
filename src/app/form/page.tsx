@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import liff from '@line/liff'
 import type { Profile } from '@liff/get-profile'
 import { MultiStepForm } from '@/components/MultiStepForm'
+import { initializeLiff } from '@/utils/liff'
 
 // デバッグ用のログを追加
 console.log('Form page loaded')
@@ -26,9 +27,8 @@ export default function Form(): React.ReactNode {
           throw new Error('LIFF ID is not configured')
         }
         
-        if (!liff.ready) {
-          await liff.init({ liffId })
-        }
+        // utils/liffの初期化関数を使用
+        await initializeLiff(liffId)
 
         // ログイン状態を確認
         if (!liff.isLoggedIn()) {
@@ -37,7 +37,9 @@ export default function Form(): React.ReactNode {
           if (!redirectUrl) {
             throw new Error('Redirect URL is not configured')
           }
-          await liff.login({ redirectUri: redirectUrl })
+          const trimmedRedirectUrl = redirectUrl.trim()
+          console.log('[DEBUG] Redirect URL:', trimmedRedirectUrl)
+          liff.login({ redirectUri: trimmedRedirectUrl })
           return
         }
 
