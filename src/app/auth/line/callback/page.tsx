@@ -3,7 +3,19 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import liff from '@line/liff'
-import { getLiffProfile } from '@/utils/liff'
+
+// プロフィールを取得する関数を定義（エクスポートされていない場合）
+const getLiffProfile = async () => {
+  try {
+    if (!liff.isLoggedIn()) {
+      throw new Error('User is not logged in')
+    }
+    return await liff.getProfile()
+  } catch (error) {
+    console.error('[ERROR] Failed to get LINE profile:', error)
+    return null
+  }
+}
 
 export default function LineCallback() {
   const router = useRouter()
@@ -13,55 +25,59 @@ export default function LineCallback() {
     const handleCallback = async () => {
       try {
         console.log('\n=== LINE Login Callback Started ===')
-        
-        // LIFF IDの検証
+
+        // LIFF IDの取得
         const liffId = process.env.NEXT_PUBLIC_LIFF_ID
         if (!liffId) {
-          console.error('LIFF ID is missing')
+          console.error('[ERROR] LIFF ID is missing')
           throw new Error('LIFF ID is not configured')
         }
-        console.log('LIFF ID:', liffId)
-        
-        // LIFF初期化
-        if (!liff.ready) {
-          try {
-            console.log('Initializing LIFF...')
+        console.log('[DEBUG] LIFF ID:', liffId)
+
+        // LIFF の初期化チェック（`liff.isInitialized()` はないため、代わりに `liff.init()` をtry-catch）
+        try {
+          if (!liff.getAccessToken()) { // 代替のチェック
+            console.log('[DEBUG] Initializing LIFF...')
             await liff.init({
-              liffId: liffId,
+              liffId: liffId.trim(),
               withLoginOnExternalBrowser: true
             })
-            console.log('LIFF initialization successful')
-          } catch (initError) {
-            console.error('LIFF initialization error:', initError)
-            throw new Error('LIFF initialization failed')
+            console.log('[DEBUG] LIFF initialization successful')
+          } else {
+            console.log('[DEBUG] LIFF is already initialized')
           }
+        } catch (initError) {
+          console.error('[ERROR] LIFF initialization failed:', initError)
+          throw new Error('LIFF initialization failed')
         }
 
-        // ログイン状態の確認
+        // ログイン状態を確認
         if (!liff.isLoggedIn()) {
-          console.error('User is not logged in at callback')
-          throw new Error('User is not logged in')
+          console.warn('[WARN] User is not logged in, redirecting to LINE login...')
+          await liff.login()
+          return // `liff.login()` が実行された場合、処理を中断
         }
 
         // プロフィール取得
-        try {
-          const profile = await getLiffProfile()
-          if (!profile) {
-            throw new Error('Failed to get LINE profile')
-          }
-          console.log('Profile retrieved successfully:', profile)
-
-          // フォームページへリダイレクト
-          router.push('/form')
-        } catch (profileError) {
-          console.error('Profile retrieval error:', profileError)
+        const profile = await getLiffProfile()
+        if (!profile) {
           throw new Error('Failed to get LINE profile')
+        }
+        console.log('[DEBUG] Profile retrieved successfully:', profile)
+
+        // LINEアプリ内で開いている場合はウィンドウを閉じる
+        if (liff.isInClient()) {
+          console.log('[DEBUG] Running inside LINE app, closing window.')
+          liff.closeWindow()
+        } else {
+          console.log('[DEBUG] Redirecting to form page.')
+          router.push('/form')
         }
 
       } catch (error) {
         console.error('\n=== LINE Login Callback Error ===')
-        console.error('Error details:', error)
-        
+        console.error('[ERROR] Details:', error)
+
         let errorMessage = 'ログインに失敗しました。'
         if (error instanceof Error) {
           if (error.message.includes('LIFF ID')) {
@@ -105,4 +121,4 @@ export default function LineCallback() {
       </div>
     </div>
   )
-} 
+}
