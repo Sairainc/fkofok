@@ -33,22 +33,29 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
       
       // LIFF IDの検証
       if (!LIFF_ID) {
+        console.error('LIFF ID is not configured:', LIFF_ID)
         throw new Error('LIFF ID is not configured')
       }
       console.log('LIFF ID:', LIFF_ID)
 
       // リダイレクトURLの検証
-      if (!isValidUrl(REDIRECT_URL)) {
+      if (!REDIRECT_URL || !isValidUrl(REDIRECT_URL)) {
         console.error('Invalid redirect URL:', REDIRECT_URL)
         throw new Error('Redirect URL is not properly configured')
       }
       console.log('Redirect URL:', REDIRECT_URL)
 
-      // LIFF初期化
-      if (!liff.ready) {
-        await liff.init({ liffId: LIFF_ID })
+      // LIFF初期化を確実に行う
+      try {
+        if (!liff.ready) {
+          console.log('Initializing LIFF...')
+          await liff.init({ liffId: LIFF_ID })
+          console.log('LIFF initialization successful')
+        }
+      } catch (initError) {
+        console.error('LIFF initialization error:', initError)
+        throw new Error('LIFF initialization failed')
       }
-      console.log('LIFF initialization successful')
       
       // ログイン処理
       if (!liff.isLoggedIn()) {
@@ -69,6 +76,8 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
       if (error instanceof Error) {
         if (error.message.includes('LIFF ID')) {
           errorMessage = 'LIFF IDの設定が正しくありません。'
+        } else if (error.message.includes('initialization failed')) {
+          errorMessage = 'LIFFの初期化に失敗しました。'
         } else if (error.message.includes('Redirect URL')) {
           errorMessage = 'リダイレクトURLの設定が正しくありません。'
         }

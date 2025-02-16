@@ -7,10 +7,12 @@ console.log('[DEBUG] liff.ts is loaded!');
 // LIFF初期化
 export const initializeLiff = async (liffId?: string) => {
   if (!liffId) {
+    console.error('LIFF ID is missing:', liffId)
     throw new Error('LIFF ID is required')
   }
   
   try {
+    console.log('Initializing LIFF with ID:', liffId)
     await liff.init({
       liffId: liffId
     })
