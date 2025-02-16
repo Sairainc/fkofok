@@ -86,7 +86,7 @@ export const getLiffProfile = async (): Promise<Profile | null> => {
       console.log('[DEBUG] Attempting to save to Supabase:', saveData)
       await sendLog('SUPABASE_SAVE_START', saveData)
 
-      const { data, error } = await supabase
+      const { _data, error } = await supabase
         .from('profiles')
         .upsert([saveData], {
           onConflict: 'line_id'

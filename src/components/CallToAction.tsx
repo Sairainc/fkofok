@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import liff from '@line/liff'
 
 type CallToActionProps = {
@@ -9,7 +9,6 @@ type CallToActionProps = {
 }
 
 export const CallToAction = ({ userType }: CallToActionProps) => {
-  const router = useRouter()
   const LINE_URL = process.env.NEXT_PUBLIC_LINE_ADD_FRIEND_URL!
 
   const handleLineClick = () => {

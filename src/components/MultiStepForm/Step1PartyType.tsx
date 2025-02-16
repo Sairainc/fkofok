@@ -1,10 +1,10 @@
 type Step1Props = {
   register: any
-  userType: 'men' | 'women'
+  _userType: 'men' | 'women'
   onNext: () => void
 }
 
-const Step1PartyType = ({ register, userType, onNext }: Step1Props) => {
+const Step1PartyType = ({ register, onNext, _userType }: Step1Props) => {
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold">どんな合コンにしたい？</h2>

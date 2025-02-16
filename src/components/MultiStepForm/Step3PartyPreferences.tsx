@@ -1,11 +1,11 @@
 type Step3Props = {
   register: any
-  userType: 'men' | 'women'
+  _userType: 'men' | 'women'
   onNext: () => void
   onPrev: () => void
 }
 
-const Step3PartyPreferences = ({ register, userType, onNext, onPrev }: Step3Props) => {
+const Step3PartyPreferences = ({ register, _userType, onNext, onPrev }: Step3Props) => {
   const restaurantOptions = [
     { value: 'casual', label: '安旨居酒屋' },
     { value: 'stylish', label: 'おしゃれカジュアル' }

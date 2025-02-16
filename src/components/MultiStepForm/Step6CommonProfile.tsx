@@ -1,11 +1,11 @@
 type Step6Props = {
   register: any
-  userType: 'men' | 'women'
+  _userType: 'men' | 'women'
   onNext: () => void
   onPrev: () => void
 }
 
-const Step6CommonProfile = ({ register, userType, onNext, onPrev }: Step6Props) => {
+const Step6CommonProfile = ({ register, onNext, onPrev, _userType }: Step6Props) => {
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold">基本情報</h2>
