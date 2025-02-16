@@ -4,7 +4,6 @@ import React from 'react'
 import liff from '@line/liff'
 
 export const CallToAction = ({ userType: _userType }: { userType: 'men' | 'women' }) => {
-  const LINE_URL = process.env.NEXT_PUBLIC_LINE_ADD_FRIEND_URL!
   const REDIRECT_URL = (process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL || 'https://gogochdlfbd.com/auth/line/callback').trim();
 
   const handleRegisterClick = async () => {
