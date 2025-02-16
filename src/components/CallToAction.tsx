@@ -1,9 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import Image from 'next/image'
+import React from 'react'
 import { useRouter } from 'next/navigation'
-import { login, initializeLiff } from '@/utils/liff'
 import liff from '@line/liff'
 
 type CallToActionProps = {

@@ -1,13 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
-import { initializeLiff, getLiffProfile } from '@/utils/liff'
 
 export default function Prepare() {
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(true)
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

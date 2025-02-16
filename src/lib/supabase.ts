@@ -29,7 +29,7 @@ export const supabase = createClient<Database>(
 // Supabaseの接続テスト用関数
 export const testSupabaseConnection = async () => {
   try {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('profiles')
       .select('*')
       .limit(1)

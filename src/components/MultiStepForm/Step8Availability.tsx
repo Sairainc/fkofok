@@ -37,7 +37,7 @@ const Step8Availability = ({ register, onPrev }: FormProps) => {
     const oneMonthLater = new Date(now)
     oneMonthLater.setMonth(now.getMonth() + 1)
 
-    let currentDate = new Date(nextFriday)
+    const currentDate = new Date(nextFriday)
     while (currentDate <= oneMonthLater) {
       const day = currentDate.getDay()
       // 金土日のみ

@@ -11,6 +11,7 @@ import Step5Profile from './Step5Profile'
 import Step6CommonProfile from './Step6CommonProfile'
 import Step7Photos from './Step7Photos'
 import Step8Availability from './Step8Availability'
+import { FormData } from '@/types/form'
 
 type MultiStepFormProps = {
   lineId: string
@@ -21,12 +22,10 @@ export const MultiStepForm = ({ lineId }: MultiStepFormProps) => {
   const [userType, setUserType] = useState<'men' | 'women' | null>(null)
   const { 
     register, 
-    handleSubmit, 
-    watch: _watch, 
-    setValue: _setValue,
+    handleSubmit,
     formState: { errors },
     trigger
-  } = useForm({
+  } = useForm<FormData>({
     mode: 'onChange'
   })
 
@@ -38,7 +37,7 @@ export const MultiStepForm = ({ lineId }: MultiStepFormProps) => {
   }
   const prevStep = () => setCurrentStep(prev => prev - 1)
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: FormData) => {
     try {
       // プロフィール情報を保存
       const { error: profileError } = await supabase

@@ -1,14 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { initializeLiff, login } from '@/utils/liff'
 import { Button } from './Button'
 import { useRouter } from 'next/navigation'
-import type { Profile } from '@liff/get-profile'
 
 export const LineLoginButton = () => {
   const router = useRouter()
-  const [profile, setProfile] = useState<Profile | null>(null)
 
   useEffect(() => {
     const initialize = async () => {

@@ -5,8 +5,12 @@ import { supabase } from '@/lib/supabase'; // 既存のSupabaseクライアン�
 // **[修正] import の後にログを移動**
 console.log('[DEBUG] liff.ts is loaded!');
 
+interface LogDetails {
+  [key: string]: unknown;
+}
+
 // **ログ送信用のヘルパー関数**
-const sendLog = async (event: string, details: any) => {
+const sendLog = async (event: string, details: LogDetails) => {
   try {
     console.log(`\n=== ${event} ===`)
     console.log('Details:', details)
@@ -136,31 +140,6 @@ export const getLiffProfile = async (): Promise<Profile | null> => {
       } : 'Unknown error'
     });
     throw error; // エラーを上位に伝播させる
-  }
-};
-
-// **IDトークンをサーバーに送信して検証**
-const sendIdTokenToServer = async (idToken: string | null) => {
-  if (!idToken) {
-    console.warn('[DEBUG] No ID token found');
-    return;
-  }
-
-  try {
-    const response = await fetch('/api/auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken }),
-    });
-
-    const result = await response.json();
-    if (response.ok) {
-      console.log('[DEBUG] ID token verified successfully:', result);
-    } else {
-      console.warn('[DEBUG] ID token verification failed:', result);
-    }
-  } catch (error) {
-    console.error('[ERROR] Error sending ID token:', error);
   }
 };
 

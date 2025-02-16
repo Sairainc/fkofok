@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import liff from '@line/liff'
 import type { Profile } from '@liff/get-profile'
 import { MultiStepForm } from '@/components/MultiStepForm'
-import { initializeLiff } from '@/utils/liff'
 
 // デバッグ用のログを追加
 console.log('Form page loaded')
