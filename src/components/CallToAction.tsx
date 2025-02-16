@@ -46,29 +46,29 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
       console.log('Redirect URL:', REDIRECT_URL)
 
       // LIFF初期化を修正
-      if (!liff.ready) {
-        try {
-          console.log('Initializing LIFF with ID:', LIFF_ID)
+      try {
+        if (!liff.ready) {
+          console.log('Initializing LIFF...')
           await liff.init({
-            liffId: LIFF_ID,
-            withLoginOnExternalBrowser: true  // 外部ブラウザでのログインを許可
+            liffId: LIFF_ID.trim(), // 空白を除去
+            withLoginOnExternalBrowser: true
           })
-          console.log('LIFF initialization successful')
-        } catch (initError) {
-          console.error('LIFF initialization error:', initError)
-          throw new Error('LIFF initialization failed')
         }
-      }
-      
-      // ログイン処理
-      if (!liff.isLoggedIn()) {
-        console.log('User not logged in, starting login process')
-        liff.login({
-          redirectUri: REDIRECT_URL
-        })
-      } else {
-        console.log('User already logged in, redirecting...')
-        window.location.href = REDIRECT_URL
+        console.log('LIFF is ready')
+
+        // ログイン処理
+        if (!liff.isLoggedIn()) {
+          console.log('User not logged in, starting login process')
+          liff.login({
+            redirectUri: REDIRECT_URL.trim() // 空白を除去
+          })
+        } else {
+          console.log('User already logged in, redirecting...')
+          window.location.href = REDIRECT_URL.trim() // 空白を除去
+        }
+      } catch (error) {
+        console.error('LIFF initialization/login error:', error)
+        throw new Error('LIFF initialization failed')
       }
       
     } catch (error) {
