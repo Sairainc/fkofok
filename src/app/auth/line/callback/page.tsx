@@ -6,7 +6,7 @@ import liff from '@line/liff'
 
 export default function LineCallback() {
   const router = useRouter()
-  const [_error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);  // _error に変更
 
   useEffect(() => {
     const handleCallback = async () => {
