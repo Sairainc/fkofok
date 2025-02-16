@@ -3,15 +3,17 @@
 import React from 'react'
 import Image from 'next/image'
 import liff from '@line/liff'
+import getConfig from 'next/config'
 
 type CallToActionProps = {
   userType: 'men' | 'women'
 }
 
 export const CallToAction = ({ userType }: CallToActionProps) => {
+  const { publicRuntimeConfig } = getConfig()
   const LINE_URL = process.env.NEXT_PUBLIC_LINE_ADD_FRIEND_URL!
   const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID
-  const REDIRECT_URL = process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL
+  const REDIRECT_URL = publicRuntimeConfig.NEXT_PUBLIC_LIFF_REDIRECT_URL || process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL
 
   const handleLineClick = () => {
     window.open(LINE_URL, '_blank')
@@ -46,7 +48,7 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
       
       // ログイン処理
       await liff.login({
-        redirectUri: REDIRECT_URL.trim()
+        redirectUri: REDIRECT_URL
       })
       
     } catch (error) {
