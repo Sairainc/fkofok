@@ -1,14 +1,18 @@
 import { useWatch } from 'react-hook-form'
-import { UseFormRegister } from 'react-hook-form'
 import { FormData } from '@/types/form'
+import { Control, UseFormRegister } from 'react-hook-form'
 
 type Step0Props = {
   register: UseFormRegister<FormData>
+  control: Control<FormData>
   onNext: (gender: 'men' | 'women') => void
 }
 
-const Step0BasicInfo = ({ register, onNext }: Step0Props) => {
-  const gender = useWatch({ name: 'gender' }) as 'men' | 'women'
+const Step0BasicInfo = ({ register, control, onNext }: Step0Props) => {
+  const gender = useWatch({ 
+    control,
+    name: 'gender' 
+  }) as 'men' | 'women'
 
   const handleNext = () => {
     if (gender) {

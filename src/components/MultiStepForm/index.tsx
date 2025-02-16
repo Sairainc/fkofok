@@ -39,7 +39,7 @@ const MultiStepForm = ({ lineId }: MultiStepFormProps) => {
     }
   })
 
-  const { register, handleSubmit, formState: { errors }, trigger } = methods
+  const { register, handleSubmit, formState: { errors }, trigger, control } = methods
 
   const nextStep = async () => {
     const isValid = await trigger() // 現在のステップのバリデーションを実行
@@ -150,6 +150,7 @@ const MultiStepForm = ({ lineId }: MultiStepFormProps) => {
       {currentStep === 0 && (
         <Step0BasicInfo
           register={register}
+          control={control}
           onNext={handleGenderSelect}
         />
       )}
