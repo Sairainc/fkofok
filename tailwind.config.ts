@@ -8,7 +8,12 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-geist)'],
+      },
       colors: {
+        background: "var(--background)",
+        foreground: "var(--foreground)",
         primary: {
           DEFAULT: '#2563eb', // 男性向け
           dark: '#1d4ed8',
