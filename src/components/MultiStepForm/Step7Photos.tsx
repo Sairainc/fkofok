@@ -1,11 +1,11 @@
 import React from 'react'
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { FormProps } from '@/types/form'
+import { FormData } from '@/types/form'
 import { UseFormRegister } from 'react-hook-form'
 
 type Step7Props = {
-  register: UseFormRegister<FormProps>
+  register: UseFormRegister<FormData>
   userType: 'men' | 'women'
   onNext: () => void
   onPrev: () => void

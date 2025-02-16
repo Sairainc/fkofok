@@ -9,7 +9,7 @@ import { MultiStepForm } from '@/components/MultiStepForm'
 // デバッグ用のログを追加
 console.log('Form page loaded')
 
-export default function Form() {
+export default function Form(): React.ReactNode {
   const router = useRouter()
   const [lineProfile, setLineProfile] = useState<Profile | null>(null)
   const [isLoading, setIsLoading] = useState(true)

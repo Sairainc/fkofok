@@ -24,28 +24,19 @@ const sendLog = async (event: string, details: LogDetails) => {
   }
 };
 
-// 初期化状態を追跡
-let isInitialized = false
-
-export const initializeLiff = async () => {
+// LIFF初期化
+export const initializeLiff = async (liffId?: string) => {
+  if (!liffId) {
+    throw new Error('LIFF ID is required')
+  }
+  
   try {
-    console.log('[DEBUG] Starting LIFF initialization...')
-    console.log('[DEBUG] LIFF ID:', process.env.NEXT_PUBLIC_LIFF_ID)
-    
-    const liffId = process.env.NEXT_PUBLIC_LIFF_ID
-    if (!liffId) {
-      throw new Error('LIFF ID is not configured')
-    }
-
-    if (!isInitialized) {
-      await liff.init({ liffId })
-      isInitialized = true
-      console.log('[DEBUG] LIFF initialization successful')
-    }
-
-    return true
+    await liff.init({
+      liffId: liffId
+    })
+    console.log('LIFF initialization succeeded')
   } catch (error) {
-    console.error('[ERROR] LIFF initialization failed:', error)
+    console.error('LIFF initialization failed:', error)
     throw error
   }
 }
@@ -86,7 +77,7 @@ export const getLiffProfile = async (): Promise<Profile | null> => {
       console.log('[DEBUG] Attempting to save to Supabase:', saveData)
       await sendLog('SUPABASE_SAVE_START', saveData)
 
-      const { _data, error } = await supabase
+      const { data: _data, error } = await supabase
         .from('profiles')
         .upsert([saveData], {
           onConflict: 'line_id'
@@ -143,7 +134,7 @@ export const getLiffProfile = async (): Promise<Profile | null> => {
   }
 };
 
-// **ログイン処理**
+// ログイン処理
 export const login = async () => {
   const redirectUrl = process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL
   if (!redirectUrl) {

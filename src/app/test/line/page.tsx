@@ -6,7 +6,7 @@ import { initializeLiff } from '@/utils/liff'
 import liff from '@line/liff'
 import type { Profile } from '@liff/get-profile'
 
-export default function TestLine() {
+export default function TestLine(): React.ReactNode {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 

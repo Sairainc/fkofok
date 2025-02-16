@@ -1,7 +1,9 @@
+import React from 'react'
+
 type Feature = {
   title: string
   description: string
-  icon: JSX.Element
+  icon: React.ReactNode
 }
 
 type FeaturesProps = {

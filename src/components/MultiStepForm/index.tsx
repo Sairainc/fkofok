@@ -146,7 +146,7 @@ export const MultiStepForm = ({ lineId }: MultiStepFormProps) => {
           {currentStep === 1 && (
             <Step1PartyType
               register={register}
-              userType={userType}
+              _userType={userType}
               onNext={nextStep}
             />
           )}
@@ -161,7 +161,7 @@ export const MultiStepForm = ({ lineId }: MultiStepFormProps) => {
           {currentStep === 3 && (
             <Step3PartyPreferences
               register={register}
-              userType={userType}
+              _userType={userType}
               onNext={nextStep}
               onPrev={prevStep}
             />
@@ -177,7 +177,7 @@ export const MultiStepForm = ({ lineId }: MultiStepFormProps) => {
           {currentStep === 5 && (
             <Step6CommonProfile
               register={register}
-              userType={userType}
+              _userType={userType}
               onNext={nextStep}
               onPrev={prevStep}
             />
