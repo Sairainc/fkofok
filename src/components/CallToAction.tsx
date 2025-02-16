@@ -10,6 +10,8 @@ type CallToActionProps = {
 
 export const CallToAction = ({ userType }: CallToActionProps) => {
   const LINE_URL = process.env.NEXT_PUBLIC_LINE_ADD_FRIEND_URL!
+  const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID
+  const REDIRECT_URL = process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL
 
   const handleLineClick = () => {
     window.open(LINE_URL, '_blank')
@@ -18,24 +20,22 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
   const handleRegisterClick = async () => {
     try {
       console.log('\n=== LINE Login Process Started from CallToAction ===')
+      console.log('LIFF ID:', LIFF_ID)
+      console.log('Redirect URL:', REDIRECT_URL)
       
-      // LIFF初期化を直接行う
-      const liffId = process.env.NEXT_PUBLIC_LIFF_ID
-      if (!liffId) {
+      if (!LIFF_ID) {
         throw new Error('LIFF ID is not configured')
       }
 
-      await liff.init({ liffId })
-      
-      // リダイレクトURLを直接指定
-      const redirectUrl = process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL
-      if (!redirectUrl) {
+      if (!REDIRECT_URL) {
         throw new Error('Redirect URL is not configured')
       }
 
-      // 直接liff.loginを呼び出す
+      await liff.init({ liffId: LIFF_ID })
+      
+      // Use the validated redirect URL
       liff.login({
-        redirectUri: redirectUrl
+        redirectUri: REDIRECT_URL
       })
       
     } catch (error) {
