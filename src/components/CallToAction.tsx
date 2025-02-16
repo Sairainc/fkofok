@@ -51,23 +51,35 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
         const trimmedLiffId = LIFF_ID?.trim()
         console.log('LIFF ID after trim:', trimmedLiffId)
 
+        // LIFF初期化の前にステータスをチェック
         if (!liff.ready) {
           console.log('Initializing LIFF...')
           if (!trimmedLiffId) {
             throw new Error('LIFF ID is empty after trimming')
           }
+
+          // 初期化を試みる
           await liff.init({
             liffId: trimmedLiffId,
             withLoginOnExternalBrowser: true
           })
+          console.log('LIFF initialization successful')
+        } else {
+          console.log('LIFF is already initialized')
         }
-        console.log('LIFF is ready')
+
+        // ログイン処理を実行する前に再度初期化状態を確認
+        if (!liff.ready) {
+          throw new Error('LIFF is not ready after initialization')
+        }
 
         // ログイン処理
         if (!liff.isLoggedIn()) {
           console.log('User not logged in, starting login process')
           const trimmedRedirectUrl = REDIRECT_URL.trim()
           console.log('Redirect URL after trim:', trimmedRedirectUrl)
+          
+          // ログイン処理を実行
           liff.login({
             redirectUri: trimmedRedirectUrl
           })
@@ -83,7 +95,7 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
             stack: error.stack
           })
         }
-        throw error // 元のエラーをそのまま投げる
+        throw new Error('LIFF initialization failed: ' + (error instanceof Error ? error.message : 'Unknown error'))
       }
       
     } catch (error) {
