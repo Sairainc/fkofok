@@ -34,13 +34,21 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
       console.log('Redirect URL:', REDIRECT_URL)
 
       // LIFF初期化
-      await liff.init({ liffId: LIFF_ID })
+      if (!liff.ready) {
+        await liff.init({ liffId: LIFF_ID })
+      }
       console.log('LIFF initialization successful')
       
       // ログイン処理
-      await liff.login({
-        redirectUri: REDIRECT_URL
-      })
+      if (!liff.isLoggedIn()) {
+        console.log('User not logged in, starting login process')
+        await liff.login({
+          redirectUri: REDIRECT_URL
+        })
+      } else {
+        console.log('User already logged in, redirecting...')
+        window.location.href = REDIRECT_URL
+      }
       
     } catch (error) {
       console.error('\n=== LINE Login Error in CallToAction ===')
@@ -54,6 +62,7 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
         } else if (error.message.includes('Redirect URL')) {
           errorMessage = 'リダイレクトURLの設定が正しくありません。'
         }
+        console.error('Error message:', error.message)
       }
       alert(`${errorMessage}\nもう一度お試しください。`)
     }

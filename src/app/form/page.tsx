@@ -26,12 +26,18 @@ export default function Form(): React.ReactNode {
           throw new Error('LIFF ID is not configured')
         }
         
-        await liff.init({ liffId })
+        if (!liff.ready) {
+          await liff.init({ liffId })
+        }
 
         // ログイン状態を確認
         if (!liff.isLoggedIn()) {
-          console.log('[DEBUG] User not logged in, redirecting to top page')
-          router.push('/')
+          console.log('[DEBUG] User not logged in, redirecting to login')
+          const redirectUrl = process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL
+          if (!redirectUrl) {
+            throw new Error('Redirect URL is not configured')
+          }
+          await liff.login({ redirectUri: redirectUrl })
           return
         }
 
