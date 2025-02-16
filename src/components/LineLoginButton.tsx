@@ -12,20 +12,28 @@ export const LineLoginButton = () => {
   useEffect(() => {
     const initialize = async () => {
       try {
-        await initializeLiff(process.env.NEXT_PUBLIC_LIFF_ID!)
+        console.log("[DEBUG] Initializing LIFF from LineLoginButton");
+
+        await initializeLiff(); // ここでは `process.env.NEXT_PUBLIC_LIFF_ID` を渡さない
       } catch (error) {
-        console.error('Initialization error:', error)
+        console.error('[ERROR] Initialization error in LineLoginButton:', error);
       }
     }
-    initialize()
-  }, [])
+
+    initialize();
+  }, []);
 
   const handleLogin = async () => {
     try {
-      await liff.login()
-      router.push('/form')
+      if (!liff.isLoggedIn()) {
+        console.log("[DEBUG] User is not logged in, redirecting...");
+        await liff.login();
+      }
+
+      console.log("[DEBUG] User logged in, redirecting to form...");
+      router.push('/form');
     } catch (error) {
-      console.error('Login error:', error)
+      console.error('[ERROR] Login error:', error);
     }
   }
 
@@ -37,4 +45,4 @@ export const LineLoginButton = () => {
       LINEでログイン
     </Button>
   )
-} 
+}
