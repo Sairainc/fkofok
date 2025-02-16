@@ -33,7 +33,7 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
       
       // LIFF IDの検証
       if (!LIFF_ID) {
-        console.error('LIFF ID is not configured:', LIFF_ID)
+        console.error('LIFF ID is missing:', LIFF_ID)
         throw new Error('LIFF ID is not configured')
       }
       console.log('LIFF ID:', LIFF_ID)
@@ -45,22 +45,25 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
       }
       console.log('Redirect URL:', REDIRECT_URL)
 
-      // LIFF初期化を確実に行う
-      try {
-        if (!liff.ready) {
-          console.log('Initializing LIFF...')
-          await liff.init({ liffId: LIFF_ID })
+      // LIFF初期化を修正
+      if (!liff.ready) {
+        try {
+          console.log('Initializing LIFF with ID:', LIFF_ID)
+          await liff.init({
+            liffId: LIFF_ID,
+            withLoginOnExternalBrowser: true  // 外部ブラウザでのログインを許可
+          })
           console.log('LIFF initialization successful')
+        } catch (initError) {
+          console.error('LIFF initialization error:', initError)
+          throw new Error('LIFF initialization failed')
         }
-      } catch (initError) {
-        console.error('LIFF initialization error:', initError)
-        throw new Error('LIFF initialization failed')
       }
       
       // ログイン処理
       if (!liff.isLoggedIn()) {
         console.log('User not logged in, starting login process')
-        await liff.login({
+        liff.login({
           redirectUri: REDIRECT_URL
         })
       } else {

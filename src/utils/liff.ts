@@ -14,7 +14,8 @@ export const initializeLiff = async (liffId?: string) => {
   try {
     console.log('Initializing LIFF with ID:', liffId)
     await liff.init({
-      liffId: liffId
+      liffId: liffId,
+      withLoginOnExternalBrowser: true
     })
     console.log('LIFF initialization succeeded')
   } catch (error) {
