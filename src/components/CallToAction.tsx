@@ -13,6 +13,16 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
   const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID
   const REDIRECT_URL = process.env.NEXT_PUBLIC_LIFF_REDIRECT_URL
 
+  // Add URL validation
+  const isValidUrl = (url: string) => {
+    try {
+      new URL(url)
+      return true
+    } catch {
+      return false
+    }
+  }
+
   const handleLineClick = () => {
     window.open(LINE_URL, '_blank')
   }
@@ -28,8 +38,9 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
       console.log('LIFF ID:', LIFF_ID)
 
       // リダイレクトURLの検証
-      if (!REDIRECT_URL) {
-        throw new Error('Redirect URL is not configured')
+      if (!REDIRECT_URL || !isValidUrl(REDIRECT_URL)) {
+        console.error('Invalid redirect URL:', REDIRECT_URL)
+        throw new Error('Redirect URL is not properly configured')
       }
       console.log('Redirect URL:', REDIRECT_URL)
 
@@ -54,7 +65,6 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
       console.error('\n=== LINE Login Error in CallToAction ===')
       console.error('Error details:', error)
       
-      // より詳細なエラーメッセージ
       let errorMessage = 'LINEログインに失敗しました。'
       if (error instanceof Error) {
         if (error.message.includes('LIFF ID')) {
