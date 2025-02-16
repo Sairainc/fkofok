@@ -20,28 +20,49 @@ export const CallToAction = ({ userType }: CallToActionProps) => {
   const handleRegisterClick = async () => {
     try {
       console.log('\n=== LINE Login Process Started from CallToAction ===')
-      console.log('LIFF ID:', LIFF_ID)
-      console.log('Redirect URL:', REDIRECT_URL)
       
+      // LIFF IDの検証
       if (!LIFF_ID) {
         throw new Error('LIFF ID is not configured')
       }
+      console.log('LIFF ID:', LIFF_ID)
 
+      // リダイレクトURLの検証
       if (!REDIRECT_URL) {
         throw new Error('Redirect URL is not configured')
       }
+      console.log('Redirect URL:', REDIRECT_URL)
 
+      // LIFF初期化前の状態確認
+      if (liff.isLoggedIn()) {
+        console.log('User is already logged in, proceeding with redirect...')
+        window.location.href = REDIRECT_URL
+        return
+      }
+
+      // LIFF初期化
       await liff.init({ liffId: LIFF_ID })
+      console.log('LIFF initialization successful')
       
-      // Use the validated redirect URL
-      liff.login({
-        redirectUri: REDIRECT_URL
+      // ログイン処理
+      await liff.login({
+        redirectUri: REDIRECT_URL.trim()
       })
       
     } catch (error) {
       console.error('\n=== LINE Login Error in CallToAction ===')
       console.error('Error details:', error)
-      alert('LINEログインに失敗しました。もう一度お試しください。')
+      
+      // より詳細なエラーメッセージ
+      let errorMessage = 'LINEログインに失敗しました。'
+      if (error instanceof Error) {
+        if (error.message.includes('LIFF ID')) {
+          errorMessage = 'LIFF IDの設定が正しくありません。'
+        } else if (error.message.includes('Redirect URL')) {
+          errorMessage = 'リダイレクトURLの設定が正しくありません。'
+        }
+      }
+      alert(`${errorMessage}\nもう一度お試しください。`)
     }
   }
 
