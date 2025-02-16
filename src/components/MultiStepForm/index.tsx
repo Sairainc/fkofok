@@ -20,14 +20,26 @@ type MultiStepFormProps = {
 const MultiStepForm = ({ lineId }: MultiStepFormProps) => {
   const [currentStep, setCurrentStep] = useState(0)
   const [userType, setUserType] = useState<'men' | 'women' | null>(null)
-  const { 
-    register, 
-    handleSubmit,
-    formState: { errors },
-    trigger
-  } = useForm<FormData>({
-    mode: 'onChange'
+  
+  const methods = useForm<FormData>({
+    mode: 'onChange',
+    defaultValues: {
+      gender: undefined,
+      phone_number: '',
+      birthdate: '',
+      prefecture: '',
+      occupation: '',
+      party_type: '',
+      preferred_age_range: '',
+      preferred_personality: [],
+      preferred_style: '',
+      restaurant_preference: '',
+      preferred_areas: [],
+      available_dates: []
+    }
   })
+
+  const { register, handleSubmit, formState: { errors }, trigger } = methods
 
   const nextStep = async () => {
     const isValid = await trigger() // 現在のステップのバリデーションを実行
