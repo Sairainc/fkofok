@@ -7,17 +7,17 @@ import { liff } from '@line/liff'
 export const CallToAction = () => {
   const router = useRouter()
 
-  const handleClick = async (gender: 'men' | 'women') => {
+  const handleClick = async (_gender: 'men' | 'women') => {
     try {
       // LIFFの初期化
       await liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID! })
       
       if (!liff.isLoggedIn()) {
         // ログインしていない場合はLINEログインを実行
-        liff.login({ redirectUri: `${process.env.NEXT_PUBLIC_URL}/form` })
+        liff.login({ redirectUri: `${process.env.NEXT_PUBLIC_URL}/form?gender=${_gender}` })
       } else {
         // すでにログインしている場合は直接フォームページへ
-        router.push('/form')
+        router.push(`/form?gender=${_gender}`)
       }
     } catch (error) {
       console.error('LIFF initialization error:', error)
