@@ -1,53 +1,29 @@
 // src/components/CallToAction.tsx
 'use client'
 
-import { liff } from '@line/liff'
-import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export const CallToAction = () => {
-  const [isLiffInitialized, setIsLiffInitialized] = useState(false)
+  const router = useRouter()
 
-  useEffect(() => {
-    // LIFFの初期化
-    const initLiff = async () => {
-      try {
-        await liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID! })
-        setIsLiffInitialized(true)
-      } catch (error) {
-        console.error('LIFF initialization failed:', error)
-      }
-    }
-
-    initLiff()
-  }, [])
-
-  const handleClick = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    
-    if (!isLiffInitialized) {
-      console.error('LIFF is not initialized')
-      return
-    }
-
-    try {
-      if (!liff.isLoggedIn()) {
-        liff.login({ redirectUri: `${process.env.NEXT_PUBLIC_URL}/form` })
-      } else {
-        window.location.href = '/form'
-      }
-    } catch (error) {
-      console.error('Login failed:', error)
-    }
+  const handleClick = (gender: 'men' | 'women') => {
+    router.push(`/payment/${gender}`)
   }
 
   return (
     <div className="py-16 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
         <button
-          onClick={handleClick}
-          className="inline-block px-8 py-3 text-lg font-medium text-white bg-primary rounded-lg hover:bg-primary-dark"
+          onClick={() => handleClick('men')}
+          className="inline-block px-8 py-3 text-lg font-medium text-white bg-primary rounded-lg hover:bg-primary-dark mr-4"
         >
-          プロフィール登録
+          男性の方はこちら
+        </button>
+        <button
+          onClick={() => handleClick('women')}
+          className="inline-block px-8 py-3 text-lg font-medium text-white bg-primary-women rounded-lg hover:opacity-90"
+        >
+          女性の方はこちら
         </button>
       </div>
     </div>
