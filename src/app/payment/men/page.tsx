@@ -10,17 +10,8 @@ export default function MenPayment() {
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.push('/auth')
-        return
-      }
-      
-      // 女性ユーザーが男性用ページにアクセスした場合
-      if (user.gender === 'women') {
-        router.push('/payment/women')
-        return
-      }
+    if (!loading && !user) {
+      router.push('/auth')
     }
   }, [user, loading, router])
 
@@ -66,7 +57,7 @@ export default function MenPayment() {
 
             <PaymentButton 
               priceId={process.env.NEXT_PUBLIC_STRIPE_MEN_PRICE_ID!}
-              _userId="test_user"
+              _userId={user.id}
             />
           </div>
         </div>
