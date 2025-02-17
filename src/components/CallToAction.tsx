@@ -2,25 +2,16 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { liff } from '@line/liff'
 
 export const CallToAction = () => {
   const router = useRouter()
 
   const handleClick = async (_gender: 'men' | 'women') => {
     try {
-      // LIFFの初期化
-      await liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID! })
-      
-      if (!liff.isLoggedIn()) {
-        // ログインしていない場合はLINEログインを実行
-        liff.login({ redirectUri: `${process.env.NEXT_PUBLIC_URL}/form?gender=${_gender}` })
-      } else {
-        // すでにログインしている場合は直接フォームページへ
-        router.push(`/form?gender=${_gender}`)
-      }
+      // LINEの友だち追加URLに遷移
+      window.location.href = process.env.NEXT_PUBLIC_LINE_ADD_FRIEND_URL!
     } catch (error) {
-      console.error('LIFF initialization error:', error)
+      console.error('Error:', error)
       alert('エラーが発生しました。もう一度お試しください。')
     }
   }
@@ -39,7 +30,7 @@ export const CallToAction = () => {
             onClick={() => handleClick('men')}
             className="inline-block px-8 py-3 text-lg font-medium text-white bg-primary rounded-lg hover:bg-primary-dark"
           >
-            プロフィールを登録する
+            LINEで友だち追加
           </button>
         </div>
       </div>

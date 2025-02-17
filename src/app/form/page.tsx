@@ -18,15 +18,23 @@ export default function Form() {
   useEffect(() => {
     const initializeLiff = async () => {
       try {
+        console.log("🔍 LIFF ID:", process.env.NEXT_PUBLIC_LIFF_ID)
+
+        // LIFF SDKの初期化
         await liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID! })
-        
+        await liff.ready
+
+        // 未ログインの場合、LINEログイン画面にリダイレクト
         if (!liff.isLoggedIn()) {
+          console.log("🔄 User is not logged in, redirecting to LINE login...")
           liff.login()
           return
         }
 
-        // IDトークンを取得
+        // IDトークンの取得
         const idToken = liff.getIDToken()
+        console.log("🚀 ID Token:", idToken)
+
         if (!idToken) {
           throw new Error('IDトークンを取得できませんでした')
         }
@@ -41,30 +49,16 @@ export default function Form() {
         })
 
         if (!response.ok) {
-          throw new Error('トークン検証に失敗しました')
+          throw new Error(`トークン検証に失敗しました (ステータス: ${response.status})`)
         }
 
         const { userId } = await response.json()
+        console.log("✅ LINE User ID:", userId)
         setLineId(userId)
 
-        // ログイン成功をログに記録
-        await fetch('/api/line-login-log', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            event: 'LINE_LOGIN_SUCCESS',
-            details: {
-              userId,
-              timestamp: new Date().toISOString(),
-            },
-          }),
-        })
-
       } catch (err) {
-        console.error('LIFF initialization error:', err)
-        setError('LINEログインに失敗しました')
+        console.error('❌ LIFF initialization error:', err)
+        setError(`LINEログインに失敗しました: ${err}`)
         router.push('/')
       }
     }
