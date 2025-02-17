@@ -1,10 +1,12 @@
 // src/components/CallToAction.tsx
 'use client'
 
-import { useRouter } from 'next/navigation'
+// useRouterのインポートを削除
+// import { useRouter } from 'next/navigation'
 
 export const CallToAction = () => {
-  const router = useRouter()
+  // routerの定義を削除
+  // const router = useRouter()
 
   const handleClick = async (_gender: 'men' | 'women') => {
     try {
