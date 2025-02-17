@@ -5,6 +5,7 @@ type Step1Props = {
   register: UseFormRegister<FormData>
   _userType: 'men' | 'women'
   onNext: () => void
+  onPrev: () => void
 }
 
 const Step1PartyType = ({ register, onNext, _userType }: Step1Props) => {

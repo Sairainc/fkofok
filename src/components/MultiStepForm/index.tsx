@@ -14,6 +14,7 @@ import Step8Availability from './Step8Availability'
 import { FormData } from '@/types/form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { formSchema } from '@/lib/validations/form'
+import { FormProvider } from 'react-hook-form'
 
 type MultiStepFormProps = {
   lineId?: string  // オプショナルに変更
@@ -48,14 +49,33 @@ const MultiStepForm = ({ lineId }: MultiStepFormProps) => {
   const { register, handleSubmit, formState: { errors }, trigger, control } = methods
 
   const nextStep = async () => {
-    console.log('Current step:', currentStep)
-    console.log('Form values:', methods.getValues())
-    
     const isValid = await trigger()
-    console.log('Validation result:', isValid)
-    
     if (isValid) {
-      setCurrentStep(prev => prev + 1)
+      const currentData = methods.getValues()
+      
+      try {
+        // 現在のステップのデータをSupabaseに保存
+        const { error } = await supabase
+          .from('profiles')
+          .upsert([
+            {
+              line_id: lineId,
+              user_type: userType,
+              ...currentData,
+              updated_at: new Date().toISOString(),
+            }
+          ], {
+            onConflict: 'line_id'
+          })
+
+        if (error) throw error
+
+        // 次のステップに進む
+        setCurrentStep(prev => prev + 1)
+      } catch (error) {
+        console.error('Error saving data:', error)
+        alert('データの保存に失敗しました。もう一度お試しください。')
+      }
     }
   }
   const prevStep = () => setCurrentStep(prev => prev - 1)
@@ -151,10 +171,72 @@ const MultiStepForm = ({ lineId }: MultiStepFormProps) => {
     }
   }
 
-  // Step0BasicInfoに渡すprops
-  const handleGenderSelect = (gender: 'men' | 'women') => {
-    setUserType(gender)
-    nextStep()
+  // フォームの表示
+  const renderStep = () => {
+    switch (currentStep) {
+      case 0:
+        return <Step0BasicInfo 
+          register={register} 
+          control={control} 
+          onNext={(gender) => {
+            setUserType(gender)
+            nextStep()
+          }} 
+        />
+      case 1:
+        return <Step1PartyType 
+          register={register} 
+          _userType={userType!} 
+          onNext={nextStep} 
+          onPrev={prevStep} 
+        />
+      case 2:
+        return <Step2Preferences 
+          register={register} 
+          userType={userType!} 
+          onNext={nextStep} 
+          onPrev={prevStep} 
+        />
+      case 3:
+        return <Step3PartyPreferences 
+          register={register} 
+          _userType={userType!} 
+          onNext={nextStep} 
+          onPrev={prevStep} 
+        />
+      case 4:
+        return <Step5Profile 
+          register={register} 
+          userType={userType!} 
+          onNext={nextStep} 
+          onPrev={prevStep} 
+        />
+      case 5:
+        return <Step6CommonProfile 
+          register={register} 
+          control={control} 
+          _userType={userType!} 
+          onNext={nextStep} 
+          onPrev={prevStep} 
+        />
+      case 6:
+        return <Step7Photos 
+          register={register} 
+          userType={userType!} 
+          onNext={nextStep} 
+          onPrev={prevStep} 
+          lineId={lineId} 
+        />
+      case 7:
+        return <Step8Availability 
+          register={register} 
+          userType={userType!} 
+          onNext={handleSubmit(onSubmit)} 
+          onPrev={prevStep} 
+        />
+      default:
+        return null
+    }
   }
 
   const steps = [
@@ -169,115 +251,51 @@ const MultiStepForm = ({ lineId }: MultiStepFormProps) => {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl mx-auto px-4 py-8">
-        {/* プログレスバー */}
-        <div className="mb-8 bg-white rounded-lg p-6 shadow-sm">
-          <div className="flex justify-between mb-4">
-            {steps.map((step, index) => (
-              <div key={step.number} className="flex flex-col items-center">
-                <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center text-lg
-                    ${currentStep >= index
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-100 text-gray-400'
-                    }`}
-                >
-                  {step.icon}
+    <FormProvider {...methods}>
+      <div className="min-h-screen bg-gray-50">
+        <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl mx-auto px-4 py-8">
+          {/* プログレスバー */}
+          <div className="mb-8 bg-white rounded-lg p-6 shadow-sm">
+            <div className="flex justify-between mb-4">
+              {steps.map((step, index) => (
+                <div key={step.number} className="flex flex-col items-center">
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center text-lg
+                      ${currentStep >= index
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-100 text-gray-400'
+                      }`}
+                  >
+                    {step.icon}
+                  </div>
+                  <span className="text-xs mt-2 font-medium text-gray-600">{step.title}</span>
                 </div>
-                <span className="text-xs mt-2 font-medium text-gray-600">{step.title}</span>
-              </div>
-            ))}
+              ))}
+            </div>
+            <div className="relative h-2 bg-gray-100 rounded-full">
+              <div
+                className="absolute h-full bg-primary transition-all duration-300"
+                style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
+              />
+            </div>
           </div>
-          <div className="relative h-2 bg-gray-100 rounded-full">
-            <div
-              className="absolute h-full bg-primary transition-all duration-300"
-              style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
-            />
-          </div>
-        </div>
 
-        {/* フォームコンテンツ */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          {!userType ? (
-            <Step0BasicInfo
-              register={register}
-              control={control}
-              onNext={handleGenderSelect}
-            />
-          ) : (
-            <>
-              {currentStep === 1 && (
-                <Step1PartyType
-                  register={register}
-                  _userType={userType}
-                  onNext={nextStep}
-                />
-              )}
-              {currentStep === 2 && (
-                <Step2Preferences
-                  register={register}
-                  userType={userType}
-                  onNext={nextStep}
-                  onPrev={prevStep}
-                />
-              )}
-              {currentStep === 3 && (
-                <Step3PartyPreferences
-                  register={register}
-                  _userType={userType}
-                  onNext={nextStep}
-                  onPrev={prevStep}
-                />
-              )}
-              {currentStep === 4 && (
-                <Step5Profile
-                  register={register}
-                  userType={userType}
-                  onNext={nextStep}
-                  onPrev={prevStep}
-                />
-              )}
-              {currentStep === 5 && (
-                <Step6CommonProfile
-                  register={register}
-                  control={control}
-                  _userType={userType}
-                  onNext={nextStep}
-                  onPrev={prevStep}
-                />
-              )}
-              {currentStep === 6 && (
-                <Step7Photos
-                  register={register}
-                  userType={userType}
-                  onNext={nextStep}
-                  onPrev={prevStep}
-                  lineId={lineId}
-                />
-              )}
-              {currentStep === 7 && (
-                <Step8Availability
-                  register={register}
-                  userType={userType}
-                  onNext={nextStep}
-                  onPrev={prevStep}
-                />
-              )}
-            </>
+          {/* フォームコンテンツ */}
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            {renderStep()}
+          </div>
+
+          {/* エラーメッセージ */}
+          {errors.available_dates && (
+            <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-100">
+              <p className="text-red-600 text-sm font-medium">
+                {errors.available_dates.message?.toString()}
+              </p>
+            </div>
           )}
-        </div>
-
-        {/* エラーメッセージ */}
-        {errors.available_dates && (
-          <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-100">
-            <p className="text-red-600 text-sm font-medium">
-              {errors.available_dates.message?.toString()}
-            </p>
-          </div>
-        )}
-      </form>
-    </div>
+        </form>
+      </div>
+    </FormProvider>
   )
 }
 
