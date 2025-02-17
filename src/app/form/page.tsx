@@ -12,12 +12,17 @@ const DynamicMultiStepForm = dynamic(() => import("@/components/MultiStepForm"),
 export default function Form() {
     const { user, loading } = useUser();
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) {
+        console.log("⌛ ユーザーデータの読み込み中...");
+        return <div>Loading...</div>;
+    }
 
-    // 🔥 user が取得できていない場合はログインを促す
     if (!user) {
+        console.log("❌ ユーザーがログインしていません！LINEログインを要求");
         return <div>LINEログインが必要です</div>;
     }
+
+    console.log("✅ ユーザー認証成功！フォームを表示:", user);
 
     return (
         <Suspense fallback={<div>Loading...</div>}>

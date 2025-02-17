@@ -10,17 +10,23 @@ export const useUser = () => {
     useEffect(() => {
         const initLiff = async () => {
             try {
+                console.log("🔍 LIFF 初期化開始");
+
                 await liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID as string });
 
                 if (!liff.isLoggedIn()) {
-                    liff.login();  // 🔥 ここでログインを実行！
+                    console.log("🔑 LINE未ログイン: liff.login() を実行");
+                    liff.login();
                     return;
                 }
 
+                console.log("✅ LINEログイン済み: プロフィール取得開始");
                 const profile = await liff.getProfile();
+                console.log("👤 取得したプロフィール:", profile);
+
                 setUser({ id: profile.userId, name: profile.displayName });
             } catch (error) {
-                console.error("LIFF init error:", error);
+                console.error("❌ LIFF 初期化エラー:", error);
             } finally {
                 setLoading(false);
             }
