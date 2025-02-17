@@ -14,7 +14,7 @@ import Step8Availability from './Step8Availability'
 import { FormData } from '@/types/form'
 
 type MultiStepFormProps = {
-  lineId: string
+  lineId?: string  // オプショナルに変更
 }
 
 const MultiStepForm = ({ lineId }: MultiStepFormProps) => {

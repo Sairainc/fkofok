@@ -9,7 +9,7 @@ type Step7Props = {
   userType: 'men' | 'women'
   onNext: () => void
   onPrev: () => void
-  lineId: string
+  lineId?: string
 }
 
 const Step7Photos = ({ register, userType, onNext, onPrev, lineId }: Step7Props) => {

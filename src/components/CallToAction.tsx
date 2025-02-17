@@ -8,10 +8,10 @@ export const CallToAction = () => {
   // routerの定義を削除
   // const router = useRouter()
 
-  const handleClick = async (_gender: 'men' | 'women') => {
+  const handleClick = async () => {
     try {
-      // LINEの友だち追加URLに遷移
-      window.location.href = process.env.NEXT_PUBLIC_LINE_ADD_FRIEND_URL!
+      // LINEの友だち追加URLを削除し、フォームページに遷移するように変更
+      window.location.href = '/auth'
     } catch (error) {
       console.error('Error:', error)
       alert('エラーが発生しました。もう一度お試しください。')
@@ -29,10 +29,10 @@ export const CallToAction = () => {
         </p>
         <div className="flex justify-center gap-4">
           <button
-            onClick={() => handleClick('men')}
+            onClick={handleClick}
             className="inline-block px-8 py-3 text-lg font-medium text-white bg-primary rounded-lg hover:bg-primary-dark"
           >
-            LINEで友だち追加
+            無料で始める
           </button>
         </div>
       </div>
