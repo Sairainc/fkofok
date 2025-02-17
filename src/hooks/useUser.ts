@@ -2,31 +2,47 @@
 
 import { useState, useEffect } from "react";
 import liff from "@line/liff";
+import { supabase } from "@/lib/supabase";
+
+type User = {
+  id: string;
+  name: string;
+  gender?: 'men' | 'women';
+}
 
 export const useUser = () => {
-    const [user, setUser] = useState<{ id: string; name: string } | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const initLiff = async () => {
             try {
-                console.log("🔍 LIFF 初期化開始");
-
-                await liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID as string });
+                await liff.init({ 
+                    liffId: process.env.NEXT_PUBLIC_LIFF_ID as string,
+                    withLoginOnExternalBrowser: true
+                });
 
                 if (!liff.isLoggedIn()) {
-                    console.log("🔑 LINE未ログイン: liff.login() を実行");
-                    liff.login();
+                    liff.login({ redirectUri: window.location.href });
                     return;
                 }
 
-                console.log("✅ LINEログイン済み: プロフィール取得開始");
                 const profile = await liff.getProfile();
-                console.log("👤 取得したプロフィール:", profile);
+                
+                // Supabaseからユーザーの性別情報を取得
+                const { data: profileData } = await supabase
+                    .from('profiles')
+                    .select('gender')
+                    .eq('line_id', profile.userId)
+                    .single();
 
-                setUser({ id: profile.userId, name: profile.displayName });
+                setUser({ 
+                    id: profile.userId, 
+                    name: profile.displayName,
+                    gender: profileData?.gender
+                });
             } catch (error) {
-                console.error("❌ LIFF 初期化エラー:", error);
+                console.error("LIFF エラー:", error);
             } finally {
                 setLoading(false);
             }

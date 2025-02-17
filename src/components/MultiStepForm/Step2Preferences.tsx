@@ -1,5 +1,6 @@
 import { UseFormRegister } from 'react-hook-form'
 import { FormData } from '@/types/form'
+import { StepContainer, StepTitle, FormGroup, CheckboxGroup, CheckboxLabel, ButtonGroup } from './styles'
 
 type Step2Props = {
   register: UseFormRegister<FormData>
@@ -30,86 +31,30 @@ const Step2Preferences = ({ register, userType, onNext, onPrev }: Step2Props) =>
   ]
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold">好きなタイプは？</h2>
-      
-      <div className="space-y-4">
-        {/* 年齢選択 */}
+    <StepContainer>
+      <StepTitle>好みのタイプ</StepTitle>
+      <FormGroup>
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            希望年齢
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            好みのスタイル
           </label>
-          <select
-            {...register('preferred_age_range', { required: true })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-          >
-            <option value="">選択してください</option>
-            <option value="18-24">18-24歳</option>
-            <option value="25-29">25-29歳</option>
-            <option value="30-34">30-34歳</option>
-            <option value="35-39">35-39歳</option>
-            <option value="40-">40歳以上</option>
-          </select>
-        </div>
-
-        {/* 性格選択 */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            好みの性格（複数選択可）
-          </label>
-          <div className="mt-2 space-y-2">
-            {personalityOptions.map((option) => (
-              <label key={option} className="flex items-center">
-                <input
-                  type="checkbox"
-                  {...register('preferred_personality')}
-                  value={option}
-                  className="form-checkbox"
-                />
-                <span className="ml-2">{option}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {/* スタイル選択 */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            好みのスタイル（複数選択可）
-          </label>
-          <div className="mt-2 space-y-2">
+          <CheckboxGroup>
             {styleOptions.map((option) => (
-              <label key={option} className="flex items-center">
+              <CheckboxLabel key={option}>
                 <input
                   type="checkbox"
                   {...register('preferred_style')}
                   value={option}
-                  className="form-checkbox"
+                  className="w-4 h-4 text-primary"
                 />
-                <span className="ml-2">{option}</span>
-              </label>
+                <span className="ml-3">{option}</span>
+              </CheckboxLabel>
             ))}
-          </div>
+          </CheckboxGroup>
         </div>
-      </div>
-
-      <div className="flex justify-between gap-4 pt-6">
-        <button
-          type="button"
-          onClick={onPrev}
-          className="w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-300"
-        >
-          戻る
-        </button>
-        <button
-          type="button"
-          onClick={onNext}
-          className="w-full bg-primary text-white py-3 px-6 rounded-lg hover:bg-primary-dark"
-        >
-          次へ進む
-        </button>
-      </div>
-    </div>
+      </FormGroup>
+      <ButtonGroup onNext={onNext} onPrev={onPrev} />
+    </StepContainer>
   )
 }
 

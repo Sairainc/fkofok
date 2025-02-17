@@ -1,43 +1,42 @@
 'use client'
 
-import { loadStripe } from '@stripe/stripe-js'
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useUser } from '@/hooks/useUser'
 
 export default function Payment() {
-  const handlePayment = async () => {
-    try {
-      const stripe = await stripePromise
-      const response = await fetch('/api/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          // 支払い情報
-        }),
-      })
-      
-      const session = await response.json()
-      
-      // Stripeのチェックアウトページにリダイレクト
-      await stripe?.redirectToCheckout({
-        sessionId: session.id,
-      })
-    } catch (error) {
-      console.error('Payment error:', error)
+  const { user, loading } = useUser()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        // ユーザーがログインしていない場合は認証ページへ
+        router.push('/auth')
+        return
+      }
+
+      // ユーザーの性別に応じて適切な決済ページへリダイレクト
+      if (user.gender === 'men') {
+        router.push('/payment/men')
+      } else if (user.gender === 'women') {
+        router.push('/payment/women')
+      }
     }
+  }, [user, loading, router])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    )
   }
 
+  // ローディング中やリダイレクト中の表示
   return (
-    <main className="min-h-screen">
-      <h1>決済ページ</h1>
-      <button
-        onClick={handlePayment}
-        className="px-4 py-2 bg-blue-500 text-white rounded"
-      >
-        決済する
-      </button>
-    </main>
+    <div className="min-h-screen flex items-center justify-center">
+      <div>リダイレクト中...</div>
+    </div>
   )
 } 

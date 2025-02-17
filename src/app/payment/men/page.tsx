@@ -1,8 +1,39 @@
 'use client'
 
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { PaymentButton } from '@/components/PaymentButton'
+import { useUser } from '@/hooks/useUser'
 
 export default function MenPayment() {
+  const { user, loading } = useUser()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        router.push('/auth')
+        return
+      }
+      
+      // 女性ユーザーが男性用ページにアクセスした場合
+      if (user.gender === 'women') {
+        router.push('/payment/women')
+        return
+      }
+    }
+  }, [user, loading, router])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  if (!user) return null
+
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-4xl mx-auto px-4">

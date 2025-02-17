@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@hookform/resolvers": "^4.1.0",
     "@line/liff": "^2.25.1",
     "@stripe/stripe-js": "^2.4.0",
     "@supabase/auth-ui-react": "^0.4.7",
@@ -21,7 +22,8 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.50.1",
-    "stripe": "^14.25.0"
+    "stripe": "^14.25.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.0.0",

@@ -2,6 +2,9 @@
 
 import { getStripe } from '@/utils/stripe'
 import { Button } from './Button'
+import { useUser } from '@/hooks/useUser'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 type PaymentButtonProps = {
   priceId: string
@@ -9,6 +12,24 @@ type PaymentButtonProps = {
 }
 
 export const PaymentButton = ({ priceId, userId }: PaymentButtonProps) => {
+  const { user, loading } = useUser()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && user) {
+      // ユーザーの性別と現在のページが一致しない場合、適切なページにリダイレクト
+      const currentPath = window.location.pathname
+      if (user.gender === 'men' && currentPath.includes('/payment/women')) {
+        router.push('/payment/men')
+      } else if (user.gender === 'women' && currentPath.includes('/payment/men')) {
+        router.push('/payment/women')
+      }
+    }
+  }, [user, loading, router])
+
+  if (loading) return <div>Loading...</div>
+  if (!user) return <div>ログインが必要です</div>
+
   const handlePayment = async () => {
     try {
       const stripe = await getStripe()
@@ -19,7 +40,7 @@ export const PaymentButton = ({ priceId, userId }: PaymentButtonProps) => {
         },
         body: JSON.stringify({
           priceId,
-          userId,
+          userId: user.id, // LINEユーザーIDを使用
         }),
       })
       

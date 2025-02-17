@@ -1,6 +1,8 @@
 import { useWatch } from 'react-hook-form'
 import { FormData } from '@/types/form'
 import { Control, UseFormRegister } from 'react-hook-form'
+import { useFormState } from 'react-hook-form'
+import { StepContainer, StepTitle, FormGroup, ButtonGroup, Select, Input, ErrorMessage, RadioGroup, RadioLabel } from './styles'
 
 type Step0Props = {
   register: UseFormRegister<FormData>
@@ -9,6 +11,7 @@ type Step0Props = {
 }
 
 const Step0BasicInfo = ({ register, control, onNext }: Step0Props) => {
+  const { errors } = useFormState({ control })
   const gender = useWatch({ 
     control,
     name: 'gender' 
@@ -21,55 +24,56 @@ const Step0BasicInfo = ({ register, control, onNext }: Step0Props) => {
   }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold">基本情報の入力</h2>
+    <StepContainer>
+      <StepTitle>基本情報の入力</StepTitle>
       
-      <div className="space-y-4">
-        {/* 性別選択 */}
+      <FormGroup>
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             性別<span className="text-red-500">*</span>
           </label>
-          <select
-            {...register('gender', { required: '性別を選択してください' })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-          >
-            <option value="men">男性</option>
-            <option value="women">女性</option>
-          </select>
+          <RadioGroup>
+            <RadioLabel>
+              <input
+                type="radio"
+                {...register('gender')}
+                value="men"
+                className="w-4 h-4 text-primary"
+              />
+              <span className="ml-3">男性</span>
+            </RadioLabel>
+            <RadioLabel>
+              <input
+                type="radio"
+                {...register('gender')}
+                value="women"
+                className="w-4 h-4 text-primary"
+              />
+              <span className="ml-3">女性</span>
+            </RadioLabel>
+          </RadioGroup>
+          {errors.gender && (
+            <ErrorMessage message={errors.gender.message as string} />
+          )}
         </div>
 
-        {/* 電話番号 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             電話番号<span className="text-red-500">*</span>
           </label>
-          <input
+          <Input
             type="tel"
-            {...register('phone_number', { 
-              required: '電話番号を入力してください',
-              pattern: {
-                value: /^[0-9]{10,11}$/,
-                message: '有効な電話番号を入力してください'
-              }
-            })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
             placeholder="例：09012345678"
+            {...register('phone_number')}
           />
+          {errors.phone_number && (
+            <ErrorMessage message={errors.phone_number.message as string} />
+          )}
         </div>
-      </div>
+      </FormGroup>
 
-      <div className="pt-6">
-        <button
-          type="button"
-          onClick={handleNext}
-          disabled={!gender}
-          className="w-full bg-primary text-white py-3 px-6 rounded-lg hover:bg-primary-dark"
-        >
-          次へ進む
-        </button>
-      </div>
-    </div>
+      <ButtonGroup onNext={handleNext} />
+    </StepContainer>
   )
 }
 

@@ -3,6 +3,9 @@
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { useUser } from "@/hooks/useUser";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 const DynamicMultiStepForm = dynamic(() => import("@/components/MultiStepForm"), {
     ssr: false,
@@ -11,18 +14,33 @@ const DynamicMultiStepForm = dynamic(() => import("@/components/MultiStepForm"),
 
 export default function Form() {
     const { user, loading } = useUser();
+    const router = useRouter();
 
-    if (loading) {
-        console.log("⌛ ユーザーデータの読み込み中...");
-        return <div>Loading...</div>;
-    }
+    useEffect(() => {
+        const checkProfileStatus = async () => {
+            if (user) {
+                // プロフィールの登録状況を確認
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('is_profile_completed')
+                    .eq('line_id', user.id)
+                    .single();
 
-    if (!user) {
-        console.log("❌ ユーザーがログインしていません！LINEログインを要求");
-        return <div>LINEログインが必要です</div>;
-    }
+                // プロフィール登録が完了している場合は決済ページへ
+                if (profile?.is_profile_completed) {
+                    router.push('/payment');
+                }
+            }
+        };
 
-    console.log("✅ ユーザー認証成功！フォームを表示:", user);
+        if (!loading) {
+            checkProfileStatus();
+        }
+    }, [user, loading, router]);
+
+    if (loading) return <div>Loading...</div>;
+
+    if (!user) return <div>LINEログインが必要です</div>;
 
     return (
         <Suspense fallback={<div>Loading...</div>}>
