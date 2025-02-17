@@ -2,12 +2,10 @@
 
 import { useState, useEffect } from "react";
 import liff from "@line/liff";
-import { supabase } from "@/lib/supabase";
 
 type User = {
   id: string;
   name: string;
-  gender?: 'men' | 'women';
 }
 
 export const useUser = () => {
@@ -29,17 +27,9 @@ export const useUser = () => {
 
                 const profile = await liff.getProfile();
                 
-                // Supabaseからユーザーの性別情報を取得
-                const { data: profileData } = await supabase
-                    .from('profiles')
-                    .select('gender')
-                    .eq('line_id', profile.userId)
-                    .single();
-
                 setUser({ 
                     id: profile.userId, 
                     name: profile.displayName,
-                    gender: profileData?.gender
                 });
             } catch (error) {
                 console.error("LIFF エラー:", error);

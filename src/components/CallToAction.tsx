@@ -25,7 +25,7 @@ export const CallToAction = () => {
           今すぐ無料で始めましょう
         </h2>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          プロフィールを登録して、理想のパートナーを見つけましょう
+          LINEで簡単ログイン
         </p>
         <div className="flex justify-center gap-4">
           <button
