@@ -1,4 +1,7 @@
 module.exports = {
+  content: [
+    "./src/**/*.{js,ts,jsx,tsx}", // Tailwind を適用するファイルを指定
+  ],
   theme: {
     extend: {
       colors: {
@@ -23,5 +26,5 @@ module.exports = {
       },
     },
   },
-  // ... 他の設定
-} 
+  plugins: [], // 必要なら公式のTailwindプラグインを追加
+};

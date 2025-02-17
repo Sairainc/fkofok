@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import './globals.css'
+import '@/app/globals.css'
 import { testSupabaseConnection } from '@/lib/supabase'
+import { GeistSans } from 'geist/font/sans'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -34,10 +35,8 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="ja">
-      <body className={`${inter.className} antialiased`}>
-        {children}
-      </body>
+    <html lang="ja" className={`${inter.className} antialiased ${GeistSans.className}`}>
+      <body>{children}</body>
     </html>
   )
 } 
