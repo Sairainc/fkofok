@@ -3,8 +3,6 @@
 import { getStripe } from '@/utils/stripe'
 import { Button } from './Button'
 import { useUser } from '@/hooks/useUser'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
 
 type PaymentButtonProps = {
   priceId: string
@@ -13,7 +11,6 @@ type PaymentButtonProps = {
 
 export const PaymentButton = ({ priceId, _userId }: PaymentButtonProps) => {
   const { user, loading } = useUser()
-  const router = useRouter()
 
   if (loading) return <div>Loading...</div>
   if (!user) return <div>ログインが必要です</div>
