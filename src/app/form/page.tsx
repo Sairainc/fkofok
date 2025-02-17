@@ -14,9 +14,14 @@ export default function Form() {
 
     if (loading) return <div>Loading...</div>;
 
+    // 🔥 user が取得できていない場合はログインを促す
+    if (!user) {
+        return <div>LINEログインが必要です</div>;
+    }
+
     return (
         <Suspense fallback={<div>Loading...</div>}>
-            {user ? <DynamicMultiStepForm lineId={user.id} /> : <div>LINEログインが必要です</div>}
+            <DynamicMultiStepForm lineId={user.id} />
         </Suspense>
     );
 }

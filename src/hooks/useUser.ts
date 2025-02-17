@@ -13,11 +13,12 @@ export const useUser = () => {
                 await liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID as string });
 
                 if (!liff.isLoggedIn()) {
-                    liff.login();
-                } else {
-                    const profile = await liff.getProfile();
-                    setUser({ id: profile.userId, name: profile.displayName });
+                    liff.login();  // 🔥 ここでログインを実行！
+                    return;
                 }
+
+                const profile = await liff.getProfile();
+                setUser({ id: profile.userId, name: profile.displayName });
             } catch (error) {
                 console.error("LIFF init error:", error);
             } finally {
