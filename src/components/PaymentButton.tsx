@@ -15,18 +15,6 @@ export const PaymentButton = ({ priceId, _userId }: PaymentButtonProps) => {
   const { user, loading } = useUser()
   const router = useRouter()
 
-  useEffect(() => {
-    if (!loading && user) {
-      // ユーザーの性別と現在のページが一致しない場合、適切なページにリダイレクト
-      const currentPath = window.location.pathname
-      if (user.gender === 'men' && currentPath.includes('/payment/women')) {
-        router.push('/payment/men')
-      } else if (user.gender === 'women' && currentPath.includes('/payment/men')) {
-        router.push('/payment/women')
-      }
-    }
-  }, [user, loading, router])
-
   if (loading) return <div>Loading...</div>
   if (!user) return <div>ログインが必要です</div>
 
@@ -40,7 +28,7 @@ export const PaymentButton = ({ priceId, _userId }: PaymentButtonProps) => {
         },
         body: JSON.stringify({
           priceId,
-          userId: user.id, // LINEユーザーIDを使用
+          userId: user.id,
         }),
       })
       
