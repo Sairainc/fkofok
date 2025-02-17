@@ -10,14 +10,6 @@ type Step2Props = {
 }
 
 const Step2Preferences = ({ register, userType, onNext, onPrev }: Step2Props) => {
-  const personalityOptions = [
-    '明るい盛り上げタイプ',
-    '気遣いできるしっかり',
-    '天然いじられ',
-    'クール',
-    '小悪魔'
-  ]
-
   const styleOptions = userType === 'men' ? [
     'スリム',
     '普通',

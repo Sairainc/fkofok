@@ -8,10 +8,10 @@ import { useEffect } from 'react'
 
 type PaymentButtonProps = {
   priceId: string
-  userId: string
+  _userId: string
 }
 
-export const PaymentButton = ({ priceId, userId }: PaymentButtonProps) => {
+export const PaymentButton = ({ priceId, _userId }: PaymentButtonProps) => {
   const { user, loading } = useUser()
   const router = useRouter()
 

@@ -2,7 +2,7 @@ import { useWatch } from 'react-hook-form'
 import { FormData } from '@/types/form'
 import { Control, UseFormRegister } from 'react-hook-form'
 import { useFormState } from 'react-hook-form'
-import { StepContainer, StepTitle, FormGroup, ButtonGroup, Select, Input, ErrorMessage, RadioGroup, RadioLabel } from './styles'
+import { StepContainer, StepTitle, FormGroup, ButtonGroup, Input, ErrorMessage, RadioGroup, RadioLabel } from './styles'
 
 type Step0Props = {
   register: UseFormRegister<FormData>

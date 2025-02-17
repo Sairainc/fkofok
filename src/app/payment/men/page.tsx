@@ -66,7 +66,7 @@ export default function MenPayment() {
 
             <PaymentButton 
               priceId={process.env.NEXT_PUBLIC_STRIPE_MEN_PRICE_ID!}
-              userId="test_user"
+              _userId="test_user"
             />
           </div>
         </div>

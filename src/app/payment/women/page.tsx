@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { PaymentButton } from '@/components/PaymentButton'
@@ -66,7 +67,7 @@ export default function WomenPayment() {
 
             <PaymentButton 
               priceId={process.env.NEXT_PUBLIC_STRIPE_WOMEN_PRICE_ID!}
-              userId="test_user"
+              _userId="test_user"
             />
           </div>
         </div>

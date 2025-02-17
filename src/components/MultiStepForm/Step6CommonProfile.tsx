@@ -15,6 +15,7 @@ const Step6CommonProfile = ({ register, control, onNext, onPrev, _userType }: St
   const { errors } = useFormState({ control })
   const [selectedPrefecture, setSelectedPrefecture] = useState('')
   const [cities, setCities] = useState<string[]>([])
+  const today = new Date()
 
   const occupationOptions = [
     '会社員（事務系）',
@@ -28,11 +29,6 @@ const Step6CommonProfile = ({ register, control, onNext, onPrev, _userType }: St
     '学生',
     'その他'
   ]
-
-  // 生年月日の入力制限を設定
-  const today = new Date()
-  const maxAge = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate())
-  const minAge = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate())
 
   // 都道府県が変更されたら市区町村リストを更新
   useEffect(() => {
