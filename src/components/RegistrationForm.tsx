@@ -36,7 +36,7 @@ const menPreferenceSchema = z.object({
     'クール',
     '小悪魔'
   ])).min(1, '1つ以上選択してください'),
-  preferred_style: z.enum([
+  preferred_body_type: z.enum([
     'スリム',
     '普通',
     'グラマー',
@@ -55,7 +55,7 @@ const womenPreferenceSchema = z.object({
     '知的',
     '紳士的'
   ])).min(1, '1つ以上選択してください'),
-  preferred_style: z.enum([
+  preferred_body_type: z.enum([
     'クール',
     'カジュアル',
     'ビジネス',
@@ -108,7 +108,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       preferred_age_min: 18,
       preferred_age_max: 30,
       preferred_personality: [],
-      preferred_style: '気にしない',
+      preferred_body_type: '気にしない',
     },
   });
 
@@ -120,7 +120,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       preferred_age_min: 20,
       preferred_age_max: 35,
       preferred_personality: [],
-      preferred_style: '気にしない',
+      preferred_body_type: '気にしない',
     },
   });
 
@@ -199,15 +199,15 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         .from('men_preferences')
         .upsert({
           line_id: userId,
+          party_type: formData.party_type,
           preferred_age_min: data.preferred_age_min,
           preferred_age_max: data.preferred_age_max,
           preferred_personality: data.preferred_personality,
-          preferred_style: data.preferred_style,
+          preferred_body_type: data.preferred_body_type,
           updated_at: new Date().toISOString(),
         });
 
       if (error) throw error;
-
       setStep(4);
     } catch (error) {
       console.error('Error:', error);
@@ -234,7 +234,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           preferred_age_min: data.preferred_age_min,
           preferred_age_max: data.preferred_age_max,
           preferred_personality: data.preferred_personality,
-          preferred_style: data.preferred_style,
+          preferred_body_type: data.preferred_body_type,
           updated_at: new Date().toISOString(),
         });
 
@@ -456,14 +456,14 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                   <label
                     key={value}
                     className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
-                      ${menPreferenceForm.watch('preferred_style') === value
+                      ${menPreferenceForm.watch('preferred_body_type') === value
                         ? 'bg-primary text-white'
                         : 'bg-white text-gray-700'}`}
                   >
                     <input
                       type="radio"
                       value={value}
-                      {...menPreferenceForm.register('preferred_style')}
+                      {...menPreferenceForm.register('preferred_body_type')}
                       className="sr-only"
                     />
                     {label}
@@ -573,14 +573,14 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                   <label
                     key={value}
                     className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
-                      ${womenPreferenceForm.watch('preferred_style') === value
+                      ${womenPreferenceForm.watch('preferred_body_type') === value
                         ? 'bg-primary text-white'
                         : 'bg-white text-gray-700'}`}
                   >
                     <input
                       type="radio"
                       value={value}
-                      {...womenPreferenceForm.register('preferred_style')}
+                      {...womenPreferenceForm.register('preferred_body_type')}
                       className="sr-only"
                     />
                     {label}

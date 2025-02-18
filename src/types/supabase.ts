@@ -280,7 +280,7 @@ export interface Database {
           preferred_age_min: number
           preferred_age_max: number
           preferred_personality: string[]
-          preferred_style: 'クール' | 'カジュアル' | 'ビジネス' | '気にしない'
+          preferred_body_type: 'クール' | 'カジュアル' | 'ビジネス' | '気にしない'
           created_at: string
           updated_at: string
           restaurant_preference: string[]
@@ -292,7 +292,7 @@ export interface Database {
           preferred_age_min: number
           preferred_age_max: number
           preferred_personality: string[]
-          preferred_style: 'クール' | 'カジュアル' | 'ビジネス' | '気にしない'
+          preferred_body_type: 'クール' | 'カジュアル' | 'ビジネス' | '気にしない'
           created_at?: string
           updated_at?: string
           restaurant_preference: string[]
