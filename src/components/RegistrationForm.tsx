@@ -217,6 +217,10 @@ const personalityOptions = [
   'クールなタイプ'
 ] as const;
 
+// 男性用と女性用の性格タイプを別々に定義
+type MenPersonalityType = typeof menPreferenceSchema.shape.preferred_personality.element._def.values[number];
+type WomenPersonalityType = typeof womenPreferenceSchema.shape.preferred_personality.element._def.values[number];
+
 export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -560,7 +564,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       const fileName = `${userId}-${Date.now()}.${fileExt}`;
 
       // Supabaseのストレージにアップロード
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('profile-photos')
         .upload(fileName, data.photo, {
           cacheControl: '3600',
@@ -608,7 +612,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       touchedFields: profile2Form.formState.touchedFields,
       values: profile2Form.getValues(),
     });
-  }, [profile2Form.formState]);
+  }, [profile2Form.formState, profile2Form]);
 
   if (isSubmitted) {
     return (
@@ -752,7 +756,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                   <label
                     key={value}
                     className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
-                      ${menPreferenceForm.watch('preferred_personality')?.includes(value as any)
+                      ${menPreferenceForm.watch('preferred_personality')?.includes(value as MenPersonalityType)
                         ? 'bg-primary text-white'
                         : 'bg-white text-gray-700'}`}
                   >
@@ -869,7 +873,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                   <label
                     key={value}
                     className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
-                      ${womenPreferenceForm.watch('preferred_personality')?.includes(value as any)
+                      ${womenPreferenceForm.watch('preferred_personality')?.includes(value as WomenPersonalityType)
                         ? 'bg-primary text-white'
                         : 'bg-white text-gray-700'}`}
                   >
