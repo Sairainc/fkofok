@@ -116,8 +116,8 @@ const occupations = [
   'その他'
 ] as const;
 
-// プロフィールのスキーマを更新
-const profileSchema = z.object({
+// プロフィール1のスキーマ
+const profile1Schema = z.object({
   personality: z.array(z.enum([
     '明るい盛り上げタイプ',
     '気遣いできるタイプ',
@@ -140,15 +140,13 @@ const profileSchema = z.object({
     '普通'
   ]),
   dating_experience: z.number().min(0).max(10),
+});
+
+// プロフィール2のスキーマ
+const profile2Schema = z.object({
   study: z.enum(educationOptions),
   from: z.enum(prefectures),
-  birthday: z.string()
-    .refine((val) => {
-      const date = new Date(val);
-      const minDate = new Date('1963-01-01');
-      const maxDate = new Date();
-      return date >= minDate && date <= maxDate;
-    }, '有効な生年月日を入力してください'),
+  birthday: z.string(),
   occupation: z.enum(occupations),
   prefecture: z.enum(prefectures),
   city: z.string().min(1, '市区町村を選択してください'),
@@ -161,7 +159,8 @@ type Step2Data = z.infer<typeof step2Schema>;
 type MenPreferenceData = z.infer<typeof menPreferenceSchema>;
 type WomenPreferenceData = z.infer<typeof womenPreferenceSchema>;
 type RestaurantPreferenceData = z.infer<typeof restaurantPreferenceSchema>;
-type ProfileData = z.infer<typeof profileSchema>;
+type Profile1Data = z.infer<typeof profile1Schema>;
+type Profile2Data = z.infer<typeof profile2Schema>;
 
 type FormDataType = Step1Data & { party_type?: 'fun' | 'serious' };
 
@@ -192,6 +191,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState<FormDataType | null>(null);
+  const [profile1Data, setProfile1Data] = useState<Profile1Data | null>(null);
   const router = useRouter();
 
   const step1Form = useForm<Step1Data>({
@@ -242,8 +242,8 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   });
 
   // プロフィールフォームの追加
-  const profileForm = useForm<ProfileData>({
-    resolver: zodResolver(profileSchema),
+  const profile1Form = useForm<Profile1Data>({
+    resolver: zodResolver(profile1Schema),
     mode: 'onChange',
     defaultValues: {
       personality: [],
@@ -251,6 +251,13 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       appearance: undefined,
       style: undefined,
       dating_experience: 0,
+    },
+  });
+
+  const profile2Form = useForm<Profile2Data>({
+    resolver: zodResolver(profile2Schema),
+    mode: 'onChange',
+    defaultValues: {
       study: undefined,
       from: undefined,
       birthday: '',
@@ -458,9 +465,15 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     }
   };
 
-  // プロフィール送信ハンドラーの追加
-  const handleProfileSubmit = async (data: ProfileData) => {
-    if (!formData) return;
+  // プロフィール1の送信ハンドラ
+  const handleProfile1Submit = async (data: Profile1Data) => {
+    setProfile1Data(data);
+    setStep(step + 1);
+  };
+
+  // プロフィール2の送信ハンドラ
+  const handleProfile2Submit = async (data: Profile2Data) => {
+    if (!profile1Data) return;
     setIsSubmitting(true);
 
     try {
@@ -468,26 +481,15 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         .from('profiles')
         .upsert({
           line_id: userId,
-          personality: data.personality,
-          mbti: data.mbti,
-          appearance: data.appearance,
-          style: data.style,
-          dating_experience: data.dating_experience,
-          study: data.study,
-          from: data.from,
-          birthday: data.birthday,
-          occupation: data.occupation,
-          prefecture: data.prefecture,
-          city: data.city,
-          income: data.income,
-          mail: data.mail,
+          ...profile1Data,
+          ...data,
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'line_id'
         });
 
       if (error) throw error;
-      setStep(6);
+      setStep(step + 1);
     } catch (error) {
       console.error('Error:', error);
       alert('エラーが発生しました。もう一度お試しください。');
@@ -920,198 +922,216 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="w-full max-w-md p-6">
           <div className="text-center mb-8">
-            <h2 className="text-xl font-bold text-gray-900">プロフィールを入力しましょう</h2>
-            <p className="text-sm text-gray-600 mt-2">あなたのことを教えてください</p>
+            <h2 className="text-xl font-bold text-gray-900">プロフィール入力 1/2</h2>
+            <p className="text-sm text-gray-600 mt-2">あなたの性格や特徴を教えてください</p>
           </div>
           
-          <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)} className="space-y-6">
-            <div className="space-y-6">
-              {/* 基本情報セクション */}
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">基本情報</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      生年月日
-                    </label>
+          <form onSubmit={profile1Form.handleSubmit(handleProfile1Submit)} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                自分の性格（複数選択可）
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {personalityOptions.map((value) => (
+                  <label
+                    key={value}
+                    className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                      ${profile1Form.watch('personality')?.includes(value as typeof personalityOptions[number])
+                        ? 'bg-primary text-white'
+                        : 'bg-white text-gray-700'}`}
+                  >
                     <input
-                      type="date"
-                      {...profileForm.register('birthday')}
-                      className="w-full p-2 border rounded-lg"
-                      max={new Date().toISOString().split('T')[0]}
-                      min="1963-01-01"
+                      type="checkbox"
+                      value={value}
+                      {...profile1Form.register('personality')}
+                      className="sr-only"
                     />
-                  </div>
+                    {value}
+                  </label>
+                ))}
+              </div>
+            </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      学歴
-                    </label>
-                    <select
-                      {...profileForm.register('study')}
-                      className="w-full p-2 border rounded-lg"
-                    >
-                      <option value="">選択してください</option>
-                      {educationOptions.map((edu) => (
-                        <option key={edu} value={edu}>{edu}</option>
-                      ))}
-                    </select>
-                  </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                MBTI
+              </label>
+              <select
+                {...profile1Form.register('mbti')}
+                className="w-full p-2 border rounded-lg"
+              >
+                <option value="">選択してください</option>
+                {mbtiOptions.map((mbti) => (
+                  <option key={mbti} value={mbti}>
+                    {mbti}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      出身地
-                    </label>
-                    <select
-                      {...profileForm.register('from')}
-                      className="w-full p-2 border rounded-lg"
-                    >
-                      <option value="">選択してください</option>
-                      {prefectures.map((pref) => (
-                        <option key={pref} value={pref}>{pref}</option>
-                      ))}
-                    </select>
-                  </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                あえて自分の雰囲気を選ぶなら
+              </label>
+              <div className="grid grid-cols-1 gap-3">
+                {[
+                  'ノリの良い体育会系',
+                  'こなれた港区系',
+                  'クールなエリート系',
+                  '個性あふれるクリエイティブ系'
+                ].map((value) => (
+                  <label
+                    key={value}
+                    className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                      ${profile1Form.watch('appearance') === value
+                        ? 'bg-primary text-white'
+                        : 'bg-white text-gray-700'}`}
+                  >
+                    <input
+                      type="radio"
+                      value={value}
+                      {...profile1Form.register('appearance')}
+                      className="sr-only"
+                    />
+                    {value}
+                  </label>
+                ))}
+              </div>
+            </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      お住まい
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <select
-                        {...profileForm.register('prefecture')}
-                        className="w-full p-2 border rounded-lg"
-                      >
-                        <option value="">都道府県</option>
-                        {prefectures.map((pref) => (
-                          <option key={pref} value={pref}>{pref}</option>
-                        ))}
-                      </select>
-                      <input
-                        type="text"
-                        placeholder="市区町村"
-                        {...profileForm.register('city')}
-                        className="w-full p-2 border rounded-lg"
-                      />
-                    </div>
-                  </div>
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                自分のスタイル
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  '筋肉質',
+                  'がっしり',
+                  'スリム',
+                  '普通'
+                ].map((value) => (
+                  <label
+                    key={value}
+                    className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                      ${profile1Form.watch('style') === value
+                        ? 'bg-primary text-white'
+                        : 'bg-white text-gray-700'}`}
+                  >
+                    <input
+                      type="radio"
+                      value={value}
+                      {...profile1Form.register('style')}
+                      className="sr-only"
+                    />
+                    {value}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                合コンの経験回数は？（非公開）
+              </label>
+              <input
+                type="number"
+                {...profile1Form.register('dating_experience', { valueAsNumber: true })}
+                min="0"
+                max="10"
+                className="w-full p-2 border rounded-lg"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={!profile1Form.formState.isValid || isSubmitting}
+              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
+            >
+              {isSubmitting ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                '次に進む'
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 6) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-6">
+          <div className="text-center mb-8">
+            <h2 className="text-xl font-bold text-gray-900">プロフィール入力 2/2</h2>
+            <p className="text-sm text-gray-600 mt-2">基本情報を入力してください</p>
+          </div>
+          
+          <form onSubmit={profile2Form.handleSubmit(handleProfile2Submit)} className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <label>生年月日</label>
+                <input
+                  type="date"
+                  {...profile2Form.register('birthday')}
+                  className="w-full p-2 border rounded-lg"
+                  max={new Date().toISOString().split('T')[0]}
+                  min="1963-01-01"
+                />
               </div>
 
-              {/* 他のセクションは既存のまま */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  自分の性格（複数選択可）
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  {personalityOptions.map((value) => (
-                    <label
-                      key={value}
-                      className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
-                        ${profileForm.watch('personality')?.includes(value as typeof personalityOptions[number])
-                          ? 'bg-primary text-white'
-                          : 'bg-white text-gray-700'}`}
-                    >
-                      <input
-                        type="checkbox"
-                        value={value}
-                        {...profileForm.register('personality')}
-                        className="sr-only"
-                      />
-                      {value}
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  MBTI
+                  学歴
                 </label>
                 <select
-                  {...profileForm.register('mbti')}
+                  {...profile2Form.register('study')}
                   className="w-full p-2 border rounded-lg"
                 >
                   <option value="">選択してください</option>
-                  {mbtiOptions.map((mbti) => (
-                    <option key={mbti} value={mbti}>
-                      {mbti}
-                    </option>
+                  {educationOptions.map((edu) => (
+                    <option key={edu} value={edu}>{edu}</option>
                   ))}
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  あえて自分の雰囲気を選ぶなら
+                  出身地
                 </label>
-                <div className="grid grid-cols-1 gap-3">
-                  {[
-                    'ノリの良い体育会系',
-                    'こなれた港区系',
-                    'クールなエリート系',
-                    '個性あふれるクリエイティブ系'
-                  ].map((value) => (
-                    <label
-                      key={value}
-                      className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
-                        ${profileForm.watch('appearance') === value
-                          ? 'bg-primary text-white'
-                          : 'bg-white text-gray-700'}`}
-                    >
-                      <input
-                        type="radio"
-                        value={value}
-                        {...profileForm.register('appearance')}
-                        className="sr-only"
-                      />
-                      {value}
-                    </label>
+                <select
+                  {...profile2Form.register('from')}
+                  className="w-full p-2 border rounded-lg"
+                >
+                  <option value="">選択してください</option>
+                  {prefectures.map((pref) => (
+                    <option key={pref} value={pref}>{pref}</option>
                   ))}
-                </div>
+                </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  自分のスタイル
+                  お住まい
                 </label>
                 <div className="grid grid-cols-2 gap-3">
-                  {[
-                    '筋肉質',
-                    'がっしり',
-                    'スリム',
-                    '普通'
-                  ].map((value) => (
-                    <label
-                      key={value}
-                      className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
-                        ${profileForm.watch('style') === value
-                          ? 'bg-primary text-white'
-                          : 'bg-white text-gray-700'}`}
-                    >
-                      <input
-                        type="radio"
-                        value={value}
-                        {...profileForm.register('style')}
-                        className="sr-only"
-                      />
-                      {value}
-                    </label>
-                  ))}
+                  <select
+                    {...profile2Form.register('prefecture')}
+                    className="w-full p-2 border rounded-lg"
+                  >
+                    <option value="">都道府県</option>
+                    {prefectures.map((pref) => (
+                      <option key={pref} value={pref}>{pref}</option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="市区町村"
+                    {...profile2Form.register('city')}
+                    className="w-full p-2 border rounded-lg"
+                  />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  合コンの経験回数は？（非公開）
-                </label>
-                <input
-                  type="number"
-                  {...profileForm.register('dating_experience', { valueAsNumber: true })}
-                  min="0"
-                  max="10"
-                  className="w-full p-2 border rounded-lg"
-                />
               </div>
 
               <div>
@@ -1119,7 +1139,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                   収入
                 </label>
                 <select
-                  {...profileForm.register('income')}
+                  {...profile2Form.register('income')}
                   className="w-full p-2 border rounded-lg"
                 >
                   <option value="">選択してください</option>
@@ -1135,7 +1155,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                 </label>
                 <input
                   type="email"
-                  {...profileForm.register('mail')}
+                  {...profile2Form.register('mail')}
                   className="w-full p-2 border rounded-lg"
                 />
               </div>
@@ -1143,7 +1163,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
             <button
               type="submit"
-              disabled={!profileForm.formState.isValid || isSubmitting}
+              disabled={!profile2Form.formState.isValid || isSubmitting}
               className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
             >
               {isSubmitting ? (
