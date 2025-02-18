@@ -281,6 +281,16 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const profile2Form = useForm<Profile2Data>({
     resolver: zodResolver(profile2Schema),
     mode: 'onChange',
+    defaultValues: {
+      study: undefined,
+      from: undefined,
+      birthday: '',
+      occupation: undefined,
+      prefecture: undefined,
+      city: '',
+      income: undefined,
+      mail: '',
+    }
   });
 
   // 写真アップロードフォームの追加
@@ -1145,17 +1155,22 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  学歴
+                  学歴*
                 </label>
                 <select
                   {...profile2Form.register('study')}
-                  className="w-full p-2 border rounded-lg"
+                  className={`w-full p-2 border rounded-lg ${
+                    profile2Form.formState.errors.study ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 >
                   <option value="">選択してください</option>
                   {educationOptions.map((edu) => (
                     <option key={edu} value={edu}>{edu}</option>
                   ))}
                 </select>
+                {profile2Form.formState.errors.study && (
+                  <p className="text-red-500 text-sm mt-1">{profile2Form.formState.errors.study.message}</p>
+                )}
               </div>
 
               <div>
