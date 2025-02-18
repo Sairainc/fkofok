@@ -203,7 +203,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           preferred_age_min: data.preferred_age_min,
           preferred_age_max: data.preferred_age_max,
           preferred_personality: data.preferred_personality,
-          preferred_body_type: data.preferred_body_type,
+          preferred_body_type: data.preferred_body_type as 'スリム' | '普通' | 'グラマー' | '気にしない',
           updated_at: new Date().toISOString(),
         });
 
