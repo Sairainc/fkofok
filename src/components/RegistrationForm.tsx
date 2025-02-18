@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 // Step 1のスキーマ
 const step1Schema = z.object({
