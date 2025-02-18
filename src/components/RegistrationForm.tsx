@@ -150,7 +150,14 @@ const profile2Schema = z.object({
   from: z.enum(prefectures, {
     required_error: '出身地を選択してください',
   }),
-  birthday: z.string().min(1, '生年月日を入力してください'),
+  birthday: z.string()
+    .min(1, '生年月日を入力してください')
+    .regex(/^\d{4}\/\d{2}\/\d{2}$/, '正しい形式で入力してください（例：2000/01/01）')
+    .refine((date) => {
+      const [year, month, day] = date.split('/').map(Number);
+      const inputDate = new Date(year, month - 1, day);
+      return inputDate instanceof Date && !isNaN(inputDate.getTime());
+    }, '正しい日付を入力してください'),
   occupation: z.enum(occupations, {
     required_error: '職業を選択してください',
   }),
@@ -1139,10 +1146,18 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                 生年月日*
               </label>
               <input
-                type="date"
+                type="text"
+                placeholder="1990/01/01"
                 {...profile2Form.register('birthday')}
-                className="w-full p-2 border rounded-lg"
+                className={`w-full p-2 border rounded-lg ${
+                  profile2Form.formState.errors.birthday ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
+              {profile2Form.formState.errors.birthday && (
+                <p className="text-red-500 text-sm mt-1">
+                  {profile2Form.formState.errors.birthday.message}
+                </p>
+              )}
             </div>
 
             <div>
