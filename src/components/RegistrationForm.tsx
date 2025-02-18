@@ -51,6 +51,10 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         throw new Error('必須項目が入力されていません');
       }
 
+      // 現在の日付を取得
+      const today = new Date();
+      const defaultBirthdate = new Date(today.getFullYear() - 20, 0, 1); // デフォルトを20歳に設定
+
       const { error } = await supabase
         .from('profiles')
         .upsert({
@@ -59,13 +63,14 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           gender: data.gender,
           user_type: data.gender,
           phone_number: data.phone_number,
-          birthdate: new Date().toISOString(),
-          prefecture: 'unknown',
-          occupation: 'unknown',
+          birthdate: defaultBirthdate.toISOString().split('T')[0], // YYYY-MM-DD形式に変換
+          prefecture: '東京都', // デフォルト値を設定
+          occupation: '会社員', // デフォルト値を設定
           updated_at: new Date().toISOString(),
           created_at: new Date().toISOString(),
-        }, {
-          onConflict: 'id'
+          personality: [], // 空の配列を設定
+          preferred_areas: [], // 空の配列を設定
+          style: 'casual', // デフォルト値を設定
         });
 
       if (error) {
@@ -105,10 +110,10 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           preferred_age_range: '20-30',
-          preferred_personality: [],
-          preferred_style: [],
-          restaurant_preference: 'any',
-          preferred_areas: []
+          preferred_personality: ['friendly'], // デフォルト値を設定
+          preferred_style: ['casual'], // デフォルト値を設定
+          restaurant_preference: 'casual', // デフォルト値を設定
+          preferred_areas: ['東京'] // デフォルト値を設定
         }, {
           onConflict: 'id'
         });
