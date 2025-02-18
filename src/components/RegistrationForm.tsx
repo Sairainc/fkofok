@@ -3,8 +3,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/router';
 
-const formSchema = z.object({
+// Step 1のスキーマ
+const step1Schema = z.object({
   gender: z.enum(['men', 'women'], {
     required_error: '性別を選択してください',
   }),
@@ -16,55 +18,81 @@ const formSchema = z.object({
     .transform((val) => val.replace(/[^0-9]/g, '')),
 });
 
-type FormData = z.infer<typeof formSchema>;
+// Step 2のスキーマ
+const step2Schema = z.object({
+  party_type: z.enum(['fun', 'serious'], {
+    required_error: '希望する合コンタイプを選択してください',
+  }),
+});
+
+type Step1Data = z.infer<typeof step1Schema>;
+type Step2Data = z.infer<typeof step2Schema>;
 
 type RegistrationFormProps = {
   userId: string;
 };
 
 export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
+  const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [formData, setFormData] = useState<Step1Data | null>(null);
+  const router = useRouter();
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+  const step1Form = useForm<Step1Data>({
+    resolver: zodResolver(step1Schema),
     mode: 'onChange',
   });
 
-  const handleSubmit = async (data: FormData) => {
-    setIsSubmitting(true);
-    try {
-      if (!userId || !data.gender || !data.phone_number) {
-        throw new Error('必須項目が入力されていません');
-      }
+  const step2Form = useForm<Step2Data>({
+    resolver: zodResolver(step2Schema),
+    mode: 'onChange',
+  });
 
-      const today = new Date();
-      const defaultBirthdate = new Date(today.getFullYear() - 20, 0, 1);
+  const handleStep1Submit = async (data: Step1Data) => {
+    setFormData(data);
+    setStep(2);
+  };
+
+  const handleStep2Submit = async (data: Step2Data) => {
+    if (!formData) return;
+    setIsSubmitting(true);
+
+    try {
       const uuid = crypto.randomUUID();
 
-      const { error } = await supabase
+      // プロフィールの作成
+      const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
           id: uuid,
           line_id: userId,
-          gender: data.gender,
-          user_type: data.gender,
-          phone_number: data.phone_number,
-          birthdate: defaultBirthdate.toISOString().split('T')[0],
-          prefecture: '東京都',
-          occupation: '会社員',
+          gender: formData.gender,
+          phone_number: formData.phone_number,
           updated_at: new Date().toISOString(),
           created_at: new Date().toISOString(),
-          personality: [],
-          style: 'casual',
         });
 
-      if (error) {
-        console.error('Database error:', error);
-        throw new Error('データベースエラーが発生しました');
-      }
+      if (profileError) throw profileError;
+
+      // 選択した性別に応じてpreferencesテーブルを選択
+      const preferencesTable = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
+      
+      // 好みの登録
+      const { error: prefError } = await supabase
+        .from(preferencesTable)
+        .upsert({
+          id: crypto.randomUUID(),
+          line_id: userId,
+          party_type: data.party_type,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (prefError) throw prefError;
 
       setIsSubmitted(true);
+      router.push('/payment');
     } catch (error) {
       console.error('Error:', error);
       if (error instanceof Error) {
@@ -81,12 +109,85 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="w-full max-w-md p-6 text-center">
+          <div className="mb-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            登録が完了しました
+            登録完了
           </h2>
           <p className="text-gray-600">
             基本情報の登録が完了しました。
+            次のステップに進みます...
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 1) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-6">
+          <div className="text-center mb-8">
+            <h2 className="text-xl font-bold text-gray-900">基本情報の登録</h2>
+            <p className="text-sm text-gray-600 mt-2">まずは基本的な情報を教えてください</p>
+          </div>
+          
+          <form onSubmit={step1Form.handleSubmit(handleStep1Submit)} className="space-y-6">
+            <div>
+              <label className="block text-sm text-gray-700 mb-1">
+                あなたの性別*
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <label className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                  ${step1Form.formState.errors.gender ? 'border-red-500' : 'border-gray-300'}
+                  ${step1Form.watch('gender') === 'men' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
+                  <input
+                    type="radio"
+                    value="men"
+                    {...step1Form.register('gender')}
+                    className="sr-only"
+                  />
+                  男性
+                </label>
+                <label className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                  ${step1Form.formState.errors.gender ? 'border-red-500' : 'border-gray-300'}
+                  ${step1Form.watch('gender') === 'women' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
+                  <input
+                    type="radio"
+                    value="women"
+                    {...step1Form.register('gender')}
+                    className="sr-only"
+                  />
+                  女性
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm text-gray-700 mb-1">
+                電話番号(非公開)*
+              </label>
+              <input
+                type="tel"
+                {...step1Form.register('phone_number')}
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 transition-all
+                  ${step1Form.formState.errors.phone_number ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-primary/20'}`}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={!step1Form.formState.isValid || isSubmitting}
+              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
+            >
+              {isSubmitting ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                '次に進む'
+              )}
+            </button>
+          </form>
         </div>
       </div>
     );
@@ -96,58 +197,46 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="w-full max-w-md p-6">
         <div className="text-center mb-8">
-          <h2 className="text-xl font-bold text-gray-900">基本情報の登録</h2>
+          <h2 className="text-xl font-bold text-gray-900">希望する合コンタイプ</h2>
+          <p className="text-sm text-gray-600 mt-2">あなたの希望に合った合コンをご紹介します</p>
         </div>
         
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-          <div>
-            <label className="block text-sm text-gray-700 mb-1">
-              あなたの性別*
+        <form onSubmit={step2Form.handleSubmit(handleStep2Submit)} className="space-y-6">
+          <div className="grid grid-cols-1 gap-4">
+            <label className={`flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-all
+              ${step2Form.formState.errors.party_type ? 'border-red-500' : 'border-gray-300'}
+              ${step2Form.watch('party_type') === 'fun' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
+              <input
+                type="radio"
+                value="fun"
+                {...step2Form.register('party_type')}
+                className="sr-only"
+              />
+              ワイワイノリ重視
             </label>
-            <div className="grid grid-cols-2 gap-4">
-              <label className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
-                ${form.formState.errors.gender ? 'border-red-500' : 'border-gray-300'}
-                ${form.watch('gender') === 'men' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
-                <input
-                  type="radio"
-                  value="men"
-                  {...form.register('gender')}
-                  className="sr-only"
-                />
-                男性
-              </label>
-              <label className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
-                ${form.formState.errors.gender ? 'border-red-500' : 'border-gray-300'}
-                ${form.watch('gender') === 'women' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
-                <input
-                  type="radio"
-                  value="women"
-                  {...form.register('gender')}
-                  className="sr-only"
-                />
-                女性
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-700 mb-1">
-              電話番号(非公開)*
+            <label className={`flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-all
+              ${step2Form.formState.errors.party_type ? 'border-red-500' : 'border-gray-300'}
+              ${step2Form.watch('party_type') === 'serious' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
+              <input
+                type="radio"
+                value="serious"
+                {...step2Form.register('party_type')}
+                className="sr-only"
+              />
+              真剣な恋愛
             </label>
-            <input
-              type="tel"
-              {...form.register('phone_number')}
-              className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 transition-all
-                ${form.formState.errors.phone_number ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-primary/20'}`}
-            />
           </div>
 
           <button
             type="submit"
-            disabled={!form.formState.isValid || isSubmitting}
-            className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500"
+            disabled={!step2Form.formState.isValid || isSubmitting}
+            className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
           >
-            登録する
+            {isSubmitting ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+            ) : (
+              '次に進む'
+            )}
           </button>
         </form>
       </div>
