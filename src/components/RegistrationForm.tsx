@@ -150,7 +150,7 @@ const profile2Schema = z.object({
   from: z.enum(prefectures, {
     required_error: '出身地を選択してください',
   }),
-  birthday: z.string()
+  birth_date: z.string()
     .min(1, '生年月日を入力してください')
     .regex(/^\d{4}\/\d{2}\/\d{2}$/, '正しい形式で入力してください（例：2000/01/01）')
     .refine((date) => {
@@ -291,7 +291,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     defaultValues: {
       study: educationOptions[0],
       from: prefectures[0],
-      birthday: '',
+      birth_date: '',
       occupation: occupations[0],
       prefecture: prefectures[0],
       city: '',
@@ -1159,14 +1159,14 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
               <input
                 type="text"
                 placeholder="1990/01/01"
-                {...profile2Form.register('birthday')}
+                {...profile2Form.register('birth_date')}
                 className={`w-full p-2 border rounded-lg ${
-                  profile2Form.formState.errors.birthday ? 'border-red-500' : 'border-gray-300'
+                  profile2Form.formState.errors.birth_date ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
-              {profile2Form.formState.errors.birthday && (
+              {profile2Form.formState.errors.birth_date && (
                 <p className="text-red-500 text-sm mt-1">
-                  {profile2Form.formState.errors.birthday.message}
+                  {profile2Form.formState.errors.birth_date.message}
                 </p>
               )}
             </div>
