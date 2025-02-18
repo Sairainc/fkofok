@@ -280,7 +280,17 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
   const profile2Form = useForm<Profile2Data>({
     resolver: zodResolver(profile2Schema),
-    mode: 'all',  // すべての入力でバリデーションを実行
+    mode: 'onChange',
+    defaultValues: {
+      study: undefined,
+      from: undefined,
+      birthday: '',
+      occupation: undefined,
+      prefecture: undefined,
+      city: '',
+      income: undefined,
+      mail: '',
+    }
   });
 
   // 写真アップロードフォームの追加
@@ -1124,106 +1134,94 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           </div>
           
           <form onSubmit={profile2Form.handleSubmit(handleProfile2Submit)} className="space-y-6">
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  生年月日*
-                </label>
-                <input
-                  type="date"
-                  {...profile2Form.register('birthday')}
-                  className={`w-full p-2 border rounded-lg ${
-                    profile2Form.formState.errors.birthday ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                {profile2Form.formState.errors.birthday && (
-                  <p className="text-red-500 text-sm mt-1">{profile2Form.formState.errors.birthday.message}</p>
-                )}
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                生年月日*
+              </label>
+              <input
+                type="date"
+                {...profile2Form.register('birthday')}
+                className="w-full p-2 border rounded-lg"
+              />
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  学歴*
-                </label>
-                <select
-                  {...profile2Form.register('study')}
-                  className={`w-full p-2 border rounded-lg ${
-                    profile2Form.formState.errors.study ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                >
-                  <option value="">選択してください</option>
-                  {educationOptions.map((option) => (
-                    <option key={option} value={option}>{option}</option>
-                  ))}
-                </select>
-                {profile2Form.formState.errors.study && (
-                  <p className="text-red-500 text-sm mt-1">{profile2Form.formState.errors.study.message}</p>
-                )}
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                学歴*
+              </label>
+              <select
+                {...profile2Form.register('study')}
+                className="w-full p-2 border rounded-lg"
+              >
+                <option value="">選択してください</option>
+                {educationOptions.map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  出身地
-                </label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                出身地
+              </label>
+              <select
+                {...profile2Form.register('from')}
+                className="w-full p-2 border rounded-lg"
+              >
+                <option value="">選択してください</option>
+                {prefectures.map((pref) => (
+                  <option key={pref} value={pref}>{pref}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                お住まい
+              </label>
+              <div className="grid grid-cols-2 gap-3">
                 <select
-                  {...profile2Form.register('from')}
+                  {...profile2Form.register('prefecture')}
                   className="w-full p-2 border rounded-lg"
                 >
-                  <option value="">選択してください</option>
+                  <option value="">都道府県</option>
                   {prefectures.map((pref) => (
                     <option key={pref} value={pref}>{pref}</option>
                   ))}
                 </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  お住まい
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <select
-                    {...profile2Form.register('prefecture')}
-                    className="w-full p-2 border rounded-lg"
-                  >
-                    <option value="">都道府県</option>
-                    {prefectures.map((pref) => (
-                      <option key={pref} value={pref}>{pref}</option>
-                    ))}
-                  </select>
-                  <input
-                    type="text"
-                    placeholder="市区町村"
-                    {...profile2Form.register('city')}
-                    className="w-full p-2 border rounded-lg"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  収入
-                </label>
-                <select
-                  {...profile2Form.register('income')}
-                  className="w-full p-2 border rounded-lg"
-                >
-                  <option value="">選択してください</option>
-                  {incomeRanges.map((income) => (
-                    <option key={income} value={income}>{income}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  メールアドレス
-                </label>
                 <input
-                  type="email"
-                  {...profile2Form.register('mail')}
+                  type="text"
+                  placeholder="市区町村"
+                  {...profile2Form.register('city')}
                   className="w-full p-2 border rounded-lg"
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                収入
+              </label>
+              <select
+                {...profile2Form.register('income')}
+                className="w-full p-2 border rounded-lg"
+              >
+                <option value="">選択してください</option>
+                {incomeRanges.map((income) => (
+                  <option key={income} value={income}>{income}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                メールアドレス
+              </label>
+              <input
+                type="email"
+                {...profile2Form.register('mail')}
+                className="w-full p-2 border rounded-lg"
+              />
             </div>
 
             <button
