@@ -544,13 +544,24 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         throw new Error('写真が選択されていません');
       }
 
+      // 既存のプロフィールを確認
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('line_id', userId)
+        .single();
+
+      if (!existingProfile) {
+        throw new Error('プロフィールが見つかりません');
+      }
+
       // ファイル名をユニークにする
       const fileExt = data.photo.name.split('.').pop();
       const fileName = `${userId}-${Date.now()}.${fileExt}`;
 
       // Supabaseのストレージにアップロード
-      const { error: uploadError } = await supabase.storage
-        .from('profile-photos')  // バケット名を指定
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('profile-photos')
         .upload(fileName, data.photo, {
           cacheControl: '3600',
           upsert: true
@@ -567,15 +578,15 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
-          photo_url: urlData.publicUrl,
+          photo: urlData.publicUrl,
           updated_at: new Date().toISOString(),
         })
-        .eq('line_id', userId);
+        .eq('line_id', userId);  // line_idで更新
 
       if (updateError) throw updateError;
 
       // 次のステップへ進む
-      setStep(8);  // または適切な次のステップ
+      setStep(8);
     } catch (error) {
       console.error('Error:', error);
       if (error instanceof Error) {
