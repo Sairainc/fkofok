@@ -289,13 +289,13 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     resolver: zodResolver(profile2Schema),
     mode: 'onChange',
     defaultValues: {
-      study: undefined,
-      from: undefined,
+      study: educationOptions[0],
+      from: prefectures[0],
       birthday: '',
-      occupation: undefined,
-      prefecture: undefined,
+      occupation: occupations[0],
+      prefecture: prefectures[0],
       city: '',
-      income: undefined,
+      income: incomeRanges[0],
       mail: '',
     }
   });
@@ -1248,6 +1248,28 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                 {...profile2Form.register('mail')}
                 className="w-full p-2 border rounded-lg"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                職業*
+              </label>
+              <select
+                {...profile2Form.register('occupation')}
+                className={`w-full p-2 border rounded-lg ${
+                  profile2Form.formState.errors.occupation ? 'border-red-500' : 'border-gray-300'
+                }`}
+              >
+                <option value="">選択してください</option>
+                {occupations.map((occupation) => (
+                  <option key={occupation} value={occupation}>{occupation}</option>
+                ))}
+              </select>
+              {profile2Form.formState.errors.occupation && (
+                <p className="text-red-500 text-sm mt-1">
+                  {profile2Form.formState.errors.occupation.message}
+                </p>
+              )}
             </div>
 
             <button
