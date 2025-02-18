@@ -53,24 +53,27 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
       // 現在の日付を取得
       const today = new Date();
-      const defaultBirthdate = new Date(today.getFullYear() - 20, 0, 1); // デフォルトを20歳に設定
+      const defaultBirthdate = new Date(today.getFullYear() - 20, 0, 1);
+
+      // UUIDv4を生成
+      const uuid = crypto.randomUUID();
 
       const { error } = await supabase
         .from('profiles')
         .upsert({
-          id: userId,
+          id: uuid, // UUIDを使用
           line_id: userId,
           gender: data.gender,
           user_type: data.gender,
           phone_number: data.phone_number,
-          birthdate: defaultBirthdate.toISOString().split('T')[0], // YYYY-MM-DD形式に変換
-          prefecture: '東京都', // デフォルト値を設定
-          occupation: '会社員', // デフォルト値を設定
+          birthdate: defaultBirthdate.toISOString().split('T')[0],
+          prefecture: '東京都',
+          occupation: '会社員',
           updated_at: new Date().toISOString(),
           created_at: new Date().toISOString(),
-          personality: [], // 空の配列を設定
-          preferred_areas: [], // 空の配列を設定
-          style: 'casual', // デフォルト値を設定
+          personality: [],
+          preferred_areas: [],
+          style: 'casual',
         });
 
       if (error) {
@@ -100,20 +103,21 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       }
 
       const tableName = userGender === 'men' ? 'men_preferences' : 'women_preferences';
+      const uuid = crypto.randomUUID();
       
       const { error } = await supabase
         .from(tableName)
         .upsert({
-          id: userId,
+          id: uuid,
           line_id: userId,
           party_type: data.preference,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           preferred_age_range: '20-30',
-          preferred_personality: ['friendly'], // デフォルト値を設定
-          preferred_style: ['casual'], // デフォルト値を設定
-          restaurant_preference: 'casual', // デフォルト値を設定
-          preferred_areas: ['東京'] // デフォルト値を設定
+          preferred_personality: ['friendly'],
+          preferred_style: ['casual'],
+          restaurant_preference: 'casual',
+          preferred_areas: ['東京']
         }, {
           onConflict: 'id'
         });
@@ -141,7 +145,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="w-full max-w-md p-6">
           <div className="text-center mb-8">
-            <img src="/images/logo.png" alt="The4" className="h-12 mx-auto mb-6" />
             <h2 className="text-xl font-bold text-gray-900">基本情報の登録</h2>
           </div>
           
@@ -205,7 +208,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="w-full max-w-md p-6">
         <div className="text-center mb-8">
-          <img src="/images/logo.png" alt="The4" className="h-12 mx-auto mb-6" />
           <h2 className="text-xl font-bold text-gray-900">どんな合コンに行きたい？</h2>
         </div>
         
