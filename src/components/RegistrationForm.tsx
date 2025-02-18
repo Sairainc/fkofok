@@ -77,6 +77,8 @@ type MenPreferenceData = z.infer<typeof menPreferenceSchema>;
 type WomenPreferenceData = z.infer<typeof womenPreferenceSchema>;
 type RestaurantPreferenceData = z.infer<typeof restaurantPreferenceSchema>;
 
+type FormDataType = Step1Data & { party_type?: 'fun' | 'serious' };
+
 type RegistrationFormProps = {
   userId: string;
 };
@@ -85,7 +87,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [formData, setFormData] = useState<Step1Data | null>(null);
+  const [formData, setFormData] = useState<FormDataType | null>(null);
   const router = useRouter();
 
   const step1Form = useForm<Step1Data>({
@@ -173,7 +175,8 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
       if (prefError) throw prefError;
 
-      // Step 3に進む
+      // formDataを更新
+      setFormData({ ...formData, party_type: data.party_type });
       setStep(3);
     } catch (error) {
       console.error('Error:', error);
@@ -205,8 +208,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
       if (error) throw error;
 
-      setIsSubmitted(true);
-      router.push('/payment');
+      setStep(4);
     } catch (error) {
       console.error('Error:', error);
       if (error instanceof Error) {
