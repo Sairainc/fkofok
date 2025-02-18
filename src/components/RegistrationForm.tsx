@@ -77,7 +77,46 @@ const restaurantPreferenceSchema = z.object({
   preferred_3areas: z.enum(['恵比寿', '新橋・銀座', 'どちらでもOK']),
 });
 
-// プロフィールのスキーマを追加
+// MBTIの組み合わせを定義
+const mbtiOptions = [
+  'INTJ', 'INTP', 'ENTJ', 'ENTP',
+  'INFJ', 'INFP', 'ENFJ', 'ENFP',
+  'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ',
+  'ISTP', 'ISFP', 'ESTP', 'ESFP'
+] as const;
+
+// 定数の追加
+const prefectures = [
+  '北海道', '青森県', '岩手県', /* ... 他の都道府県 ... */ '沖縄県'
+] as const;
+
+const educationOptions = [
+  '大学卒',
+  '海外大学卒',
+  '短大/専門学校卒',
+  '高校卒'
+] as const;
+
+const incomeRanges = [
+  '300万円未満',
+  '300-500万円',
+  '500-700万円',
+  '700-1000万円',
+  '1000万円以上'
+] as const;
+
+const occupations = [
+  '会社員',
+  '公務員',
+  '経営者・役員',
+  '自営業',
+  '専門職',
+  '教職',
+  'パート・アルバイト',
+  'その他'
+] as const;
+
+// プロフィールのスキーマを更新
 const profileSchema = z.object({
   personality: z.array(z.enum([
     '明るい盛り上げタイプ',
@@ -85,7 +124,9 @@ const profileSchema = z.object({
     '天然いじられタイプ',
     'クールなタイプ'
   ])).min(1, '1つ以上選択してください'),
-  mbti: z.string().min(4, 'MBTIを入力してください'),
+  mbti: z.enum(mbtiOptions, {
+    required_error: 'MBTIを選択してください',
+  }),
   appearance: z.enum([
     'ノリの良い体育会系',
     'こなれた港区系',
@@ -99,6 +140,14 @@ const profileSchema = z.object({
     '普通'
   ]),
   dating_experience: z.number().min(0).max(10),
+  study: z.enum(educationOptions),
+  from: z.enum(prefectures),
+  birthday: z.string().regex(/^\d{4}\/\d{2}\/\d{2}$/, '正しい日付形式で入力してください'),
+  occupation: z.enum(occupations),
+  prefecture: z.enum(prefectures),
+  city: z.string().min(1, '市区町村を選択してください'),
+  income: z.enum(incomeRanges),
+  mail: z.string().email('正しいメールアドレスを入力してください'),
 });
 
 type Step1Data = z.infer<typeof step1Schema>;
@@ -192,10 +241,18 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     mode: 'onChange',
     defaultValues: {
       personality: [],
-      mbti: '',
+      mbti: undefined,
       appearance: undefined,
       style: undefined,
       dating_experience: 0,
+      study: undefined,
+      from: undefined,
+      birthday: '',
+      occupation: undefined,
+      prefecture: undefined,
+      city: '',
+      income: undefined,
+      mail: '',
     },
   });
 
@@ -410,20 +467,24 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           appearance: data.appearance,
           style: data.style,
           dating_experience: data.dating_experience,
+          study: data.study,
+          from: data.from,
+          birthday: data.birthday,
+          occupation: data.occupation,
+          prefecture: data.prefecture,
+          city: data.city,
+          income: data.income,
+          mail: data.mail,
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'line_id'
         });
 
       if (error) throw error;
-      setStep(6); // 次のステップへ
+      setStep(6);
     } catch (error) {
       console.error('Error:', error);
-      if (error instanceof Error) {
-        alert(error.message);
-      } else {
-        alert('エラーが発生しました。もう一度お試しください。');
-      }
+      alert('エラーが発生しました。もう一度お試しください。');
     } finally {
       setIsSubmitting(false);
     }
@@ -887,12 +948,17 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 MBTI
               </label>
-              <input
-                type="text"
+              <select
                 {...profileForm.register('mbti')}
                 className="w-full p-2 border rounded-lg"
-                placeholder="例：INTJ"
-              />
+              >
+                <option value="">選択してください</option>
+                {mbtiOptions.map((mbti) => (
+                  <option key={mbti} value={mbti}>
+                    {mbti}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -964,6 +1030,33 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                 {...profileForm.register('dating_experience', { valueAsNumber: true })}
                 min="0"
                 max="10"
+                className="w-full p-2 border rounded-lg"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                学歴
+              </label>
+              <select
+                {...profileForm.register('study')}
+                className="w-full p-2 border rounded-lg"
+              >
+                <option value="">選択してください</option>
+                {educationOptions.map((edu) => (
+                  <option key={edu} value={edu}>{edu}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                生年月日
+              </label>
+              <input
+                type="text"
+                placeholder="2001/05/20"
+                {...profileForm.register('birthday')}
                 className="w-full p-2 border rounded-lg"
               />
             </div>
