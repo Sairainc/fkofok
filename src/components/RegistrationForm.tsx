@@ -63,12 +63,20 @@ const womenPreferenceSchema = z.object({
   ]),
 });
 
-// レストラン選択のスキーマ
+// レストラン選択のスキーマを更新
 const restaurantPreferenceSchema = z.object({
   restaurant_preference: z.array(z.enum([
     '安旨居酒屋',
     'おしゃれダイニング'
   ])).min(1, '1つ以上選択してください'),
+  agree_to_split: z.boolean().refine((val) => val === true, {
+    message: '同意が必要です',
+  }),
+  preferred_areas: z.array(z.enum([
+    '恵比寿',
+    '新橋・銀座',
+    'どちらでもOK'
+  ])).length(3, '3つのエリアを順番に選択してください'),
 });
 
 type Step1Data = z.infer<typeof step1Schema>;
@@ -82,6 +90,9 @@ type FormDataType = Step1Data & { party_type?: 'fun' | 'serious' };
 type RegistrationFormProps = {
   userId: string;
 };
+
+const areaOptions = ['恵比寿', '新橋・銀座', 'どちらでもOK'] as const;
+type AreaType = typeof areaOptions[number];
 
 export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [step, setStep] = useState(1);
@@ -130,6 +141,8 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     mode: 'onChange',
     defaultValues: {
       restaurant_preference: [],
+      agree_to_split: false,
+      preferred_areas: [],
     },
   });
 
@@ -308,6 +321,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           id: existingPref?.id || crypto.randomUUID(),
           line_id: userId,
           restaurant_preference: data.restaurant_preference,
+          preferred_areas: data.preferred_areas,
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'line_id'
@@ -680,6 +694,49 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                   {label}
                 </label>
               ))}
+            </div>
+
+            {formData?.gender === 'men' && (
+              <div className="flex items-start mt-4">
+                <div className="flex items-center h-5">
+                  <input
+                    type="checkbox"
+                    {...restaurantForm.register('agree_to_split')}
+                    className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary/20"
+                  />
+                </div>
+                <label className="ml-2 text-sm text-gray-600">
+                  女性の飲食代はペア男性と負担してください。
+                </label>
+              </div>
+            )}
+
+            <div className="mt-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                開催エリアを希望順に選んでください
+              </label>
+              <div className="space-y-4">
+                {[1, 2, 3].map((order) => (
+                  <div key={order}>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      第{order}希望
+                    </label>
+                    <select
+                      {...restaurantForm.register(`preferred_areas.${order - 1}` as any)}
+                      className="w-full p-2 border rounded-lg"
+                    >
+                      <option value="">選択してください</option>
+                      {areaOptions.map((area) => (
+                        <option key={area} value={area}
+                          disabled={restaurantForm.watch('preferred_areas')?.includes(area as AreaType)}
+                        >
+                          {area}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <button
