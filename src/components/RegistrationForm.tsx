@@ -273,7 +273,8 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         });
 
       if (error) throw error;
-      setStep(4);
+      setIsSubmitted(true);
+      router.push('/payment');
     } catch (error) {
       console.error('Error:', error);
       if (error instanceof Error) {
