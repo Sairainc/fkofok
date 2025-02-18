@@ -90,7 +90,15 @@ type RegistrationFormProps = {
 };
 
 const areaOptions = ['恵比寿', '新橋・銀座', 'どちらでもOK'] as const;
-type AreaType = typeof areaOptions[number];
+
+// フォームの型定義を追加
+type RestaurantFormValues = {
+  restaurant_preference: string[];
+  agree_to_split: boolean;
+  preferred_1areas: (typeof areaOptions)[number];
+  preferred_2areas: (typeof areaOptions)[number];
+  preferred_3areas: (typeof areaOptions)[number];
+};
 
 export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [step, setStep] = useState(1);
@@ -723,7 +731,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                       第{order}希望
                     </label>
                     <select
-                      {...restaurantForm.register(`preferred_${order}areas` as any)}
+                      {...restaurantForm.register(`preferred_${order}areas` as keyof RestaurantFormValues)}
                       className="w-full p-2 border rounded-lg"
                     >
                       <option value="">選択してください</option>
