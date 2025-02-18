@@ -156,8 +156,15 @@ const profile2Schema = z.object({
 
 // 写真アップロードのスキーマを修正
 const photoSchema = z.object({
-  photo: z.instanceof(FileList).transform(list => list.item(0))
-    .refine((file): file is File => file !== null, "写真をアップロードしてください")
+  photo: z.any()
+    .refine((file) => {
+      if (typeof window === 'undefined') return true; // サーバーサイドでは検証をスキップ
+      return file instanceof FileList && file.length > 0;
+    }, "写真をアップロードしてください")
+    .transform(file => {
+      if (typeof window === 'undefined') return null;
+      return file instanceof FileList ? file.item(0) : null;
+    })
 });
 
 type Step1Data = z.infer<typeof step1Schema>;
@@ -513,7 +520,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
   // 写真アップロード処理を修正
   const handlePhotoSubmit = async (data: PhotoData) => {
-    if (!formData || !data.photo) return;
+    if (!data.photo) return;
     setIsSubmitting(true);
 
     try {
