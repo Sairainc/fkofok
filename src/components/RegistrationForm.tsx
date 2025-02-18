@@ -535,36 +535,54 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     }
   };
 
-  // 写真アップロード処理を修正
+  // 写真アップロードの送信ハンドラーを修正
   const handlePhotoSubmit = async (data: PhotoData) => {
-    if (!data.photo) return;
     setIsSubmitting(true);
 
     try {
+      if (!data.photo || !(data.photo instanceof File)) {
+        throw new Error('写真が選択されていません');
+      }
+
+      // ファイル名をユニークにする
       const fileExt = data.photo.name.split('.').pop();
       const fileName = `${userId}-${Date.now()}.${fileExt}`;
 
-      // Storageにアップロード
+      // Supabaseのストレージにアップロード
       const { error: uploadError } = await supabase.storage
-        .from('user_photos')
-        .upload(fileName, data.photo);
+        .from('profile-photos')  // バケット名を指定
+        .upload(fileName, data.photo, {
+          cacheControl: '3600',
+          upsert: true
+        });
 
       if (uploadError) throw uploadError;
 
-      // DBに記録
-      const { error: dbError } = await supabase
-        .from('user_photos')
-        .insert({
-          user_id: userId,
-          photo_url: fileName,
-          status: 'pending',
-        });
+      // 写真のURLを取得
+      const { data: urlData } = supabase.storage
+        .from('profile-photos')
+        .getPublicUrl(fileName);
 
-      if (dbError) throw dbError;
-      setStep(8); // 次のステップへ
+      // プロフィールテーブルを更新
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          photo_url: urlData.publicUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('line_id', userId);
+
+      if (updateError) throw updateError;
+
+      // 次のステップへ進む
+      setStep(8);  // または適切な次のステップ
     } catch (error) {
       console.error('Error:', error);
-      alert('エラーが発生しました。もう一度お試しください。');
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert('写真のアップロードに失敗しました。もう一度お試しください。');
+      }
     } finally {
       setIsSubmitting(false);
     }
