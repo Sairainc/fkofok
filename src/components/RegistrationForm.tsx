@@ -72,11 +72,9 @@ const restaurantPreferenceSchema = z.object({
   agree_to_split: z.boolean().refine((val) => val === true, {
     message: '同意が必要です',
   }),
-  preferred_areas: z.array(z.enum([
-    '恵比寿',
-    '新橋・銀座',
-    'どちらでもOK'
-  ])).length(3, '3つのエリアを順番に選択してください'),
+  preferred_1areas: z.enum(['恵比寿', '新橋・銀座', 'どちらでもOK']),
+  preferred_2areas: z.enum(['恵比寿', '新橋・銀座', 'どちらでもOK']),
+  preferred_3areas: z.enum(['恵比寿', '新橋・銀座', 'どちらでもOK']),
 });
 
 type Step1Data = z.infer<typeof step1Schema>;
@@ -142,7 +140,9 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     defaultValues: {
       restaurant_preference: [],
       agree_to_split: false,
-      preferred_areas: [],
+      preferred_1areas: undefined,
+      preferred_2areas: undefined,
+      preferred_3areas: undefined,
     },
   });
 
@@ -308,7 +308,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     try {
       const table = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
       
-      // 既存のレコードを確認
       const { data: existingPref } = await supabase
         .from(table)
         .select('id')
@@ -321,7 +320,9 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           id: existingPref?.id || crypto.randomUUID(),
           line_id: userId,
           restaurant_preference: data.restaurant_preference,
-          preferred_areas: data.preferred_areas,
+          preferred_1areas: data.preferred_1areas,
+          preferred_2areas: data.preferred_2areas,
+          preferred_3areas: data.preferred_3areas,
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'line_id'
@@ -722,13 +723,17 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                       第{order}希望
                     </label>
                     <select
-                      {...restaurantForm.register(`preferred_areas.${order - 1}` as any)}
+                      {...restaurantForm.register(`preferred_${order}areas` as any)}
                       className="w-full p-2 border rounded-lg"
                     >
                       <option value="">選択してください</option>
                       {areaOptions.map((area) => (
                         <option key={area} value={area}
-                          disabled={restaurantForm.watch('preferred_areas')?.includes(area as AreaType)}
+                          disabled={
+                            restaurantForm.watch('preferred_1areas') === area ||
+                            restaurantForm.watch('preferred_2areas') === area ||
+                            restaurantForm.watch('preferred_3areas') === area
+                          }
                         >
                           {area}
                         </option>
