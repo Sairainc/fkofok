@@ -143,18 +143,24 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     setIsSubmitting(true);
 
     try {
-      const uuid = crypto.randomUUID();
+      // 既存のプロフィールを確認
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('line_id', userId)
+        .single();
 
-      // プロフィールの作成
+      // プロフィールの更新
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
-          id: uuid,
+          id: existingProfile?.id || crypto.randomUUID(),
           line_id: userId,
           gender: formData.gender,
           phone_number: formData.phone_number,
           updated_at: new Date().toISOString(),
-          created_at: new Date().toISOString(),
+        }, {
+          onConflict: 'line_id'
         });
 
       if (profileError) throw profileError;
@@ -162,21 +168,20 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       // 選択した性別に応じてpreferencesテーブルを選択
       const preferencesTable = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
       
-      // 既存のレコードを確認
+      // 既存のpreferencesを確認
       const { data: existingPref } = await supabase
         .from(preferencesTable)
         .select('id')
         .eq('line_id', userId)
         .single();
 
-      // 好みの登録（既存のidがあれば更新、なければ新規作成）
+      // 好みの更新
       const { error: prefError } = await supabase
         .from(preferencesTable)
         .upsert({
           id: existingPref?.id || crypto.randomUUID(),
           line_id: userId,
           party_type: data.party_type,
-          created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'line_id'
@@ -184,7 +189,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
       if (prefError) throw prefError;
 
-      // formDataを更新
       setFormData({ ...formData, party_type: data.party_type });
       setStep(3);
     } catch (error) {
@@ -204,9 +208,17 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     setIsSubmitting(true);
 
     try {
+      // 既存のレコードを確認
+      const { data: existingPref } = await supabase
+        .from('men_preferences')
+        .select('id')
+        .eq('line_id', userId)
+        .single();
+
       const { error } = await supabase
         .from('men_preferences')
         .upsert({
+          id: existingPref?.id || crypto.randomUUID(),
           line_id: userId,
           party_type: formData.party_type,
           preferred_age_min: data.preferred_age_min,
@@ -238,21 +250,30 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     setIsSubmitting(true);
 
     try {
+      // 既存のレコードを確認
+      const { data: existingPref } = await supabase
+        .from('women_preferences')
+        .select('id')
+        .eq('line_id', userId)
+        .single();
+
       const { error } = await supabase
         .from('women_preferences')
         .upsert({
+          id: existingPref?.id || crypto.randomUUID(),
           line_id: userId,
+          party_type: formData.party_type,
           preferred_age_min: data.preferred_age_min,
           preferred_age_max: data.preferred_age_max,
           preferred_personality: data.preferred_personality,
           preferred_body_type: [data.preferred_body_type],
           updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'line_id'
         });
 
       if (error) throw error;
-
-      setIsSubmitted(true);
-      router.push('/payment');
+      setStep(4);
     } catch (error) {
       console.error('Error:', error);
       if (error instanceof Error) {
@@ -272,17 +293,27 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
     try {
       const table = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
+      
+      // 既存のレコードを確認
+      const { data: existingPref } = await supabase
+        .from(table)
+        .select('id')
+        .eq('line_id', userId)
+        .single();
+
       const { error } = await supabase
         .from(table)
         .upsert({
+          id: existingPref?.id || crypto.randomUUID(),
           line_id: userId,
           restaurant_preference: data.restaurant_preference,
           updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'line_id'
         });
 
       if (error) throw error;
-
-      setStep(5); // 次のステップへ
+      setStep(5);
     } catch (error) {
       console.error('Error:', error);
       if (error instanceof Error) {
