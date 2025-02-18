@@ -548,17 +548,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         throw new Error('写真が選択されていません');
       }
 
-      // 既存のプロフィールを確認
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('line_id', userId)
-        .single();
-
-      if (!existingProfile) {
-        throw new Error('プロフィールが見つかりません');
-      }
-
       // ファイル名をユニークにする
       const fileExt = data.photo.name.split('.').pop();
       const fileName = `${userId}-${Date.now()}.${fileExt}`;
@@ -578,16 +567,18 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         .from('profile-photos')
         .getPublicUrl(fileName);
 
-      // プロフィールテーブルを更新
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          photo: urlData.publicUrl,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('line_id', userId);  // line_idで更新
+      // user_photosテーブルに写真情報を保存
+      const { error: insertError } = await supabase
+        .from('user_photos')
+        .insert({
+          line_id: userId,
+          photo_url: urlData.publicUrl,
+          is_main: true,
+          order_index: 0,
+          status: 'pending'
+        });
 
-      if (updateError) throw updateError;
+      if (insertError) throw insertError;
 
       // 次のステップへ進む
       setStep(8);
