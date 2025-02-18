@@ -77,11 +77,36 @@ const restaurantPreferenceSchema = z.object({
   preferred_3areas: z.enum(['恵比寿', '新橋・銀座', 'どちらでもOK']),
 });
 
+// プロフィールのスキーマを追加
+const profileSchema = z.object({
+  personality: z.array(z.enum([
+    '明るい盛り上げタイプ',
+    '気遣いできるタイプ',
+    '天然いじられタイプ',
+    'クールなタイプ'
+  ])).min(1, '1つ以上選択してください'),
+  mbti: z.string().min(4, 'MBTIを入力してください'),
+  appearance: z.enum([
+    'ノリの良い体育会系',
+    'こなれた港区系',
+    'クールなエリート系',
+    '個性あふれるクリエイティブ系'
+  ]),
+  style: z.enum([
+    '筋肉質',
+    'がっしり',
+    'スリム',
+    '普通'
+  ]),
+  dating_experience: z.number().min(0).max(10),
+});
+
 type Step1Data = z.infer<typeof step1Schema>;
 type Step2Data = z.infer<typeof step2Schema>;
 type MenPreferenceData = z.infer<typeof menPreferenceSchema>;
 type WomenPreferenceData = z.infer<typeof womenPreferenceSchema>;
 type RestaurantPreferenceData = z.infer<typeof restaurantPreferenceSchema>;
+type ProfileData = z.infer<typeof profileSchema>;
 
 type FormDataType = Step1Data & { party_type?: 'fun' | 'serious' };
 
@@ -99,6 +124,13 @@ type RestaurantFormValues = {
   preferred_2areas: (typeof areaOptions)[number];
   preferred_3areas: (typeof areaOptions)[number];
 };
+
+const personalityOptions = [
+  '明るい盛り上げタイプ',
+  '気遣いできるタイプ',
+  '天然いじられタイプ',
+  'クールなタイプ'
+] as const;
 
 export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [step, setStep] = useState(1);
@@ -151,6 +183,19 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       preferred_1areas: undefined,
       preferred_2areas: undefined,
       preferred_3areas: undefined,
+    },
+  });
+
+  // プロフィールフォームの追加
+  const profileForm = useForm<ProfileData>({
+    resolver: zodResolver(profileSchema),
+    mode: 'onChange',
+    defaultValues: {
+      personality: [],
+      mbti: '',
+      appearance: undefined,
+      style: undefined,
+      dating_experience: 0,
     },
   });
 
@@ -338,6 +383,40 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
       if (error) throw error;
       setStep(5);
+    } catch (error) {
+      console.error('Error:', error);
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert('エラーが発生しました。もう一度お試しください。');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // プロフィール送信ハンドラーの追加
+  const handleProfileSubmit = async (data: ProfileData) => {
+    if (!formData) return;
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          line_id: userId,
+          personality: data.personality,
+          mbti: data.mbti,
+          appearance: data.appearance,
+          style: data.style,
+          dating_experience: data.dating_experience,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'line_id'
+        });
+
+      if (error) throw error;
+      setStep(6); // 次のステップへ
     } catch (error) {
       console.error('Error:', error);
       if (error instanceof Error) {
@@ -755,6 +834,143 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
             <button
               type="submit"
               disabled={!restaurantForm.formState.isValid || isSubmitting}
+              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
+            >
+              {isSubmitting ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                '次に進む'
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 5) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-6">
+          <div className="text-center mb-8">
+            <h2 className="text-xl font-bold text-gray-900">プロフィールを入力しましょう</h2>
+            <p className="text-sm text-gray-600 mt-2">あなたのことを教えてください</p>
+          </div>
+          
+          <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                自分の性格（複数選択可）
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {personalityOptions.map((value) => (
+                  <label
+                    key={value}
+                    className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                      ${profileForm.watch('personality')?.includes(value as typeof personalityOptions[number])
+                        ? 'bg-primary text-white'
+                        : 'bg-white text-gray-700'}`}
+                  >
+                    <input
+                      type="checkbox"
+                      value={value}
+                      {...profileForm.register('personality')}
+                      className="sr-only"
+                    />
+                    {value}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                MBTI
+              </label>
+              <input
+                type="text"
+                {...profileForm.register('mbti')}
+                className="w-full p-2 border rounded-lg"
+                placeholder="例：INTJ"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                あえて自分の雰囲気を選ぶなら
+              </label>
+              <div className="grid grid-cols-1 gap-3">
+                {[
+                  'ノリの良い体育会系',
+                  'こなれた港区系',
+                  'クールなエリート系',
+                  '個性あふれるクリエイティブ系'
+                ].map((value) => (
+                  <label
+                    key={value}
+                    className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                      ${profileForm.watch('appearance') === value
+                        ? 'bg-primary text-white'
+                        : 'bg-white text-gray-700'}`}
+                  >
+                    <input
+                      type="radio"
+                      value={value}
+                      {...profileForm.register('appearance')}
+                      className="sr-only"
+                    />
+                    {value}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                自分のスタイル
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  '筋肉質',
+                  'がっしり',
+                  'スリム',
+                  '普通'
+                ].map((value) => (
+                  <label
+                    key={value}
+                    className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                      ${profileForm.watch('style') === value
+                        ? 'bg-primary text-white'
+                        : 'bg-white text-gray-700'}`}
+                  >
+                    <input
+                      type="radio"
+                      value={value}
+                      {...profileForm.register('style')}
+                      className="sr-only"
+                    />
+                    {value}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                合コンの経験回数は？（非公開）
+              </label>
+              <input
+                type="number"
+                {...profileForm.register('dating_experience', { valueAsNumber: true })}
+                min="0"
+                max="10"
+                className="w-full p-2 border rounded-lg"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={!profileForm.formState.isValid || isSubmitting}
               className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
             >
               {isSubmitting ? (
