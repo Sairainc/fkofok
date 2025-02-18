@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -569,6 +569,17 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       setIsSubmitting(false);
     }
   };
+
+  // フォームの状態を監視
+  useEffect(() => {
+    console.log('Profile2 Form State:', {
+      isValid: profile2Form.formState.isValid,
+      errors: profile2Form.formState.errors,
+      dirtyFields: profile2Form.formState.dirtyFields,
+      touchedFields: profile2Form.formState.touchedFields,
+      values: profile2Form.getValues(),
+    });
+  }, [profile2Form.formState]);
 
   if (isSubmitted) {
     return (
