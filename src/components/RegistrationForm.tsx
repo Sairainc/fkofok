@@ -25,8 +25,48 @@ const step2Schema = z.object({
   }),
 });
 
+// Step 3のスキーマ（男性用）
+const menPreferenceSchema = z.object({
+  preferred_age_min: z.number().min(18).max(60),
+  preferred_age_max: z.number().min(18).max(60),
+  preferred_personality: z.array(z.enum([
+    '明るい盛り上げタイプ',
+    '気遣いできる',
+    '天然',
+    'クール',
+    '小悪魔'
+  ])).min(1, '1つ以上選択してください'),
+  preferred_style: z.enum([
+    'スリム',
+    '普通',
+    'グラマー',
+    '気にしない'
+  ]),
+});
+
+// Step 3のスキーマ（女性用）
+const womenPreferenceSchema = z.object({
+  preferred_age_min: z.number().min(20).max(60),
+  preferred_age_max: z.number().min(20).max(60),
+  preferred_personality: z.array(z.enum([
+    '優しい',
+    '向上心がある',
+    '面白い',
+    '知的',
+    '紳士的'
+  ])).min(1, '1つ以上選択してください'),
+  preferred_style: z.enum([
+    'クール',
+    'カジュアル',
+    'ビジネス',
+    '気にしない'
+  ]),
+});
+
 type Step1Data = z.infer<typeof step1Schema>;
 type Step2Data = z.infer<typeof step2Schema>;
+type MenPreferenceData = z.infer<typeof menPreferenceSchema>;
+type WomenPreferenceData = z.infer<typeof womenPreferenceSchema>;
 
 type RegistrationFormProps = {
   userId: string;
@@ -47,6 +87,30 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const step2Form = useForm<Step2Data>({
     resolver: zodResolver(step2Schema),
     mode: 'onChange',
+  });
+
+  // 既存のフォーム定義に加えて、Step3のフォームを追加
+  const menPreferenceForm = useForm<MenPreferenceData>({
+    resolver: zodResolver(menPreferenceSchema),
+    mode: 'onChange',
+    defaultValues: {
+      preferred_age_min: 18,
+      preferred_age_max: 30,
+      preferred_personality: [],
+      preferred_style: '気にしない',
+    },
+  });
+
+  // 女性用フォームの追加
+  const womenPreferenceForm = useForm<WomenPreferenceData>({
+    resolver: zodResolver(womenPreferenceSchema),
+    mode: 'onChange',
+    defaultValues: {
+      preferred_age_min: 20,
+      preferred_age_max: 35,
+      preferred_personality: [],
+      preferred_style: '気にしない',
+    },
   });
 
   const handleStep1Submit = async (data: Step1Data) => {
@@ -90,6 +154,71 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         });
 
       if (prefError) throw prefError;
+
+      // Step 3に進む
+      setStep(3);
+    } catch (error) {
+      console.error('Error:', error);
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert('エラーが発生しました。もう一度お試しください。');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleMenPreferenceSubmit = async (data: MenPreferenceData) => {
+    if (!formData) return;
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('men_preferences')
+        .upsert({
+          line_id: userId,
+          preferred_age_min: data.preferred_age_min,
+          preferred_age_max: data.preferred_age_max,
+          preferred_personality: data.preferred_personality,
+          preferred_style: data.preferred_style,
+          updated_at: new Date().toISOString(),
+        });
+
+      if (error) throw error;
+
+      setIsSubmitted(true);
+      router.push('/payment');
+    } catch (error) {
+      console.error('Error:', error);
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert('エラーが発生しました。もう一度お試しください。');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // 女性用の送信ハンドラーを追加
+  const handleWomenPreferenceSubmit = async (data: WomenPreferenceData) => {
+    if (!formData) return;
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('women_preferences')
+        .upsert({
+          line_id: userId,
+          preferred_age_min: data.preferred_age_min,
+          preferred_age_max: data.preferred_age_max,
+          preferred_personality: data.preferred_personality,
+          preferred_style: data.preferred_style,
+          updated_at: new Date().toISOString(),
+        });
+
+      if (error) throw error;
 
       setIsSubmitted(true);
       router.push('/payment');
@@ -179,6 +308,240 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
             <button
               type="submit"
               disabled={!step1Form.formState.isValid || isSubmitting}
+              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
+            >
+              {isSubmitting ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                '次に進む'
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 3 && formData?.gender === 'men') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-6">
+          <div className="text-center mb-8">
+            <h2 className="text-xl font-bold text-gray-900">好みのタイプ</h2>
+            <p className="text-sm text-gray-600 mt-2">あなたの理想の相手を教えてください</p>
+          </div>
+          
+          <form onSubmit={menPreferenceForm.handleSubmit(handleMenPreferenceSubmit)} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                希望年齢
+              </label>
+              <div className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <select
+                    {...menPreferenceForm.register('preferred_age_min', { valueAsNumber: true })}
+                    className="w-full p-2 border rounded-lg"
+                  >
+                    {Array.from({ length: 43 }, (_, i) => i + 18).map((age) => (
+                      <option key={age} value={age}>{age}歳</option>
+                    ))}
+                  </select>
+                </div>
+                <span>〜</span>
+                <div className="flex-1">
+                  <select
+                    {...menPreferenceForm.register('preferred_age_max', { valueAsNumber: true })}
+                    className="w-full p-2 border rounded-lg"
+                  >
+                    {Array.from({ length: 43 }, (_, i) => i + 18).map((age) => (
+                      <option key={age} value={age}>{age}歳</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                好みの性格（複数選択可）
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: '明るい盛り上げタイプ', label: '明るい盛り上げタイプ' },
+                  { value: '気遣いできる', label: '気遣いできる' },
+                  { value: '天然', label: '天然' },
+                  { value: 'クール', label: 'クール' },
+                  { value: '小悪魔', label: '小悪魔' },
+                ].map(({ value, label }) => (
+                  <label
+                    key={value}
+                    className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                      ${menPreferenceForm.watch('preferred_personality')?.includes(value as any)
+                        ? 'bg-primary text-white'
+                        : 'bg-white text-gray-700'}`}
+                  >
+                    <input
+                      type="checkbox"
+                      value={value}
+                      {...menPreferenceForm.register('preferred_personality')}
+                      className="sr-only"
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                好みのスタイル
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: 'スリム', label: 'スリム' },
+                  { value: '普通', label: '普通' },
+                  { value: 'グラマー', label: 'グラマー' },
+                  { value: '気にしない', label: '気にしない' },
+                ].map(({ value, label }) => (
+                  <label
+                    key={value}
+                    className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                      ${menPreferenceForm.watch('preferred_style') === value
+                        ? 'bg-primary text-white'
+                        : 'bg-white text-gray-700'}`}
+                  >
+                    <input
+                      type="radio"
+                      value={value}
+                      {...menPreferenceForm.register('preferred_style')}
+                      className="sr-only"
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={!menPreferenceForm.formState.isValid || isSubmitting}
+              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
+            >
+              {isSubmitting ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                '次に進む'
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 3 && formData?.gender === 'women') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-6">
+          <div className="text-center mb-8">
+            <h2 className="text-xl font-bold text-gray-900">好みのタイプ</h2>
+            <p className="text-sm text-gray-600 mt-2">あなたの理想の相手を教えてください</p>
+          </div>
+          
+          <form onSubmit={womenPreferenceForm.handleSubmit(handleWomenPreferenceSubmit)} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                希望年齢
+              </label>
+              <div className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <select
+                    {...womenPreferenceForm.register('preferred_age_min', { valueAsNumber: true })}
+                    className="w-full p-2 border rounded-lg"
+                  >
+                    {Array.from({ length: 41 }, (_, i) => i + 20).map((age) => (
+                      <option key={age} value={age}>{age}歳</option>
+                    ))}
+                  </select>
+                </div>
+                <span>〜</span>
+                <div className="flex-1">
+                  <select
+                    {...womenPreferenceForm.register('preferred_age_max', { valueAsNumber: true })}
+                    className="w-full p-2 border rounded-lg"
+                  >
+                    {Array.from({ length: 41 }, (_, i) => i + 20).map((age) => (
+                      <option key={age} value={age}>{age}歳</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                好みの性格（複数選択可）
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: '優しい', label: '優しい' },
+                  { value: '向上心がある', label: '向上心がある' },
+                  { value: '面白い', label: '面白い' },
+                  { value: '知的', label: '知的' },
+                  { value: '紳士的', label: '紳士的' },
+                ].map(({ value, label }) => (
+                  <label
+                    key={value}
+                    className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                      ${womenPreferenceForm.watch('preferred_personality')?.includes(value as any)
+                        ? 'bg-primary text-white'
+                        : 'bg-white text-gray-700'}`}
+                  >
+                    <input
+                      type="checkbox"
+                      value={value}
+                      {...womenPreferenceForm.register('preferred_personality')}
+                      className="sr-only"
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                好みのスタイル
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: 'クール', label: 'クール' },
+                  { value: 'カジュアル', label: 'カジュアル' },
+                  { value: 'ビジネス', label: 'ビジネス' },
+                  { value: '気にしない', label: '気にしない' },
+                ].map(({ value, label }) => (
+                  <label
+                    key={value}
+                    className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                      ${womenPreferenceForm.watch('preferred_style') === value
+                        ? 'bg-primary text-white'
+                        : 'bg-white text-gray-700'}`}
+                  >
+                    <input
+                      type="radio"
+                      value={value}
+                      {...womenPreferenceForm.register('preferred_style')}
+                      className="sr-only"
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={!womenPreferenceForm.formState.isValid || isSubmitting}
               className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
             >
               {isSubmitting ? (

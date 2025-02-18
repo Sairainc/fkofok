@@ -249,37 +249,23 @@ export interface Database {
       men_preferences: {
         Row: {
           id: string
-          line_id: string | null
-          party_type: string
-          preferred_age_range: string
+          line_id: string
+          party_type: 'fun' | 'serious'
+          preferred_age_min: number
+          preferred_age_max: number
           preferred_personality: string[]
-          preferred_style: string[]
-          restaurant_preference: string
-          preferred_areas: string[]
+          preferred_body_type: 'スリム' | '普通' | 'グラマー' | '気にしない'
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
-          line_id: string | null
-          party_type?: string
-          preferred_age_range?: string
-          preferred_personality?: string[]
-          preferred_style?: string[]
-          restaurant_preference?: string
-          preferred_areas?: string[]
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          line_id?: string | null
-          party_type?: string
-          preferred_age_range?: string
-          preferred_personality?: string[]
-          preferred_style?: string[]
-          restaurant_preference?: string
-          preferred_areas?: string[]
+          line_id: string
+          party_type: 'fun' | 'serious'
+          preferred_age_min: number
+          preferred_age_max: number
+          preferred_personality: string[]
+          preferred_body_type: 'スリム' | '普通' | 'グラマー' | '気にしない'
           created_at?: string
           updated_at?: string
         }
@@ -287,37 +273,23 @@ export interface Database {
       women_preferences: {
         Row: {
           id: string
-          line_id: string | null
-          party_type: string
-          preferred_age_range: string
+          line_id: string
+          party_type: 'fun' | 'serious'
+          preferred_age_min: number
+          preferred_age_max: number
           preferred_personality: string[]
-          preferred_style: string[]
-          restaurant_preference: string
-          preferred_areas: string[]
+          preferred_style: 'クール' | 'カジュアル' | 'ビジネス' | '気にしない'
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
-          line_id: string | null
-          party_type?: string
-          preferred_age_range?: string
-          preferred_personality?: string[]
-          preferred_style?: string[]
-          restaurant_preference?: string
-          preferred_areas?: string[]
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          line_id?: string | null
-          party_type?: string
-          preferred_age_range?: string
-          preferred_personality?: string[]
-          preferred_style?: string[]
-          restaurant_preference?: string
-          preferred_areas?: string[]
+          line_id: string
+          party_type: 'fun' | 'serious'
+          preferred_age_min: number
+          preferred_age_max: number
+          preferred_personality: string[]
+          preferred_style: 'クール' | 'カジュアル' | 'ビジネス' | '気にしない'
           created_at?: string
           updated_at?: string
         }
