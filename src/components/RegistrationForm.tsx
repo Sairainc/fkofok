@@ -142,7 +142,13 @@ const profileSchema = z.object({
   dating_experience: z.number().min(0).max(10),
   study: z.enum(educationOptions),
   from: z.enum(prefectures),
-  birthday: z.string().regex(/^\d{4}\/\d{2}\/\d{2}$/, '正しい日付形式で入力してください'),
+  birthday: z.string()
+    .refine((val) => {
+      const date = new Date(val);
+      const minDate = new Date('1963-01-01');
+      const maxDate = new Date();
+      return date >= minDate && date <= maxDate;
+    }, '有効な生年月日を入力してください'),
   occupation: z.enum(occupations),
   prefecture: z.enum(prefectures),
   city: z.string().min(1, '市区町村を選択してください'),
@@ -919,146 +925,220 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           </div>
           
           <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                自分の性格（複数選択可）
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                {personalityOptions.map((value) => (
-                  <label
-                    key={value}
-                    className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
-                      ${profileForm.watch('personality')?.includes(value as typeof personalityOptions[number])
-                        ? 'bg-primary text-white'
-                        : 'bg-white text-gray-700'}`}
-                  >
+            <div className="space-y-6">
+              {/* 基本情報セクション */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">基本情報</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      生年月日
+                    </label>
                     <input
-                      type="checkbox"
-                      value={value}
-                      {...profileForm.register('personality')}
-                      className="sr-only"
+                      type="date"
+                      {...profileForm.register('birthday')}
+                      className="w-full p-2 border rounded-lg"
+                      max={new Date().toISOString().split('T')[0]}
+                      min="1963-01-01"
                     />
-                    {value}
-                  </label>
-                ))}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      学歴
+                    </label>
+                    <select
+                      {...profileForm.register('study')}
+                      className="w-full p-2 border rounded-lg"
+                    >
+                      <option value="">選択してください</option>
+                      {educationOptions.map((edu) => (
+                        <option key={edu} value={edu}>{edu}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      出身地
+                    </label>
+                    <select
+                      {...profileForm.register('from')}
+                      className="w-full p-2 border rounded-lg"
+                    >
+                      <option value="">選択してください</option>
+                      {prefectures.map((pref) => (
+                        <option key={pref} value={pref}>{pref}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      お住まい
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <select
+                        {...profileForm.register('prefecture')}
+                        className="w-full p-2 border rounded-lg"
+                      >
+                        <option value="">都道府県</option>
+                        {prefectures.map((pref) => (
+                          <option key={pref} value={pref}>{pref}</option>
+                        ))}
+                      </select>
+                      <input
+                        type="text"
+                        placeholder="市区町村"
+                        {...profileForm.register('city')}
+                        className="w-full p-2 border rounded-lg"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                MBTI
-              </label>
-              <select
-                {...profileForm.register('mbti')}
-                className="w-full p-2 border rounded-lg"
-              >
-                <option value="">選択してください</option>
-                {mbtiOptions.map((mbti) => (
-                  <option key={mbti} value={mbti}>
-                    {mbti}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                あえて自分の雰囲気を選ぶなら
-              </label>
-              <div className="grid grid-cols-1 gap-3">
-                {[
-                  'ノリの良い体育会系',
-                  'こなれた港区系',
-                  'クールなエリート系',
-                  '個性あふれるクリエイティブ系'
-                ].map((value) => (
-                  <label
-                    key={value}
-                    className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
-                      ${profileForm.watch('appearance') === value
-                        ? 'bg-primary text-white'
-                        : 'bg-white text-gray-700'}`}
-                  >
-                    <input
-                      type="radio"
-                      value={value}
-                      {...profileForm.register('appearance')}
-                      className="sr-only"
-                    />
-                    {value}
-                  </label>
-                ))}
+              {/* 他のセクションは既存のまま */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  自分の性格（複数選択可）
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {personalityOptions.map((value) => (
+                    <label
+                      key={value}
+                      className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                        ${profileForm.watch('personality')?.includes(value as typeof personalityOptions[number])
+                          ? 'bg-primary text-white'
+                          : 'bg-white text-gray-700'}`}
+                    >
+                      <input
+                        type="checkbox"
+                        value={value}
+                        {...profileForm.register('personality')}
+                        className="sr-only"
+                      />
+                      {value}
+                    </label>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                自分のスタイル
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  '筋肉質',
-                  'がっしり',
-                  'スリム',
-                  '普通'
-                ].map((value) => (
-                  <label
-                    key={value}
-                    className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
-                      ${profileForm.watch('style') === value
-                        ? 'bg-primary text-white'
-                        : 'bg-white text-gray-700'}`}
-                  >
-                    <input
-                      type="radio"
-                      value={value}
-                      {...profileForm.register('style')}
-                      className="sr-only"
-                    />
-                    {value}
-                  </label>
-                ))}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  MBTI
+                </label>
+                <select
+                  {...profileForm.register('mbti')}
+                  className="w-full p-2 border rounded-lg"
+                >
+                  <option value="">選択してください</option>
+                  {mbtiOptions.map((mbti) => (
+                    <option key={mbti} value={mbti}>
+                      {mbti}
+                    </option>
+                  ))}
+                </select>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                合コンの経験回数は？（非公開）
-              </label>
-              <input
-                type="number"
-                {...profileForm.register('dating_experience', { valueAsNumber: true })}
-                min="0"
-                max="10"
-                className="w-full p-2 border rounded-lg"
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  あえて自分の雰囲気を選ぶなら
+                </label>
+                <div className="grid grid-cols-1 gap-3">
+                  {[
+                    'ノリの良い体育会系',
+                    'こなれた港区系',
+                    'クールなエリート系',
+                    '個性あふれるクリエイティブ系'
+                  ].map((value) => (
+                    <label
+                      key={value}
+                      className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                        ${profileForm.watch('appearance') === value
+                          ? 'bg-primary text-white'
+                          : 'bg-white text-gray-700'}`}
+                    >
+                      <input
+                        type="radio"
+                        value={value}
+                        {...profileForm.register('appearance')}
+                        className="sr-only"
+                      />
+                      {value}
+                    </label>
+                  ))}
+                </div>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                学歴
-              </label>
-              <select
-                {...profileForm.register('study')}
-                className="w-full p-2 border rounded-lg"
-              >
-                <option value="">選択してください</option>
-                {educationOptions.map((edu) => (
-                  <option key={edu} value={edu}>{edu}</option>
-                ))}
-              </select>
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  自分のスタイル
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    '筋肉質',
+                    'がっしり',
+                    'スリム',
+                    '普通'
+                  ].map((value) => (
+                    <label
+                      key={value}
+                      className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                        ${profileForm.watch('style') === value
+                          ? 'bg-primary text-white'
+                          : 'bg-white text-gray-700'}`}
+                    >
+                      <input
+                        type="radio"
+                        value={value}
+                        {...profileForm.register('style')}
+                        className="sr-only"
+                      />
+                      {value}
+                    </label>
+                  ))}
+                </div>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                生年月日
-              </label>
-              <input
-                type="text"
-                placeholder="2001/05/20"
-                {...profileForm.register('birthday')}
-                className="w-full p-2 border rounded-lg"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  合コンの経験回数は？（非公開）
+                </label>
+                <input
+                  type="number"
+                  {...profileForm.register('dating_experience', { valueAsNumber: true })}
+                  min="0"
+                  max="10"
+                  className="w-full p-2 border rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  収入
+                </label>
+                <select
+                  {...profileForm.register('income')}
+                  className="w-full p-2 border rounded-lg"
+                >
+                  <option value="">選択してください</option>
+                  {incomeRanges.map((income) => (
+                    <option key={income} value={income}>{income}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  メールアドレス
+                </label>
+                <input
+                  type="email"
+                  {...profileForm.register('mail')}
+                  className="w-full p-2 border rounded-lg"
+                />
+              </div>
             </div>
 
             <button
