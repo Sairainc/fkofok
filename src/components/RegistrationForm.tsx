@@ -162,15 +162,24 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       // 選択した性別に応じてpreferencesテーブルを選択
       const preferencesTable = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
       
-      // 好みの登録
+      // 既存のレコードを確認
+      const { data: existingPref } = await supabase
+        .from(preferencesTable)
+        .select('id')
+        .eq('line_id', userId)
+        .single();
+
+      // 好みの登録（既存のidがあれば更新、なければ新規作成）
       const { error: prefError } = await supabase
         .from(preferencesTable)
         .upsert({
-          id: crypto.randomUUID(),
+          id: existingPref?.id || crypto.randomUUID(),
           line_id: userId,
           party_type: data.party_type,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'line_id'
         });
 
       if (prefError) throw prefError;
@@ -205,6 +214,8 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           preferred_personality: data.preferred_personality,
           preferred_body_type: [data.preferred_body_type],
           updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'line_id'
         });
 
       if (error) throw error;
