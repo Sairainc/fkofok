@@ -154,6 +154,12 @@ const profile2Schema = z.object({
   mail: z.string().email('正しいメールアドレスを入力してください'),
 });
 
+// 写真アップロードのスキーマを修正
+const photoSchema = z.object({
+  photo: z.instanceof(FileList).transform(list => list.item(0))
+    .refine((file): file is File => file !== null, "写真をアップロードしてください")
+});
+
 type Step1Data = z.infer<typeof step1Schema>;
 type Step2Data = z.infer<typeof step2Schema>;
 type MenPreferenceData = z.infer<typeof menPreferenceSchema>;
@@ -161,6 +167,7 @@ type WomenPreferenceData = z.infer<typeof womenPreferenceSchema>;
 type RestaurantPreferenceData = z.infer<typeof restaurantPreferenceSchema>;
 type Profile1Data = z.infer<typeof profile1Schema>;
 type Profile2Data = z.infer<typeof profile2Schema>;
+type PhotoData = z.infer<typeof photoSchema>;
 
 type FormDataType = Step1Data & { party_type?: 'fun' | 'serious' };
 
@@ -267,6 +274,12 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       income: undefined,
       mail: '',
     },
+  });
+
+  // 写真アップロードフォームの追加
+  const photoForm = useForm<PhotoData>({
+    resolver: zodResolver(photoSchema),
+    mode: 'onChange',
   });
 
   const handleStep1Submit = async (data: Step1Data) => {
@@ -490,6 +503,41 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
       if (error) throw error;
       setStep(step + 1);
+    } catch (error) {
+      console.error('Error:', error);
+      alert('エラーが発生しました。もう一度お試しください。');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // 写真アップロード処理を修正
+  const handlePhotoSubmit = async (data: PhotoData) => {
+    if (!formData || !data.photo) return;
+    setIsSubmitting(true);
+
+    try {
+      const fileExt = data.photo.name.split('.').pop();
+      const fileName = `${userId}-${Date.now()}.${fileExt}`;
+
+      // Storageにアップロード
+      const { error: uploadError } = await supabase.storage
+        .from('user_photos')
+        .upload(fileName, data.photo);
+
+      if (uploadError) throw uploadError;
+
+      // DBに記録
+      const { error: dbError } = await supabase
+        .from('user_photos')
+        .insert({
+          user_id: userId,
+          photo_url: fileName,
+          status: 'pending',
+        });
+
+      if (dbError) throw dbError;
+      setStep(8); // 次のステップへ
     } catch (error) {
       console.error('Error:', error);
       alert('エラーが発生しました。もう一度お試しください。');
@@ -1164,6 +1212,48 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
             <button
               type="submit"
               disabled={!profile2Form.formState.isValid || isSubmitting}
+              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
+            >
+              {isSubmitting ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                '次に進む'
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 7) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-6">
+          <div className="text-center mb-8">
+            <h2 className="text-xl font-bold text-gray-900">審査用写真の提出</h2>
+            <p className="text-sm text-gray-600 mt-2">
+              一切公開されません。<br />
+              ※マスクや過度な加工の写真は審査ができません。
+            </p>
+          </div>
+          
+          <form onSubmit={photoForm.handleSubmit(handlePhotoSubmit)} className="space-y-6">
+            <div className="space-y-4">
+              <input
+                type="file"
+                accept="image/*"
+                {...photoForm.register('photo')}
+                className="w-full"
+              />
+              {photoForm.formState.errors.photo && (
+                <p className="text-red-500 text-sm">{photoForm.formState.errors.photo.message}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={!photoForm.formState.isValid || isSubmitting}
               className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
             >
               {isSubmitting ? (
