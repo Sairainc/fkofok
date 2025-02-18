@@ -54,16 +54,22 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       const { error } = await supabase
         .from('profiles')
         .upsert({
+          id: userId,
           line_id: userId,
           gender: data.gender,
+          user_type: data.gender,
           phone_number: data.phone_number,
+          birthdate: new Date().toISOString(),
+          prefecture: 'unknown',
+          occupation: 'unknown',
           updated_at: new Date().toISOString(),
+          created_at: new Date().toISOString(),
         }, {
-          onConflict: 'line_id',
-          returning: 'minimal'
+          onConflict: 'id'
         });
 
       if (error) {
+        console.error('Database error:', error);
         throw new Error('データベースエラーが発生しました');
       }
 
@@ -93,15 +99,22 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       const { error } = await supabase
         .from(tableName)
         .upsert({
+          id: userId,
           line_id: userId,
-          preference_type: data.preference,
+          party_type: data.preference,
           created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          preferred_age_range: '20-30',
+          preferred_personality: [],
+          preferred_style: [],
+          restaurant_preference: 'any',
+          preferred_areas: []
         }, {
-          onConflict: 'line_id',
-          returning: 'minimal'
+          onConflict: 'id'
         });
 
       if (error) {
+        console.error('Database error:', error);
         throw new Error('データベースエラーが発生しました');
       }
 
