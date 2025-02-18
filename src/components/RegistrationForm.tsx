@@ -142,15 +142,25 @@ const profile1Schema = z.object({
   dating_experience: z.number().min(0).max(10),
 });
 
-// プロフィール2のスキーマ
+// プロフィール2のスキーマを修正
 const profile2Schema = z.object({
-  study: z.enum(educationOptions),
-  from: z.enum(prefectures),
+  study: z.enum(educationOptions, {
+    required_error: '学歴を選択してください',
+  }),
+  from: z.enum(prefectures, {
+    required_error: '出身地を選択してください',
+  }),
   birthday: z.string().min(1, '生年月日を入力してください'),
-  occupation: z.enum(occupations),
-  prefecture: z.enum(prefectures),
+  occupation: z.enum(occupations, {
+    required_error: '職業を選択してください',
+  }),
+  prefecture: z.enum(prefectures, {
+    required_error: '都道府県を選択してください',
+  }),
   city: z.string().min(1, '市区町村を入力してください'),
-  income: z.enum(incomeRanges),
+  income: z.enum(incomeRanges, {
+    required_error: '年収を選択してください',
+  }),
   mail: z.string().email('正しいメールアドレスを入力してください'),
 });
 
@@ -271,16 +281,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const profile2Form = useForm<Profile2Data>({
     resolver: zodResolver(profile2Schema),
     mode: 'onChange',
-    defaultValues: {
-      study: undefined,
-      from: undefined,
-      birthday: '',
-      occupation: undefined,
-      prefecture: undefined,
-      city: '',
-      income: undefined,
-      mail: '',
-    },
   });
 
   // 写真アップロードフォームの追加
