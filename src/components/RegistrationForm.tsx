@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { supabase } from '@/lib/supabase';
 
-const schema = z.object({
+const firstPageSchema = z.object({
   gender: z.enum(['men', 'women'], {
     required_error: '性別を選択してください',
   }),
@@ -16,7 +16,14 @@ const schema = z.object({
     .transform((val) => val.replace(/[^0-9]/g, '')),
 });
 
-type FormData = z.infer<typeof schema>;
+const secondPageSchema = z.object({
+  preference: z.enum(['fun', 'serious'], {
+    required_error: '希望する合コンタイプを選択してください',
+  }),
+});
+
+type FirstPageFormData = z.infer<typeof firstPageSchema>;
+type SecondPageFormData = z.infer<typeof secondPageSchema>;
 
 type RegistrationFormProps = {
   userId: string;
@@ -24,19 +31,26 @@ type RegistrationFormProps = {
 
 export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors, isValid },
-  } = useForm<FormData>({
-    resolver: zodResolver(schema),
+  const [currentPage, setCurrentPage] = useState(1);
+  const [userGender, setUserGender] = useState<'men' | 'women' | null>(null);
+
+  const firstForm = useForm<FirstPageFormData>({
+    resolver: zodResolver(firstPageSchema),
     mode: 'onChange',
   });
 
-  const onSubmit = async (data: FormData) => {
+  const secondForm = useForm<SecondPageFormData>({
+    resolver: zodResolver(secondPageSchema),
+    mode: 'onChange',
+  });
+
+  const handleFirstPageSubmit = async (data: FirstPageFormData) => {
     setIsSubmitting(true);
     try {
+      if (!userId || !data.gender || !data.phone_number) {
+        throw new Error('必須項目が入力されていません');
+      }
+
       const { error } = await supabase
         .from('profiles')
         .upsert({
@@ -44,74 +58,169 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           gender: data.gender,
           phone_number: data.phone_number,
           updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'line_id',
+          returning: 'minimal'
         });
 
-      if (error) throw error;
-      
-      window.location.href = '/prepare';
+      if (error) {
+        throw new Error('データベースエラーが発生しました');
+      }
+
+      setUserGender(data.gender);
+      setCurrentPage(2);
     } catch (error) {
       console.error('Error:', error);
-      alert('エラーが発生しました。もう一度お試しください。');
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert('エラーが発生しました。もう一度お試しください。');
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const handleSecondPageSubmit = async (data: SecondPageFormData) => {
+    setIsSubmitting(true);
+    try {
+      if (!userId || !userGender) {
+        throw new Error('セッションエラーが発生しました');
+      }
+
+      const tableName = userGender === 'men' ? 'men_preferences' : 'women_preferences';
+      
+      const { error } = await supabase
+        .from(tableName)
+        .upsert({
+          line_id: userId,
+          preference_type: data.preference,
+          created_at: new Date().toISOString(),
+        }, {
+          onConflict: 'line_id',
+          returning: 'minimal'
+        });
+
+      if (error) {
+        throw new Error('データベースエラーが発生しました');
+      }
+
+      window.location.href = '/prepare';
+    } catch (error) {
+      console.error('Error:', error);
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert('エラーが発生しました。もう一度お試しください。');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (currentPage === 1) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-6">
+          <div className="text-center mb-8">
+            <img src="/images/logo.png" alt="The4" className="h-12 mx-auto mb-6" />
+            <h2 className="text-xl font-bold text-gray-900">基本情報の登録</h2>
+          </div>
+          
+          <form onSubmit={firstForm.handleSubmit(handleFirstPageSubmit)} className="space-y-6">
+            <div>
+              <label className="block text-sm text-gray-700 mb-1">
+                あなたの性別*
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <label className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                  ${firstForm.formState.errors.gender ? 'border-red-500' : 'border-gray-300'}
+                  ${firstForm.watch('gender') === 'men' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
+                  <input
+                    type="radio"
+                    value="men"
+                    {...firstForm.register('gender')}
+                    className="sr-only"
+                  />
+                  男性
+                </label>
+                <label className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
+                  ${firstForm.formState.errors.gender ? 'border-red-500' : 'border-gray-300'}
+                  ${firstForm.watch('gender') === 'women' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
+                  <input
+                    type="radio"
+                    value="women"
+                    {...firstForm.register('gender')}
+                    className="sr-only"
+                  />
+                  女性
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm text-gray-700 mb-1">
+                電話番号(非公開)*
+              </label>
+              <input
+                type="tel"
+                {...firstForm.register('phone_number')}
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 transition-all
+                  ${firstForm.formState.errors.phone_number ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-primary/20'}`}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={!firstForm.formState.isValid || isSubmitting}
+              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500"
+            >
+              次へ進む
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="w-full max-w-md p-6">
         <div className="text-center mb-8">
           <img src="/images/logo.png" alt="The4" className="h-12 mx-auto mb-6" />
-          <h2 className="text-xl font-bold text-gray-900">基本情報の登録</h2>
+          <h2 className="text-xl font-bold text-gray-900">どんな合コンに行きたい？</h2>
         </div>
         
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div>
-            <label className="block text-sm text-gray-700 mb-1">
-              あなたの性別*
+        <form onSubmit={secondForm.handleSubmit(handleSecondPageSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 gap-4">
+            <label className={`flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-all
+              ${secondForm.formState.errors.preference ? 'border-red-500' : 'border-gray-300'}
+              ${secondForm.watch('preference') === 'fun' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
+              <input
+                type="radio"
+                value="fun"
+                {...secondForm.register('preference')}
+                className="sr-only"
+              />
+              ワイワイノリ重視
             </label>
-            <div className="grid grid-cols-2 gap-4">
-              <label className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
-                ${errors.gender ? 'border-red-500' : 'border-gray-300'}
-                ${watch('gender') === 'men' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
-                <input
-                  type="radio"
-                  value="men"
-                  {...register('gender')}
-                  className="sr-only"
-                />
-                男性
-              </label>
-              <label className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
-                ${errors.gender ? 'border-red-500' : 'border-gray-300'}
-                ${watch('gender') === 'women' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
-                <input
-                  type="radio"
-                  value="women"
-                  {...register('gender')}
-                  className="sr-only"
-                />
-                女性
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-700 mb-1">
-              電話番号(非公開)*
+            <label className={`flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-all
+              ${secondForm.formState.errors.preference ? 'border-red-500' : 'border-gray-300'}
+              ${secondForm.watch('preference') === 'serious' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
+              <input
+                type="radio"
+                value="serious"
+                {...secondForm.register('preference')}
+                className="sr-only"
+              />
+              真剣な恋愛
             </label>
-            <input
-              type="tel"
-              {...register('phone_number')}
-              className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 transition-all
-                ${errors.phone_number ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-primary/20'}`}
-            />
           </div>
 
           <button
             type="submit"
-            disabled={!isValid || isSubmitting}
-            className="w-full p-3 bg-gray-200 text-gray-800 rounded-lg font-medium"
+            disabled={!secondForm.formState.isValid || isSubmitting}
+            className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500"
           >
             次へ進む
           </button>
