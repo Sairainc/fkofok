@@ -146,10 +146,10 @@ const profile1Schema = z.object({
 const profile2Schema = z.object({
   study: z.enum(educationOptions),
   from: z.enum(prefectures),
-  birthday: z.string(),
+  birthday: z.string().min(1, '生年月日を入力してください'),
   occupation: z.enum(occupations),
   prefecture: z.enum(prefectures),
-  city: z.string().min(1, '市区町村を選択してください'),
+  city: z.string().min(1, '市区町村を入力してください'),
   income: z.enum(incomeRanges),
   mail: z.string().email('正しいメールアドレスを入力してください'),
 });
@@ -1126,14 +1126,21 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           <form onSubmit={profile2Form.handleSubmit(handleProfile2Submit)} className="space-y-6">
             <div className="space-y-4">
               <div>
-                <label>生年月日</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  生年月日*
+                </label>
                 <input
                   type="date"
                   {...profile2Form.register('birthday')}
-                  className="w-full p-2 border rounded-lg"
+                  className={`w-full p-2 border rounded-lg ${
+                    profile2Form.formState.errors.birthday ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   max={new Date().toISOString().split('T')[0]}
                   min="1963-01-01"
                 />
+                {profile2Form.formState.errors.birthday && (
+                  <p className="text-red-500 text-sm mt-1">{profile2Form.formState.errors.birthday.message}</p>
+                )}
               </div>
 
               <div>
