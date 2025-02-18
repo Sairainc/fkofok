@@ -257,6 +257,7 @@ export interface Database {
           preferred_body_type: 'スリム' | '普通' | 'グラマー' | '気にしない'
           created_at: string
           updated_at: string
+          restaurant_preference: string[]
         }
         Insert: {
           id?: string
@@ -268,6 +269,7 @@ export interface Database {
           preferred_body_type: 'スリム' | '普通' | 'グラマー' | '気にしない'
           created_at?: string
           updated_at?: string
+          restaurant_preference: string[]
         }
       }
       women_preferences: {
@@ -281,6 +283,7 @@ export interface Database {
           preferred_style: 'クール' | 'カジュアル' | 'ビジネス' | '気にしない'
           created_at: string
           updated_at: string
+          restaurant_preference: string[]
         }
         Insert: {
           id?: string
@@ -292,6 +295,7 @@ export interface Database {
           preferred_style: 'クール' | 'カジュアル' | 'ビジネス' | '気にしない'
           created_at?: string
           updated_at?: string
+          restaurant_preference: string[]
         }
       }
     }

@@ -63,10 +63,19 @@ const womenPreferenceSchema = z.object({
   ]),
 });
 
+// レストラン選択のスキーマ
+const restaurantPreferenceSchema = z.object({
+  restaurant_preference: z.array(z.enum([
+    '安旨居酒屋',
+    'おしゃれダイニング'
+  ])).min(1, '1つ以上選択してください'),
+});
+
 type Step1Data = z.infer<typeof step1Schema>;
 type Step2Data = z.infer<typeof step2Schema>;
 type MenPreferenceData = z.infer<typeof menPreferenceSchema>;
 type WomenPreferenceData = z.infer<typeof womenPreferenceSchema>;
+type RestaurantPreferenceData = z.infer<typeof restaurantPreferenceSchema>;
 
 type RegistrationFormProps = {
   userId: string;
@@ -110,6 +119,15 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       preferred_age_max: 35,
       preferred_personality: [],
       preferred_style: '気にしない',
+    },
+  });
+
+  // レストラン選択フォームの追加
+  const restaurantForm = useForm<RestaurantPreferenceData>({
+    resolver: zodResolver(restaurantPreferenceSchema),
+    mode: 'onChange',
+    defaultValues: {
+      restaurant_preference: [],
     },
   });
 
@@ -222,6 +240,36 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
       setIsSubmitted(true);
       router.push('/payment');
+    } catch (error) {
+      console.error('Error:', error);
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert('エラーが発生しました。もう一度お試しください。');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // レストラン選択の送信ハンドラー
+  const handleRestaurantSubmit = async (data: RestaurantPreferenceData) => {
+    if (!formData) return;
+    setIsSubmitting(true);
+
+    try {
+      const table = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
+      const { error } = await supabase
+        .from(table)
+        .upsert({
+          line_id: userId,
+          restaurant_preference: data.restaurant_preference,
+          updated_at: new Date().toISOString(),
+        });
+
+      if (error) throw error;
+
+      setStep(5); // 次のステップへ
     } catch (error) {
       console.error('Error:', error);
       if (error instanceof Error) {
@@ -542,6 +590,56 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
             <button
               type="submit"
               disabled={!womenPreferenceForm.formState.isValid || isSubmitting}
+              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
+            >
+              {isSubmitting ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                '次に進む'
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 4) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-6">
+          <div className="text-center mb-8">
+            <h2 className="text-xl font-bold text-gray-900">どんな合コンにしたい？</h2>
+            <p className="text-sm text-gray-600 mt-2">お店の希望を教えてください</p>
+          </div>
+          
+          <form onSubmit={restaurantForm.handleSubmit(handleRestaurantSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 gap-4">
+              {[
+                { value: '安旨居酒屋' as const, label: '安旨居酒屋 ¥3,500~/人' },
+                { value: 'おしゃれダイニング' as const, label: 'おしゃれダイニング ¥5,000~/人' },
+              ].map(({ value, label }) => (
+                <label
+                  key={value}
+                  className={`flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-all
+                    ${restaurantForm.watch('restaurant_preference')?.includes(value)
+                      ? 'bg-primary text-white'
+                      : 'bg-white text-gray-700'}`}
+                >
+                  <input
+                    type="checkbox"
+                    value={value}
+                    {...restaurantForm.register('restaurant_preference')}
+                    className="sr-only"
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+
+            <button
+              type="submit"
+              disabled={!restaurantForm.formState.isValid || isSubmitting}
               className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
             >
               {isSubmitting ? (
