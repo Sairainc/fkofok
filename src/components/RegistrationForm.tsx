@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { findMatch } from '@/lib/matching';
 
 // Step 1のスキーマ
 const step1Schema = z.object({
@@ -228,6 +229,17 @@ const personalityOptions = [
 type MenPersonalityType = typeof menPreferenceSchema.shape.preferred_personality.element._def.values[number];
 type WomenPersonalityType = typeof womenPreferenceSchema.shape.preferred_personality.element._def.values[number];
 
+// 戻るボタンのコンポーネントを作成
+const BackButton = ({ onClick }: { onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="w-full p-3 mt-3 bg-white text-gray-600 border border-gray-300 rounded-lg font-medium hover:bg-gray-50"
+  >
+    戻る
+  </button>
+);
+
 export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -240,6 +252,8 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     isPopular: boolean;
   }>>([]);
   const router = useRouter();
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (step === 9) {
@@ -337,6 +351,74 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     resolver: zodResolver(availabilitySchema),
   });
 
+  // ユーザーの登録状態をチェックする関数を追加
+  const checkRegistrationStatus = async (userId: string) => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('line_id', userId)
+        .single();
+
+      if (error) throw error;
+
+      // プロフィールが存在し、必要な情報が揃っている場合
+      if (profile && profile.gender && profile.phone_number) {
+        setIsRegistered(true);
+      }
+    } catch (error) {
+      console.error('Error checking registration status:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // コンポーネントのマウント時にチェックを実行
+  useEffect(() => {
+    if (userId) {
+      checkRegistrationStatus(userId);
+    }
+  }, [userId]);
+
+  // ローディング中の表示
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // 登録済みユーザー向けの表示
+  if (isRegistered) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-6 text-center">
+          <div className="mb-8">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">マッチング待ち</h2>
+            <p className="text-gray-600 mt-2">
+              ご登録ありがとうございます。<br />
+              マッチングをお待ちください。
+            </p>
+            <p className="text-sm text-primary mt-4">
+              ※マッチングが成立しましたら、<br />
+              合コンの詳細をLINEでお知らせいたします。
+            </p>
+            <p className="text-xs text-gray-500 mt-6">
+              マッチングまでしばらくお待ちください。<br />
+              通常1〜2日程度でマッチングが成立します。
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // 送信ハンドラーを修正
   const handleAvailabilitySubmit = async (data: { datetime: string }) => {
     setIsSubmitting(true);
@@ -377,7 +459,14 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         if (error) throw error;
       }
 
-      router.push('/payment');
+      // マッチング処理を実行
+      const matchResult = await findMatch(jstTimestamp);
+      if (matchResult.success) {
+        console.log('マッチング成功:', matchResult.match);
+      }
+
+      // 登録完了画面に遷移
+      setStep(10);
     } catch (error) {
       console.error('Error:', error);
       alert(error instanceof Error ? error.message : 'エラーが発生しました');
@@ -754,16 +843,22 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="w-full max-w-md p-6 text-center">
-          <div className="mb-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <div className="mb-8">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">登録完了しました</h2>
+            <p className="text-gray-600 mt-2">
+              ご登録ありがとうございます。<br />
+              マッチングが成立次第、LINEにてご連絡いたします。
+            </p>
+            <p className="text-sm text-primary mt-4">
+              ※マッチングが成立しましたら、<br />
+              合コンの詳細をLINEでお知らせいたします。
+            </p>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            登録完了
-          </h2>
-          <p className="text-gray-600">
-            基本情報の登録が完了しました。
-            次のステップに進みます...
-          </p>
         </div>
       </div>
     );
@@ -821,17 +916,20 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={!step1Form.formState.isValid || isSubmitting}
-              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
-            >
-              {isSubmitting ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              ) : (
-                '次に進む'
-              )}
-            </button>
+            <div className="space-y-3">
+              <button
+                type="submit"
+                disabled={!step1Form.formState.isValid || isSubmitting}
+                className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
+              >
+                {isSubmitting ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  '次に進む'
+                )}
+              </button>
+              {step > 1 && <BackButton onClick={() => setStep(step - 1)} />}
+            </div>
           </form>
         </div>
       </div>
@@ -938,17 +1036,20 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={!menPreferenceForm.formState.isValid || isSubmitting}
-              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
-            >
-              {isSubmitting ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              ) : (
-                '次に進む'
-              )}
-            </button>
+            <div className="space-y-3">
+              <button
+                type="submit"
+                disabled={!menPreferenceForm.formState.isValid || isSubmitting}
+                className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
+              >
+                {isSubmitting ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  '次に進む'
+                )}
+              </button>
+              <BackButton onClick={() => setStep(step - 1)} />
+            </div>
           </form>
         </div>
       </div>
@@ -1055,17 +1156,20 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={!womenPreferenceForm.formState.isValid || isSubmitting}
-              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
-            >
-              {isSubmitting ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              ) : (
-                '次に進む'
-              )}
-            </button>
+            <div className="space-y-3">
+              <button
+                type="submit"
+                disabled={!womenPreferenceForm.formState.isValid || isSubmitting}
+                className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
+              >
+                {isSubmitting ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  '次に進む'
+                )}
+              </button>
+              <BackButton onClick={() => setStep(step - 1)} />
+            </div>
           </form>
         </div>
       </div>
@@ -1152,17 +1256,20 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={!restaurantForm.formState.isValid || isSubmitting}
-              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
-            >
-              {isSubmitting ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              ) : (
-                '次に進む'
-              )}
-            </button>
+            <div className="space-y-3">
+              <button
+                type="submit"
+                disabled={!restaurantForm.formState.isValid || isSubmitting}
+                className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
+              >
+                {isSubmitting ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  '次に進む'
+                )}
+              </button>
+              <BackButton onClick={() => setStep(step - 1)} />
+            </div>
           </form>
         </div>
       </div>
@@ -1563,25 +1670,28 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           </div>
           
           <form onSubmit={availabilityForm.handleSubmit(handleAvailabilitySubmit)} className="space-y-6">
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-3">
               {dateOptions.map((option) => (
-                <label key={option.value} className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all
-                  ${availabilityForm.formState.errors.datetime ? 'border-red-500' : 'border-gray-300'}
-                  ${availabilityForm.watch('datetime') === option.value ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
-                  <div className="flex items-center">
+                <label
+                  key={option.value}
+                  className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all
+                    ${availabilityForm.formState.errors.datetime ? 'border-red-500' : 'border-gray-300'}
+                    ${availabilityForm.watch('datetime') === option.value ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}
+                  >
                     <input
                       type="radio"
                       value={option.value}
                       {...availabilityForm.register('datetime')}
                       className="sr-only"
                     />
-                    {option.label}
-                  </div>
-                  {option.isPopular && (
-                    <span className="text-sm font-medium text-red-500">人気</span>
-                  )}
-                </label>
-              ))}
+                    <span>{option.label}</span>
+                    {option.isPopular && (
+                      <span className="text-xs px-2 py-1 bg-red-500 text-white rounded-full">
+                        人気
+                      </span>
+                    )}
+                  </label>
+                ))}
             </div>
 
             <button
@@ -1592,10 +1702,35 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
               {isSubmitting ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
               ) : (
-                '次に進む'
+                '登録'
               )}
             </button>
           </form>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 10) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-6 text-center">
+          <div className="mb-8">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">登録完了しました</h2>
+            <p className="text-gray-600 mt-2">
+              ご登録ありがとうございます。<br />
+              マッチングが成立次第、LINEにてご連絡いたします。
+            </p>
+            <p className="text-sm text-primary mt-4">
+              ※マッチングが成立しましたら、<br />
+              合コンの詳細をLINEでお知らせいたします。
+            </p>
+          </div>
         </div>
       </div>
     );

@@ -329,6 +329,41 @@ export interface Database {
           created_at?: string
         }
       }
+      matches: {
+        Row: {
+          id: string
+          male_user_1: string
+          male_user_2: string
+          female_user_1: string
+          female_user_2: string
+          match_date: string
+          status: 'pending' | 'confirmed' | 'cancelled'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          male_user_1: string
+          male_user_2: string
+          female_user_1: string
+          female_user_2: string
+          match_date: string
+          status?: 'pending' | 'confirmed' | 'cancelled'
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          male_user_1?: string
+          male_user_2?: string
+          female_user_1?: string
+          female_user_2?: string
+          match_date?: string
+          status?: 'pending' | 'confirmed' | 'cancelled'
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
