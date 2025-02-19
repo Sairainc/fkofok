@@ -33,7 +33,6 @@ export interface Database {
           hometown_city?: string
           current_city?: string
           email?: string
-          photo: string | null
         }
         Insert: {
           id?: string
@@ -58,7 +57,6 @@ export interface Database {
           hometown_city?: string
           current_city?: string
           email?: string
-          photo?: string | null
         }
         Update: {
           id?: string
@@ -83,7 +81,6 @@ export interface Database {
           hometown_city?: string
           current_city?: string
           email?: string
-          photo?: string | null
         }
       }
       stripe_customers: {
