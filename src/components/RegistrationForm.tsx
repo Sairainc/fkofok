@@ -351,36 +351,34 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     resolver: zodResolver(availabilitySchema),
   });
 
-  // ユーザーの登録状態をチェックする関数を追加
-  const checkRegistrationStatus = async (userId: string) => {
-    try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('line_id', userId)
-        .single();
-
-      if (error) throw error;
-
-      // プロフィールが存在し、必要な情報が揃っている場合
-      if (profile && profile.gender && profile.phone_number) {
-        setIsRegistered(true);
-      }
-    } catch (error) {
-      console.error('Error checking registration status:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // コンポーネントのマウント時にチェックを実行
+  // 登録状態チェック用のuseEffect
   useEffect(() => {
-    if (userId) {
-      checkRegistrationStatus(userId);
-    }
+    const checkRegistrationStatus = async () => {
+      if (!userId) return;
+      
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('line_id', userId)
+          .single();
+
+        if (error) throw error;
+
+        if (profile && profile.gender && profile.phone_number) {
+          setIsRegistered(true);
+        }
+      } catch (error) {
+        console.error('Error checking registration status:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkRegistrationStatus();
   }, [userId]);
 
-  // ローディング中の表示
+  // ローディング表示
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -389,7 +387,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     );
   }
 
-  // 登録済みユーザー向けの表示
+  // 登録済みユーザー表示
   if (isRegistered) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">

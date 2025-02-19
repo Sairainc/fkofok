@@ -1,15 +1,7 @@
 import { supabase } from './supabase';
-import { Database } from '@/types/supabase';
-
-type PreferenceUser = {
-  line_id: string;
-  datetime: string;
-  party_type: 'fun' | 'serious';
-};
 
 export const findMatch = async (preferredDate: string) => {
   try {
-    // 男性の候補を取得
     const { data: maleCandidates, error: maleError } = await supabase
       .from('men_preferences')
       .select('line_id, datetime, party_type')
@@ -18,8 +10,8 @@ export const findMatch = async (preferredDate: string) => {
       .limit(2);
 
     if (maleError) throw maleError;
+    if (!maleCandidates) return { success: false, message: '男性の候補が見つかりませんでした' };
 
-    // 女性の候補を取得
     const { data: femaleCandidates, error: femaleError } = await supabase
       .from('women_preferences')
       .select('line_id, datetime, party_type')
@@ -28,6 +20,7 @@ export const findMatch = async (preferredDate: string) => {
       .limit(2);
 
     if (femaleError) throw femaleError;
+    if (!femaleCandidates) return { success: false, message: '女性の候補が見つかりませんでした' };
 
     // マッチング条件をチェック
     if (maleCandidates.length === 2 && femaleCandidates.length === 2) {
