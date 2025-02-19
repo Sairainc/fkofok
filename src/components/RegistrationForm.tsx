@@ -337,20 +337,46 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     resolver: zodResolver(availabilitySchema),
   });
 
-  // 送信ハンドラーを先に定義
+  // 送信ハンドラーを修正
   const handleAvailabilitySubmit = async (data: { datetime: string }) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('availability')
-        .insert({
-          line_id: userId,
-          datetime: data.datetime,
-          count: 1,
-          created_at: new Date().toISOString(),
-        });
+      // フォームデータから性別を取得
+      const gender = formData?.gender;
+      if (!gender) throw new Error('性別が不明です');
 
-      if (error) throw error;
+      // タイムスタンプをUTCからJSTに変換
+      const jstDate = new Date(data.datetime);
+      const jstTimestamp = jstDate.toISOString().slice(0, 19).replace('T', ' ');
+
+      if (gender === 'men') {
+        const { error } = await supabase
+          .from('men_preferences')
+          .upsert({
+            line_id: userId,
+            datetime: jstTimestamp,
+            count: 1,
+            updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'line_id'
+          });
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('women_preferences')
+          .upsert({
+            line_id: userId,
+            datetime: jstTimestamp,
+            count: 1,
+            updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'line_id'
+          });
+
+        if (error) throw error;
+      }
+
       router.push('/payment');
     } catch (error) {
       console.error('Error:', error);
@@ -661,14 +687,18 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const generateDateOptions = async () => {
     const dates = [];
     const today = new Date();
-    const nextFriday = new Date(today);
     
-    // 次の金曜日を見つける
+    // 来週の月曜日を取得
+    const nextMonday = new Date(today);
+    nextMonday.setDate(today.getDate() + (8 - today.getDay()));
+    
+    // 来週の金曜日を取得
+    const nextFriday = new Date(nextMonday);
     while (nextFriday.getDay() !== 5) {
       nextFriday.setDate(nextFriday.getDate() + 1);
     }
 
-    // 4週間分の金土を生成
+    // 来週から4週間分の金土を生成
     for (let week = 0; week < 4; week++) {
       // 金曜日を追加
       const friday = new Date(nextFriday);
@@ -685,7 +715,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       dates.push({
         value: fridayISO,
         label: `${friday.getMonth() + 1}月${friday.getDate()}日 (金) 19:00~`,
-        isPopular: (fridayCount?.count ?? 0) > 3  // nullish coalescing operatorを使用
+        isPopular: (fridayCount?.count ?? 0) > 3
       });
 
       // 土曜日を追加
@@ -693,7 +723,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       saturday.setDate(saturday.getDate() + 1);
       const saturdayISO = saturday.toISOString();
 
-      // 予約数を取得して人気判定
       const { data: saturdayCount } = await supabase
         .from('availability')
         .select('count')
@@ -703,7 +732,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       dates.push({
         value: saturdayISO,
         label: `${saturday.getMonth() + 1}月${saturday.getDate()}日 (土) 19:00~`,
-        isPopular: (saturdayCount?.count ?? 0) > 3  // nullish coalescing operatorを使用
+        isPopular: (saturdayCount?.count ?? 0) > 3
       });
     }
 

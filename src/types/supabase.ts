@@ -258,6 +258,8 @@ export interface Database {
           created_at: string
           updated_at: string
           restaurant_preference: string[]
+          datetime: string
+          count: number
         }
         Insert: {
           id?: string
@@ -270,6 +272,8 @@ export interface Database {
           created_at?: string
           updated_at?: string
           restaurant_preference: string[]
+          datetime: string
+          count?: number
         }
       }
       women_preferences: {
@@ -284,6 +288,8 @@ export interface Database {
           created_at: string
           updated_at: string
           restaurant_preference: string[]
+          datetime: string
+          count: number
         }
         Insert: {
           id?: string
@@ -296,6 +302,8 @@ export interface Database {
           created_at?: string
           updated_at?: string
           restaurant_preference: string[]
+          datetime: string
+          count?: number
         }
       }
       availability: {
