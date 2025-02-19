@@ -1508,6 +1508,69 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     );
   }
 
+  if (step === 9) {
+    const [dateOptions, setDateOptions] = useState<Array<{
+      value: string;
+      label: string;
+      isPopular: boolean;
+    }>>([]);
+
+    useEffect(() => {
+      const fetchDates = async () => {
+        const options = await generateDateOptions();
+        setDateOptions(options);
+      };
+      fetchDates();
+    }, []);
+
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-6">
+          <div className="text-center mb-8">
+            <h2 className="text-xl font-bold text-gray-900">空いている日を教えて下さい</h2>
+            <p className="text-sm text-gray-600 mt-2">1つ選択してください</p>
+            <p className="text-primary font-medium mt-4">今だけ初回無料合コンをプレゼント！</p>
+          </div>
+          
+          <form onSubmit={availabilityForm.handleSubmit(handleAvailabilitySubmit)} className="space-y-6">
+            <div className="space-y-4">
+              {dateOptions.map((option) => (
+                <label key={option.value} className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all
+                  ${availabilityForm.formState.errors.datetime ? 'border-red-500' : 'border-gray-300'}
+                  ${availabilityForm.watch('datetime') === option.value ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      value={option.value}
+                      {...availabilityForm.register('datetime')}
+                      className="sr-only"
+                    />
+                    {option.label}
+                  </div>
+                  {option.isPopular && (
+                    <span className="text-sm font-medium text-red-500">人気</span>
+                  )}
+                </label>
+              ))}
+            </div>
+
+            <button
+              type="submit"
+              disabled={!availabilityForm.formState.isValid || isSubmitting}
+              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
+            >
+              {isSubmitting ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                '次に進む'
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="w-full max-w-md p-6">
