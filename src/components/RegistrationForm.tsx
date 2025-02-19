@@ -553,7 +553,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       const fileName = `${userId}-${Date.now()}.${fileExt}`;
 
       // Supabaseのストレージにアップロード
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('profile-photos')
         .upload(fileName, data.photo, {
           cacheControl: '3600',
@@ -575,7 +575,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       }
 
       // user_photosテーブルに写真情報を保存
-      const { data: insertData, error: insertError } = await supabase
+      const { error: insertError } = await supabase
         .from('user_photos')
         .insert([{
           line_id: userId,
