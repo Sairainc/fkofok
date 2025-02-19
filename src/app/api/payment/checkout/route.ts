@@ -8,6 +8,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: Request) {
   try {
+    console.log('Environment variables:', {
+      STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY?.slice(0, 10) + '...',
+      NEXT_PUBLIC_STRIPE_MEN_PRICE_ID: process.env.NEXT_PUBLIC_STRIPE_MEN_PRICE_ID,
+      NEXT_PUBLIC_STRIPE_WOMEN_PRICE_ID: process.env.NEXT_PUBLIC_STRIPE_WOMEN_PRICE_ID,
+      NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
+    })
+
     const { priceId, userId, gender } = await request.json()
 
     if (!process.env.STRIPE_SECRET_KEY) {
