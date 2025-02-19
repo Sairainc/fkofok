@@ -14,8 +14,8 @@ export default function Payment() {
         // ユーザーがログインしていない場合は認証ページへ
         router.push('/auth')
       } else {
-        // 一時的に全てのユーザーを男性用ページにリダイレクト
-        router.push('/payment/men')
+        // ユーザーの性別に基づいて適切な支払いページ（men/women）にリダイレクト
+        router.push(user.gender === 'male' ? '/payment/men' : '/payment/women')
       }
     }
   }, [user, loading, router])
