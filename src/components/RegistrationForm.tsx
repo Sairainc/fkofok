@@ -553,39 +553,52 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       const fileName = `${userId}-${Date.now()}.${fileExt}`;
 
       // Supabaseのストレージにアップロード
-      const { error: uploadError } = await supabase.storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('profile-photos')
         .upload(fileName, data.photo, {
           cacheControl: '3600',
           upsert: true
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
 
       // 写真のURLを取得
       const { data: urlData } = supabase.storage
         .from('profile-photos')
         .getPublicUrl(fileName);
 
+      if (!urlData || !urlData.publicUrl) {
+        throw new Error('写真URLの取得に失敗しました');
+      }
+
       // user_photosテーブルに写真情報を保存
-      const { error: insertError } = await supabase
+      const { data: insertData, error: insertError } = await supabase
         .from('user_photos')
-        .insert({
+        .insert([{
           line_id: userId,
           photo_url: urlData.publicUrl,
           is_main: true,
           order_index: 0,
-          status: 'pending'
-        });
+          status: 'pending',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }])
+        .select();
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        throw insertError;
+      }
 
       // 次のステップへ進む
       setStep(8);
     } catch (error) {
       console.error('Error:', error);
       if (error instanceof Error) {
-        alert(error.message);
+        alert(`エラー: ${error.message}`);
       } else {
         alert('写真のアップロードに失敗しました。もう一度お試しください。');
       }
