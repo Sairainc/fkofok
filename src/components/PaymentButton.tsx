@@ -29,16 +29,19 @@ export const PaymentButton = ({ priceId }: PaymentButtonProps) => {
         }),
       })
       
+      const data = await response.json()
+      
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error)
+        throw new Error(data.error || 'Payment initialization failed')
       }
 
-      const { id: sessionId } = await response.json()
-      await stripe?.redirectToCheckout({ sessionId })
+      const result = await stripe?.redirectToCheckout({ sessionId: data.id })
+      if (result?.error) {
+        throw new Error(result.error.message)
+      }
     } catch (error) {
       console.error('Payment error:', error)
-      alert('決済処理中にエラーが発生しました。もう一度お試しください。')
+      alert(error instanceof Error ? error.message : '決済処理中にエラーが発生しました。もう一度お試しください。')
     }
   }
 
