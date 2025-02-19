@@ -265,6 +265,29 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     }
   }, [step]);
 
+  useEffect(() => {
+    const checkRegistrationStatus = async () => {
+      if (!userId) return;
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('line_id', userId)
+          .single();
+
+        if (error) throw error;
+        if (profile && profile.gender && profile.phone_number) {
+          setIsRegistered(true);
+        }
+      } catch (error) {
+        console.error('Error checking registration status:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    checkRegistrationStatus();
+  }, [userId]);
+
   const step1Form = useForm<Step1Data>({
     resolver: zodResolver(step1Schema),
     mode: 'onChange',
@@ -351,34 +374,17 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     resolver: zodResolver(availabilitySchema),
   });
 
-  // 登録状態チェック用のuseEffect
+  // フォームの状態を監視するuseEffect
   useEffect(() => {
-    const checkRegistrationStatus = async () => {
-      if (!userId) return;
-      
-      try {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('line_id', userId)
-          .single();
+    console.log('Profile2 Form State:', {
+      isValid: profile2Form.formState.isValid,
+      errors: profile2Form.formState.errors,
+      dirtyFields: profile2Form.formState.dirtyFields,
+      touchedFields: profile2Form.formState.touchedFields,
+      values: profile2Form.getValues(),
+    });
+  }, [profile2Form.formState, profile2Form]);
 
-        if (error) throw error;
-
-        if (profile && profile.gender && profile.phone_number) {
-          setIsRegistered(true);
-        }
-      } catch (error) {
-        console.error('Error checking registration status:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkRegistrationStatus();
-  }, [userId]);
-
-  // ローディング表示
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -387,7 +393,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     );
   }
 
-  // 登録済みユーザー表示
   if (isRegistered) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -417,7 +422,31 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     );
   }
 
-  // 送信ハンドラーを修正
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-6 text-center">
+          <div className="mb-8">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">登録完了しました</h2>
+            <p className="text-gray-600 mt-2">
+              ご登録ありがとうございます。<br />
+              マッチングが成立次第、LINEにてご連絡いたします。
+            </p>
+            <p className="text-sm text-primary mt-4">
+              ※マッチングが成立しましたら、<br />
+              合コンの詳細をLINEでお知らせいたします。
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const handleAvailabilitySubmit = async (data: { datetime: string }) => {
     setIsSubmitting(true);
     try {
@@ -825,42 +854,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
     return dates;
   };
-
-  // フォームの状態を監視
-  useEffect(() => {
-    console.log('Profile2 Form State:', {
-      isValid: profile2Form.formState.isValid,
-      errors: profile2Form.formState.errors,
-      dirtyFields: profile2Form.formState.dirtyFields,
-      touchedFields: profile2Form.formState.touchedFields,
-      values: profile2Form.getValues(),
-    });
-  }, [profile2Form.formState, profile2Form]);
-
-  if (isSubmitted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-full max-w-md p-6 text-center">
-          <div className="mb-8">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900">登録完了しました</h2>
-            <p className="text-gray-600 mt-2">
-              ご登録ありがとうございます。<br />
-              マッチングが成立次第、LINEにてご連絡いたします。
-            </p>
-            <p className="text-sm text-primary mt-4">
-              ※マッチングが成立しましたら、<br />
-              合コンの詳細をLINEでお知らせいたします。
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (step === 1) {
     return (
