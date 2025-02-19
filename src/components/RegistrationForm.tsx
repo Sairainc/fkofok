@@ -234,7 +234,22 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState<FormDataType | null>(null);
   const [profile1Data, setProfile1Data] = useState<Profile1Data | null>(null);
+  const [dateOptions, setDateOptions] = useState<Array<{
+    value: string;
+    label: string;
+    isPopular: boolean;
+  }>>([]);
   const router = useRouter();
+
+  useEffect(() => {
+    if (step === 9) {
+      const fetchDates = async () => {
+        const options = await generateDateOptions();
+        setDateOptions(options);
+      };
+      fetchDates();
+    }
+  }, [step]);
 
   const step1Form = useForm<Step1Data>({
     resolver: zodResolver(step1Schema),
@@ -1509,20 +1524,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   }
 
   if (step === 9) {
-    const [dateOptions, setDateOptions] = useState<Array<{
-      value: string;
-      label: string;
-      isPopular: boolean;
-    }>>([]);
-
-    useEffect(() => {
-      const fetchDates = async () => {
-        const options = await generateDateOptions();
-        setDateOptions(options);
-      };
-      fetchDates();
-    }, []);
-
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="w-full max-w-md p-6">
