@@ -15,7 +15,7 @@ export default function Payment() {
         router.push('/auth')
       } else {
         // ユーザーの性別に基づいて適切な支払いページ（men/women）にリダイレクト
-        router.push(user.gender === 'male' ? '/payment/men' : '/payment/women')
+        router.push(user.gender === 'men' ? '/payment/men' : '/payment/women')
       }
     }
   }, [user, loading, router])

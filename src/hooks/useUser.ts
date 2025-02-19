@@ -7,7 +7,7 @@ import { supabase } from "../lib/supabase";
 type User = {
   id: string;
   name: string;
-  gender: 'male' | 'female';
+  gender: 'men' | 'women';
 }
 
 export const useUser = () => {
@@ -37,7 +37,7 @@ export const useUser = () => {
                 setUser({ 
                     id: profile.userId, 
                     name: profile.displayName,
-                    gender: userData?.gender || 'male',
+                    gender: userData?.gender || 'men',
                 });
             } catch (error) {
                 console.error("LIFF エラー:", error);
