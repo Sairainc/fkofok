@@ -36,9 +36,9 @@ export default function WomenPayment() {
             <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-2xl font-semibold">スタンダードプラン</h2>
-                <p className="text-gray-600 mt-2">厳選された男性会員とマッチング</p>
+                <p className="text-gray-600 mt-2">収入証明書確認済みの男性会員とマッチング</p>
               </div>
-              <div className="text-3xl font-bold">¥4,800</div>
+              <div className="text-3xl font-bold">¥2,980</div>
             </div>
             
             <ul className="space-y-3">
@@ -58,7 +58,6 @@ export default function WomenPayment() {
 
             <PaymentButton 
               priceId={process.env.NEXT_PUBLIC_STRIPE_WOMEN_PRICE_ID!}
-              _userId={user.id}
             />
           </div>
         </div>

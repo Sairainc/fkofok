@@ -37,7 +37,7 @@ export default function MenPayment() {
                 <h2 className="text-2xl font-semibold">プレミアムプラン</h2>
                 <p className="text-gray-600 mt-2">厳選された女性会員とマッチング</p>
               </div>
-              <div className="text-3xl font-bold">¥9,800</div>
+              <div className="text-3xl font-bold">¥4,980</div>
             </div>
             
             <ul className="space-y-3">
@@ -57,7 +57,6 @@ export default function MenPayment() {
 
             <PaymentButton 
               priceId={process.env.NEXT_PUBLIC_STRIPE_MEN_PRICE_ID!}
-              _userId={user.id}
             />
           </div>
         </div>
