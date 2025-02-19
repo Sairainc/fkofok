@@ -184,6 +184,13 @@ const photoSchema = z.object({
     })
 });
 
+// 日程選択のスキーマを修正
+const availabilitySchema = z.object({
+  datetime: z.string({
+    required_error: '日時を選択してください',
+  }),
+});
+
 type Step1Data = z.infer<typeof step1Schema>;
 type Step2Data = z.infer<typeof step2Schema>;
 type MenPreferenceData = z.infer<typeof menPreferenceSchema>;
@@ -309,6 +316,34 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     resolver: zodResolver(photoSchema),
     mode: 'onChange',
   });
+
+  // 日程選択フォームの追加
+  const availabilityForm = useForm({
+    resolver: zodResolver(availabilitySchema),
+  });
+
+  // 送信ハンドラーを先に定義
+  const handleAvailabilitySubmit = async (data: { datetime: string }) => {
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('availability')
+        .insert({
+          line_id: userId,
+          datetime: data.datetime,
+          count: 1,
+          created_at: new Date().toISOString(),
+        });
+
+      if (error) throw error;
+      router.push('/payment');
+    } catch (error) {
+      console.error('Error:', error);
+      alert(error instanceof Error ? error.message : 'エラーが発生しました');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleStep1Submit = async (data: Step1Data) => {
     setFormData(data);
@@ -594,7 +629,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       }
 
       // 次のステップへ進む
-      setStep(8);
+      setStep(9);
     } catch (error) {
       console.error('Error:', error);
       if (error instanceof Error) {
@@ -605,6 +640,59 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // コンポーネント内で日付オプションを生成する関数を追加
+  const generateDateOptions = async () => {
+    const dates = [];
+    const today = new Date();
+    const nextFriday = new Date(today);
+    
+    // 次の金曜日を見つける
+    while (nextFriday.getDay() !== 5) {
+      nextFriday.setDate(nextFriday.getDate() + 1);
+    }
+
+    // 4週間分の金土を生成
+    for (let week = 0; week < 4; week++) {
+      // 金曜日を追加
+      const friday = new Date(nextFriday);
+      friday.setDate(friday.getDate() + (week * 7));
+      const fridayISO = friday.toISOString();
+
+      // 予約数を取得して人気判定
+      const { data: fridayCount } = await supabase
+        .from('availability')
+        .select('count')
+        .eq('datetime', fridayISO)
+        .single();
+
+      dates.push({
+        value: fridayISO,
+        label: `${friday.getMonth() + 1}月${friday.getDate()}日 (金) 19:00~`,
+        isPopular: (fridayCount?.count ?? 0) > 3  // nullish coalescing operatorを使用
+      });
+
+      // 土曜日を追加
+      const saturday = new Date(friday);
+      saturday.setDate(saturday.getDate() + 1);
+      const saturdayISO = saturday.toISOString();
+
+      // 予約数を取得して人気判定
+      const { data: saturdayCount } = await supabase
+        .from('availability')
+        .select('count')
+        .eq('datetime', saturdayISO)
+        .single();
+
+      dates.push({
+        value: saturdayISO,
+        label: `${saturday.getMonth() + 1}月${saturday.getDate()}日 (土) 19:00~`,
+        isPopular: (saturdayCount?.count ?? 0) > 3  // nullish coalescing operatorを使用
+      });
+    }
+
+    return dates;
   };
 
   // フォームの状態を監視
@@ -1354,6 +1442,58 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
             <button
               type="submit"
               disabled={!photoForm.formState.isValid || isSubmitting}
+              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
+            >
+              {isSubmitting ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                '次に進む'
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 8) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-6">
+          <div className="text-center mb-8">
+            <h2 className="text-xl font-bold text-gray-900">希望する合コンタイプ</h2>
+            <p className="text-sm text-gray-600 mt-2">あなたの希望に合った合コンをご紹介します</p>
+          </div>
+          
+          <form onSubmit={step2Form.handleSubmit(handleStep2Submit)} className="space-y-6">
+            <div className="grid grid-cols-1 gap-4">
+              <label className={`flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-all
+                ${step2Form.formState.errors.party_type ? 'border-red-500' : 'border-gray-300'}
+                ${step2Form.watch('party_type') === 'fun' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
+                <input
+                  type="radio"
+                  value="fun"
+                  {...step2Form.register('party_type')}
+                  className="sr-only"
+                />
+                ワイワイノリ重視
+              </label>
+              <label className={`flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-all
+                ${step2Form.formState.errors.party_type ? 'border-red-500' : 'border-gray-300'}
+                ${step2Form.watch('party_type') === 'serious' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
+                <input
+                  type="radio"
+                  value="serious"
+                  {...step2Form.register('party_type')}
+                  className="sr-only"
+                />
+                真剣な恋愛
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              disabled={!step2Form.formState.isValid || isSubmitting}
               className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
             >
               {isSubmitting ? (

@@ -298,6 +298,29 @@ export interface Database {
           restaurant_preference: string[]
         }
       }
+      availability: {
+        Row: {
+          id: string
+          line_id: string
+          datetime: string
+          count: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          line_id: string
+          datetime: string
+          count?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          line_id?: string
+          datetime?: string
+          count?: number
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
