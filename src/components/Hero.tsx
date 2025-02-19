@@ -1,10 +1,11 @@
-type HeroProps = {
+interface HeroProps {
   title: string
   subtitle: string
   imageUrl: string
+  overlay?: boolean
 }
 
-export const Hero = ({ title, subtitle, imageUrl }: HeroProps) => {
+export const Hero = ({ title, subtitle, imageUrl, overlay }: HeroProps) => {
   return (
     <div className="relative h-screen">
       {/* 背景画像 */}
@@ -12,7 +13,7 @@ export const Hero = ({ title, subtitle, imageUrl }: HeroProps) => {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${imageUrl})` }}
       >
-        <div className="absolute inset-0 bg-black/40" />
+        {overlay && <div className="absolute inset-0 bg-black/40" />}
       </div>
       
       {/* コンテンツ */}

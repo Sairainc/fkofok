@@ -13,10 +13,10 @@ export default function PaymentCancel() {
         </h1>
         <p className="text-gray-600 mb-8">
           決済を中断しました。
-          ご不明な点がございましたら、お気軽にお問い合わせください。
+          ご不明な点がございましたら、LINEにてお気軽にお問い合わせください。
         </p>
         <button
-          onClick={() => router.back()}
+          onClick={() => router.push('/')}
           className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark"
         >
           戻る
