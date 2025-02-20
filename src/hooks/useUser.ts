@@ -7,69 +7,78 @@ import { supabase } from "../lib/supabase";
 type User = {
   id: string;
   name: string;
-  gender: 'men' | 'women';
-}
+  gender: "men" | "women";
+};
 
 export const useUser = () => {
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const initLiff = async () => {
-            try {
-                await liff.init({ 
-                    liffId: process.env.NEXT_PUBLIC_LIFF_ID as string,
-                    withLoginOnExternalBrowser: true
-                });
+  useEffect(() => {
+    const initLiff = async () => {
+      try {
+        console.log("📢 LIFF 初期化開始");
+        await liff.init({
+          liffId: process.env.NEXT_PUBLIC_LIFF_ID as string,
+          withLoginOnExternalBrowser: true,
+        });
 
-                if (!liff.isLoggedIn()) {
-                    liff.login({ redirectUri: window.location.href });
-                    return;
-                }
+        console.log("✅ LIFF 初期化成功");
 
-                const profile = await liff.getProfile();
+        if (!liff.isLoggedIn()) {
+          console.log("⚠️ ユーザーがログインしていません。ログイン処理を開始");
+          liff.login({ redirectUri: window.location.href });
+          return;
+        }
 
-                // **DBにline_idがあるかチェック**
-                const { data: userData, error } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('line_id', profile.userId)
-                    .single();
+        console.log("✅ ユーザーがログイン済み");
+        const profile = await liff.getProfile();
+        console.log("✅ ユーザープロフィール取得成功:", profile);
 
-                if (error && error.code !== 'PGRST116') {
-                    console.error("Supabaseエラー:", error);
-                }
+        // **DBにline_idがあるかチェック**
+        const { data: userData, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("line_id", profile.userId)
+          .single();
 
-                // **DBにline_idがない場合、新規作成**
-                if (!userData) {
-                    console.log("⚠️ プロフィールが存在しないため、新しく作成します");
+        if (error && error.code !== "PGRST116") {
+          console.error("❌ Supabaseエラー:", error);
+        }
 
-                    const { error: insertError } = await supabase
-                        .from('profiles')
-                        .insert([
-                            { line_id: profile.userId, gender: "men" } // `gender` を `men` に仮設定
-                        ]);
+        // **DBにline_idがない場合、新規作成**
+        if (!userData) {
+          console.log("⚠️ プロフィールが存在しないため、新しく作成します");
 
-                    if (insertError) {
-                        console.error("❌ プロフィール作成エラー:", insertError);
-                    }
-                }
+          const { error: insertError } = await supabase.from("profiles").insert([
+            {
+              line_id: profile.userId,
+              name: profile.displayName, // 🔹 LINEの表示名を保存
+              gender: "men", // 🔹 仮に "men" をデフォルトとして設定
+            },
+          ]);
 
-                setUser({ 
-                    id: profile.userId, 
-                    name: profile.displayName,
-                    gender: userData?.gender || "men",
-                });
+          if (insertError) {
+            console.error("❌ プロフィール作成エラー:", insertError);
+          }
+        }
 
-            } catch (error) {
-                console.error("LIFF エラー:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+        // **取得したデータを user ステートにセット**
+        setUser({
+          id: profile.userId,
+          name: profile.displayName,
+          gender: userData?.gender || "men", // 🔹 gender を取得できなければデフォルトを設定
+        });
 
-        initLiff();
-    }, []);
+      } catch (error) {
+        console.error("❌ LIFF 初期化エラー:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return { user, loading };
+    initLiff();
+  }, []);
+
+  return { user, loading };
 };
