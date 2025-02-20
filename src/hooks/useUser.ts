@@ -47,7 +47,7 @@ export const useUser = () => {
                     const { error: insertError } = await supabase
                         .from('profiles')
                         .insert([
-                            { line_id: profile.userId, name: profile.displayName, gender: "men" } // `gender` を `men` に仮設定
+                            { line_id: profile.userId, gender: "men" } // `gender` を `men` に仮設定
                         ]);
 
                     if (insertError) {
