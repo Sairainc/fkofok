@@ -619,17 +619,35 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     setIsSubmitting(true);
   
     try {
+      // `preferred_personality` と `preferred_body_type` を配列として確実に処理
+      const formattedPersonality = Array.isArray(data.preferred_personality)
+        ? data.preferred_personality
+        : [data.preferred_personality];
+  
+      const formattedBodyType = Array.isArray(data.preferred_body_type)
+        ? data.preferred_body_type
+        : [data.preferred_body_type];
+  
+      console.log("送信データ:", {
+        line_id: userId,
+        preferred_age_min: data.preferred_age_min,
+        preferred_age_max: data.preferred_age_max,
+        preferred_personality: formattedPersonality,
+        preferred_body_type: formattedBodyType,
+        party_type: formData.party_type,
+      });
+  
       // 性別に応じたテーブルを選択
       const preferencesTable = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
-      
+  
       const { error } = await supabase
         .from(preferencesTable)
         .upsert({
           line_id: userId,
           preferred_age_min: data.preferred_age_min,
           preferred_age_max: data.preferred_age_max,
-          preferred_personality: data.preferred_personality, // ⚠️ 修正: そのまま渡す
-          preferred_body_type: data.preferred_body_type,
+          preferred_personality: formattedPersonality, // 修正: 必ず配列で送信
+          preferred_body_type: formattedBodyType, // 修正: 必ず配列で送信
           party_type: formData.party_type,
           updated_at: new Date().toISOString(),
         }, {
@@ -644,7 +662,8 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     } finally {
       setIsSubmitting(false);
     }
-  };  
+  };
+  
 
   // 既存のハンドラーを共通ハンドラーに置き換え
   const handleMenPreferenceSubmit = handlePreferenceSubmit;
