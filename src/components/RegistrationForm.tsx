@@ -249,7 +249,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState<FormDataType | null>(null);
   const [_profile1Data, setProfile1Data] = useState<Profile1Data | null>(null);
-  const [_dateOptions, setDateOptions] = useState<Array<{
+  const [dateOptions, setDateOptions] = useState<Array<{
     value: string;
     label: string;
     isPopular: boolean;
@@ -461,8 +461,8 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   });
 
   // 日程選択フォームの追加
-  const _availabilityForm = useForm({
-    resolver: zodResolver(availabilitySchema),
+  const availabilityForm = useForm<{ datetime: string }>({
+    resolver: zodResolver(availabilitySchema)
   });
 
   if (isLoading) {
@@ -532,32 +532,31 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     );
   }
 
-  const _handleAvailabilitySubmit = async (data: { datetime: string }) => {
-    setIsSubmitting(true);
+  const handleAvailabilitySubmit = async (data: { datetime: string }) => {
+    if (!userId || !formData?.gender) return;
+
     try {
-      const gender = formData?.gender;
-      if (!gender) throw new Error('性別が不明です');
-
-      const jstDate = new Date(data.datetime);
-      const jstTimestamp = jstDate.toISOString().slice(0, 19).replace('T', ' ');
-
-      const table = gender === 'men' ? 'men_preferences' : 'women_preferences';
+      setIsSubmitting(true);
+      const table = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
+      
       const { error } = await supabase
         .from(table)
-        .upsert({
-          line_id: userId,
-          datetime: jstTimestamp,
-          count: 1,
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'line_id'
-        });
+        .update({ datetime: data.datetime })
+        .eq('line_id', userId);
 
       if (error) throw error;
-      setStep(10);
+
+      // 予約数を更新
+      await supabase.rpc('increment_availability_count', {
+        target_datetime: data.datetime
+      });
+
+      setStep(8); // 完了画面へ
     } catch (error) {
-      console.error('Error:', error);
-      alert(error instanceof Error ? error.message : 'エラーが発生しました');
+      console.error('Error updating datetime:', error);
+      alert('日時の登録に失敗しました。もう一度お試しください。');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -1713,6 +1712,68 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
               合コンの詳細をLINEでお知らせいたします。
             </p>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 9) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-6">
+          <div className="text-center mb-8">
+            <h2 className="text-xl font-bold text-gray-900">希望日時の選択</h2>
+            <p className="text-sm text-gray-600 mt-2">参加可能な日時を選んでください</p>
+          </div>
+          
+          <form onSubmit={availabilityForm.handleSubmit(handleAvailabilitySubmit)} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                希望日時
+              </label>
+              <div className="space-y-3">
+                {dateOptions.map((option) => (
+                  <label
+                    key={option.value}
+                    className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all
+                      ${availabilityForm.watch('datetime') === option.value
+                        ? 'bg-primary text-white'
+                        : 'bg-white text-gray-700'}`}
+                  >
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        value={option.value}
+                        {...availabilityForm.register('datetime')}
+                        className="sr-only"
+                      />
+                      <span>{option.label}</span>
+                    </div>
+                    {option.isPopular && (
+                      <span className="text-xs bg-red-500 text-white px-2 py-1 rounded-full">
+                        人気
+                      </span>
+                    )}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                type="submit"
+                disabled={!availabilityForm.formState.isValid || isSubmitting}
+                className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
+              >
+                {isSubmitting ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  '登録を完了する'
+                )}
+              </button>
+              <BackButton onClick={() => setStep(step - 1)} />
+            </div>
+          </form>
         </div>
       </div>
     );
