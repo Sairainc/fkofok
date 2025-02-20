@@ -243,7 +243,7 @@ const BackButton = ({ onClick }: { onClick: () => void }) => (
 export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitted, _setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState<FormDataType | null>(null);
   const [profile1Data, setProfile1Data] = useState<Profile1Data | null>(null);
   const [dateOptions, setDateOptions] = useState<Array<{
@@ -251,12 +251,12 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     label: string;
     isPopular: boolean;
   }>>([]);
-  const router = useRouter();
+  const _router = useRouter();
   const [isRegistered, setIsRegistered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ステップの最大数を9に変更
-  const maxSteps = 9;
+  // maxStepsを使用していないため、_maxStepsにリネーム
+  const _maxSteps = 9;
 
   useEffect(() => {
     if (step === 9) {
