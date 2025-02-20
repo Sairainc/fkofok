@@ -246,7 +246,7 @@ const BackButton = ({ onClick }: { onClick: () => void }) => (
 export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, _setIsSubmitted] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState<FormDataType | null>(null);
   const [_profile1Data, setProfile1Data] = useState<Profile1Data | null>(null);
   const [_dateOptions, setDateOptions] = useState<Array<{
@@ -455,6 +455,9 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const photoForm = useForm<PhotoData>({
     resolver: zodResolver(photoSchema),
     mode: 'onChange',
+    defaultValues: {
+      photo: undefined
+    }
   });
 
   // 日程選択フォームの追加
@@ -792,14 +795,16 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
       const { error: updateError } = await supabase
         .from('user_photos')
-        .update({
+        .upsert({
+          line_id: userId,
           photo_url: filePath,
           updated_at: new Date().toISOString()
-        })
-        .eq('line_id', userId);
+        }, {
+          onConflict: 'line_id'
+        });
 
       if (updateError) throw updateError;
-      setStep(8);
+      setStep(9); // 日程選択ステップへ
     } catch (error) {
       console.error('Error uploading photo:', error);
       alert('写真のアップロードに失敗しました。もう一度お試しください。');
@@ -864,30 +869,25 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     return dates;
   };
 
-  if (isSubmitted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-full max-w-md p-6 text-center">
-          <div className="mb-8">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900">登録完了しました</h2>
-            <p className="text-gray-600 mt-2">
-              ご登録ありがとうございます。<br />
-              マッチングが成立次第、LINEにてご連絡いたします。
-            </p>
-            <p className="text-sm text-primary mt-4">
-              ※マッチングが成立しましたら、<br />
-              合コンの詳細をLINEでお知らせいたします。
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // 登録完了チェックを追加
+  useEffect(() => {
+    const checkRegistrationCompletion = async () => {
+      if (!userId || !formData?.gender) return;
+      
+      const table = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
+      const { data, error } = await supabase
+        .from(table)
+        .select('datetime')
+        .eq('line_id', userId)
+        .single();
+
+      if (!error && data?.datetime) {
+        setIsSubmitted(true);
+      }
+    };
+
+    checkRegistrationCompletion();
+  }, [userId, formData?.gender]);
 
   if (step === 1) {
     return (
@@ -1659,7 +1659,12 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
               <input
                 type="file"
                 accept="image/*"
-                {...photoForm.register('photo', { required: '写真を選択してください' })}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    photoForm.setValue('photo', file);
+                  }
+                }}
                 className="w-full text-sm text-gray-500
                   file:mr-4 file:py-2 file:px-4
                   file:rounded-full file:border-0
@@ -1667,16 +1672,11 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                   file:bg-primary file:text-white
                   hover:file:bg-primary/80"
               />
-              {photoForm.formState.errors.photo && (
-                <p className="text-red-500 text-sm mt-1">
-                  {photoForm.formState.errors.photo.message}
-                </p>
-              )}
             </div>
 
             <button
               type="submit"
-              disabled={!photoForm.formState.isValid || isSubmitting}
+              disabled={isSubmitting}
               className="w-full p-3 bg-primary text-white rounded-lg font-medium 
                 disabled:bg-gray-200 disabled:text-gray-500 
                 flex items-center justify-center"
