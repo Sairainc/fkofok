@@ -28,8 +28,8 @@ const step2Schema = z.object({
 
 // Step 3のスキーマ（男性用）
 const menPreferenceSchema = z.object({
-  preferred_age_min: z.number().min(18).max(60),
-  preferred_age_max: z.number().min(18).max(60),
+  preferred_age_min: z.number({ required_error: '最小年齢を選択してください' }).min(18).max(60),
+  preferred_age_max: z.number({ required_error: '最大年齢を選択してください' }).min(18).max(60),
   preferred_personality: z.array(z.enum([
     '明るい盛り上げタイプ',
     '気遣いできる',
@@ -42,13 +42,15 @@ const menPreferenceSchema = z.object({
     '普通',
     'グラマー',
     '気にしない'
-  ]),
+  ], {
+    required_error: 'スタイルを選択してください'
+  }),
 });
 
 // Step 3のスキーマ（女性用）
 const womenPreferenceSchema = z.object({
-  preferred_age_min: z.number().min(20).max(60),
-  preferred_age_max: z.number().min(20).max(60),
+  preferred_age_min: z.number({ required_error: '最小年齢を選択してください' }).min(20).max(60),
+  preferred_age_max: z.number({ required_error: '最大年齢を選択してください' }).min(20).max(60),
   preferred_personality: z.array(z.enum([
     '優しい',
     '向上心がある',
@@ -61,10 +63,12 @@ const womenPreferenceSchema = z.object({
     'カジュアル',
     'ビジネス',
     '気にしない'
-  ]),
+  ], {
+    required_error: 'スタイルを選択してください'
+  }),
 });
 
-// レストラン選択のスキーマを更新
+// レストラン選択のスキーマ
 const restaurantPreferenceSchema = z.object({
   restaurant_preference: z.array(z.enum([
     '安旨居酒屋',
@@ -73,9 +77,15 @@ const restaurantPreferenceSchema = z.object({
   agree_to_split: z.boolean().refine((val) => val === true, {
     message: '同意が必要です',
   }),
-  preferred_1areas: z.enum(['恵比寿', '新橋・銀座', 'どちらでもOK']),
-  preferred_2areas: z.enum(['恵比寿', '新橋・銀座', 'どちらでもOK']),
-  preferred_3areas: z.enum(['恵比寿', '新橋・銀座', 'どちらでもOK']),
+  preferred_1areas: z.enum(['恵比寿', '新橋・銀座', 'どちらでもOK'], {
+    required_error: 'エリアを選択してください'
+  }),
+  preferred_2areas: z.enum(['恵比寿', '新橋・銀座', 'どちらでもOK'], {
+    required_error: 'エリアを選択してください'
+  }),
+  preferred_3areas: z.enum(['恵比寿', '新橋・銀座', 'どちらでもOK'], {
+    required_error: 'エリアを選択してください'
+  }),
 });
 
 // MBTIの組み合わせを定義
@@ -172,23 +182,17 @@ const profile2Schema = z.object({
   mail: z.string().email('正しいメールアドレスを入力してください'),
 });
 
-// 写真アップロードのスキーマを修正
+// 写真アップロードのスキーマ
 const photoSchema = z.object({
-  photo: z.any()
-    .refine((file) => {
-      if (typeof window === 'undefined') return true; // サーバーサイドでは検証をスキップ
-      return file instanceof FileList && file.length > 0;
-    }, "写真をアップロードしてください")
-    .transform(file => {
-      if (typeof window === 'undefined') return null;
-      return file instanceof FileList ? file.item(0) : null;
-    })
+  photo: z.custom<File>((file) => file instanceof File, {
+    message: '写真を選択してください'
+  })
 });
 
-// 日程選択のスキーマを修正
+// 日程選択のスキーマ
 const availabilitySchema = z.object({
   datetime: z.string({
-    required_error: '日時を選択してください',
+    required_error: '日時を選択してください'
   }),
 });
 
@@ -846,6 +850,31 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
     return dates;
   };
+
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-6 text-center">
+          <div className="mb-8">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">登録完了しました</h2>
+            <p className="text-gray-600 mt-2">
+              ご登録ありがとうございます。<br />
+              マッチングが成立次第、LINEにてご連絡いたします。
+            </p>
+            <p className="text-sm text-primary mt-4">
+              ※マッチングが成立しましたら、<br />
+              合コンの詳細をLINEでお知らせいたします。
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (step === 1) {
     return (
