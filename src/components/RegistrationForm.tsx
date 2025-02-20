@@ -316,13 +316,13 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
           // Step 2: 合コンタイプ
           const preferencesTable = profile.gender === 'men' ? 'men_preferences' : 'women_preferences';
-          const { data: partyPref } = await supabase
+          const { data: partyPref, error: partyError } = await supabase
             .from(preferencesTable)
             .select('party_type')
             .eq('line_id', userId)
             .single();
 
-          if (!partyPref?.party_type) {
+          if (partyError || !partyPref?.party_type) {
             setStep(2);
             return;
           }
