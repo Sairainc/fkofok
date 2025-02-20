@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { findMatch } from '@/lib/matching';
 
 // Step 1のスキーマ
 const step1Schema = z.object({
@@ -363,20 +362,21 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       }
     };
     checkRegistrationStatus();
-  }, [userId]);
+  }, [userId, profile1Data]);
 
+  // フォーム定義をまとめて配置
   const step1Form = useForm<Step1Data>({
     resolver: zodResolver(step1Schema),
     mode: 'onChange',
   });
 
-  const step2Form = useForm<Step2Data>({
-    resolver: zodResolver(step2Schema),
+  const profile1Form = useForm<Profile1Data>({
+    resolver: zodResolver(profile1Schema),
     mode: 'onChange',
   });
 
-  const profile1Form = useForm<Profile1Data>({
-    resolver: zodResolver(profile1Schema),
+  const step2Form = useForm<Step2Data>({
+    resolver: zodResolver(step2Schema),
     mode: 'onChange',
   });
 
@@ -716,7 +716,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   };
 
   // 写真アップロードの送信ハンドラーを修正
-  const handlePhotoSubmit = async (data: PhotoData) => {
+  const _handlePhotoSubmit = async (data: PhotoData) => {
     if (!userId || !data.photo) return;
     setIsSubmitting(true);
 
@@ -1665,53 +1665,5 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     );
   }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="w-full max-w-md p-6">
-        <div className="text-center mb-8">
-          <h2 className="text-xl font-bold text-gray-900">希望する合コンタイプ</h2>
-          <p className="text-sm text-gray-600 mt-2">あなたの希望に合った合コンをご紹介します</p>
-        </div>
-        
-        <form onSubmit={step2Form.handleSubmit(handleStep2Submit)} className="space-y-6">
-          <div className="grid grid-cols-1 gap-4">
-            <label className={`flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-all
-              ${step2Form.formState.errors.party_type ? 'border-red-500' : 'border-gray-300'}
-              ${step2Form.watch('party_type') === 'fun' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
-              <input
-                type="radio"
-                value="fun"
-                {...step2Form.register('party_type', { required: true })}
-                className="sr-only"
-              />
-              ワイワイノリ重視
-            </label>
-            <label className={`flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-all
-              ${step2Form.formState.errors.party_type ? 'border-red-500' : 'border-gray-300'}
-              ${step2Form.watch('party_type') === 'serious' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
-              <input
-                type="radio"
-                value="serious"
-                {...step2Form.register('party_type', { required: true })}
-                className="sr-only"
-              />
-              真剣な恋愛
-            </label>
-          </div>
-
-          <button
-            type="submit"
-            disabled={!step2Form.formState.isValid || isSubmitting}
-            className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
-          >
-            {isSubmitting ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-            ) : (
-              '次に進む'
-            )}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-}; 
+  return null;
+};
