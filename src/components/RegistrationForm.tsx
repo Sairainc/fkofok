@@ -619,34 +619,26 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     setIsSubmitting(true);
 
     try {
-      // 1. まず profiles テーブルにユーザー基本情報を登録
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          line_id: userId,
-          gender: formData.gender,
-          phone_number: formData.phone_number,
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'line_id'
-        });
-
-      if (profileError) throw profileError;
-
-      // 2. 次に性別に応じたpreferencesテーブルに登録
+      // 性別に応じたテーブルを選択
       const preferencesTable = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
-      const { error: prefError } = await supabase
+      
+      const { error } = await supabase
         .from(preferencesTable)
         .upsert({
           line_id: userId,
-          ...data,
+          preferred_age_min: data.preferred_age_min,
+          preferred_age_max: data.preferred_age_max,
+          preferred_personality: Array.isArray(data.preferred_personality) 
+            ? data.preferred_personality 
+            : [data.preferred_personality],
+          preferred_body_type: data.preferred_body_type,
           party_type: formData.party_type,
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'line_id'
         });
 
-      if (prefError) throw prefError;
+      if (error) throw error;
       setStep(4);
     } catch (error) {
       console.error('Error:', error);
@@ -1600,8 +1592,8 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
               {isSubmitting ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
               ) : (
-                '次に進む'
-              )}
+                  '次に進む'
+                )}
             </button>
           </form>
         </div>
