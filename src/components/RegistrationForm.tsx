@@ -610,61 +610,63 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     }
   };
 
-  // 共通の送信ハンドラー
-  const handlePreferenceSubmit = async (data: MenPreferenceData | WomenPreferenceData) => {
+  // 男性用の送信ハンドラー
+  const handleMenPreferenceSubmit = async (data: MenPreferenceData) => {
     if (!formData || !userId) return;
     setIsSubmitting(true);
-  
+
     try {
-      // 1️⃣ `preferred_personality` を配列として確実に処理
-      const formattedPersonality = Array.isArray(data.preferred_personality)
-        ? `{${data.preferred_personality.map((p) => `"${p}"`).join(",")}}`
-        : `{${data.preferred_personality}}`;
-  
-      // 2️⃣ `preferred_body_type` も同様に配列変換
-      const formattedBodyType = Array.isArray(data.preferred_body_type)
-        ? `{${data.preferred_body_type.map((b) => `"${b}"`).join(",")}}`
-        : `{${data.preferred_body_type}}`;
-  
-      console.log("🚀 送信データ:", {
-        line_id: userId,
-        preferred_age_min: data.preferred_age_min,
-        preferred_age_max: data.preferred_age_max,
-        preferred_personality: formattedPersonality,
-        preferred_body_type: formattedBodyType,
-        party_type: formData.party_type,
-      });
-  
-      // 3️⃣ 性別に応じたテーブルを選択
-      const preferencesTable = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
-  
       const { error } = await supabase
-        .from(preferencesTable)
+        .from('men_preferences')
         .upsert({
           line_id: userId,
           preferred_age_min: data.preferred_age_min,
           preferred_age_max: data.preferred_age_max,
-          preferred_personality: formattedPersonality,
-          preferred_body_type: formattedBodyType,
-          party_type: formData.party_type,
+          preferred_personality: data.preferred_personality,
+          preferred_body_type: data.preferred_body_type,
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'line_id'
         });
-  
+
       if (error) throw error;
       setStep(4);
     } catch (error) {
-      console.error("❌ エラー:", error);
-      alert("エラーが発生しました。もう一度お試しください。");
+      console.error('Error:', error);
+      alert('エラーが発生しました。もう一度お試しください。');
     } finally {
       setIsSubmitting(false);
     }
   };
-  
-  // 既存のハンドラーを共通ハンドラーに置き換え
-  const handleMenPreferenceSubmit = handlePreferenceSubmit;
-  const handleWomenPreferenceSubmit = handlePreferenceSubmit;
+
+  // 女性用の送信ハンドラー
+  const handleWomenPreferenceSubmit = async (data: WomenPreferenceData) => {
+    if (!formData || !userId) return;
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('women_preferences')
+        .upsert({
+          line_id: userId,
+          preferred_age_min: data.preferred_age_min,
+          preferred_age_max: data.preferred_age_max,
+          preferred_personality: data.preferred_personality,
+          preferred_body_type: data.preferred_body_type,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'line_id'
+        });
+
+      if (error) throw error;
+      setStep(4);
+    } catch (error) {
+      console.error('Error:', error);
+      alert('エラーが発生しました。もう一度お試しください。');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // レストラン選択の送信ハンドラー
   const handleRestaurantSubmit = async (data: RestaurantPreferenceData) => {
