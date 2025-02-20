@@ -616,16 +616,19 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     setIsSubmitting(true);
 
     try {
+      // PostgreSQL配列形式に変換
+      const formattedData = {
+        line_id: userId,
+        preferred_age_min: data.preferred_age_min,
+        preferred_age_max: data.preferred_age_max,
+        preferred_personality: data.preferred_personality, // 配列はそのまま
+        preferred_body_type: [data.preferred_body_type], // 単一値を配列に変換
+        updated_at: new Date().toISOString(),
+      };
+
       const { error } = await supabase
         .from('men_preferences')
-        .upsert({
-          line_id: userId,
-          preferred_age_min: data.preferred_age_min,
-          preferred_age_max: data.preferred_age_max,
-          preferred_personality: data.preferred_personality,
-          preferred_body_type: data.preferred_body_type,
-          updated_at: new Date().toISOString(),
-        }, {
+        .upsert(formattedData, {
           onConflict: 'line_id'
         });
 
@@ -645,16 +648,19 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     setIsSubmitting(true);
 
     try {
+      // PostgreSQL配列形式に変換
+      const formattedData = {
+        line_id: userId,
+        preferred_age_min: data.preferred_age_min,
+        preferred_age_max: data.preferred_age_max,
+        preferred_personality: data.preferred_personality, // 配列はそのまま
+        preferred_body_type: [data.preferred_body_type], // 単一値を配列に変換
+        updated_at: new Date().toISOString(),
+      };
+
       const { error } = await supabase
         .from('women_preferences')
-        .upsert({
-          line_id: userId,
-          preferred_age_min: data.preferred_age_min,
-          preferred_age_max: data.preferred_age_max,
-          preferred_personality: data.preferred_personality,
-          preferred_body_type: data.preferred_body_type,
-          updated_at: new Date().toISOString(),
-        }, {
+        .upsert(formattedData, {
           onConflict: 'line_id'
         });
 
