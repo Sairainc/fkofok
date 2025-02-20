@@ -255,6 +255,9 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [isRegistered, setIsRegistered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // ステップの最大数を9に変更
+  const maxSteps = 9;
+
   useEffect(() => {
     if (step === 9) {
       const fetchDates = async () => {
@@ -269,18 +272,21 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     const checkRegistrationStatus = async () => {
       if (!userId) return;
       try {
+        // 必要なカラムのみを取得
         const { data: profile, error } = await supabase
           .from('profiles')
-          .select('*')
+          .select('gender, phone_number')  // 必要なカラムのみを指定
           .eq('line_id', userId)
           .single();
 
         if (error) throw error;
-        if (profile && profile.gender && profile.phone_number) {
+        if (profile?.gender && profile?.phone_number) {
           setIsRegistered(true);
         }
       } catch (error) {
-        console.error('Error checking registration status:', error);
+        if (error instanceof Error && error.message !== 'No rows found') {
+          console.error('Error checking registration status:', error);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -388,7 +394,12 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="w-full max-w-md p-6">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-gray-600">読み込み中...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -619,7 +630,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     setIsSubmitting(true);
 
     try {
-      // 既存のレコードを確認
       const { data: existingPref } = await supabase
         .from('women_preferences')
         .select('id')
@@ -642,8 +652,8 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         });
 
       if (error) throw error;
-      setIsSubmitted(true);
-      router.push('/payment');
+      // 次のステップに進む
+      setStep(4);
     } catch (error) {
       console.error('Error:', error);
       if (error instanceof Error) {

@@ -1,6 +1,15 @@
 'use client'
 
-import React from 'react'
+import { Pie } from 'react-chartjs-2'
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  ChartData as ChartJSData,
+} from 'chart.js'
+
+ChartJS.register(ArcElement, Tooltip, Legend)
 
 interface ChartData {
   labels: string[]
@@ -8,17 +17,40 @@ interface ChartData {
 }
 
 export const PieChart = ({ data }: { data: ChartData }) => {
+  const chartData: ChartJSData<'pie'> = {
+    labels: data.labels,
+    datasets: [
+      {
+        data: data.data,
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.8)',
+          'rgba(54, 162, 235, 0.8)',
+          'rgba(255, 206, 86, 0.8)',
+          'rgba(75, 192, 192, 0.8)',
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  }
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'bottom' as const,
+      },
+    },
+  }
+
   return (
-    <div className="relative">
-      {/* 仮のグラフ表示 - 後で実際のグラフライブラリに置き換え */}
-      <div className="grid grid-cols-2 gap-4">
-        {data.labels.map((label, index) => (
-          <div key={label} className="text-center">
-            <div className="font-bold">{label}</div>
-            <div>{data.data[index]}%</div>
-          </div>
-        ))}
-      </div>
+    <div className="w-full max-w-md mx-auto">
+      <Pie data={chartData} options={options} />
     </div>
   )
 }
