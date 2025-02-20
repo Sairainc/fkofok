@@ -902,6 +902,58 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     );
   }
 
+  if (step === 2) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-6">
+          <div className="text-center mb-8">
+            <h2 className="text-xl font-bold text-gray-900">希望する合コンタイプ</h2>
+            <p className="text-sm text-gray-600 mt-2">あなたの希望に合った合コンをご紹介します</p>
+          </div>
+          
+          <form onSubmit={step2Form.handleSubmit(handleStep2Submit)} className="space-y-6">
+            <div className="grid grid-cols-1 gap-4">
+              <label className={`flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-all
+                ${step2Form.formState.errors.party_type ? 'border-red-500' : 'border-gray-300'}
+                ${step2Form.watch('party_type') === 'fun' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
+                <input
+                  type="radio"
+                  value="fun"
+                  {...step2Form.register('party_type', { required: true })}
+                  className="sr-only"
+                />
+                ワイワイノリ重視
+              </label>
+              <label className={`flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-all
+                ${step2Form.formState.errors.party_type ? 'border-red-500' : 'border-gray-300'}
+                ${step2Form.watch('party_type') === 'serious' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
+                <input
+                  type="radio"
+                  value="serious"
+                  {...step2Form.register('party_type', { required: true })}
+                  className="sr-only"
+                />
+                真剣な恋愛
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              disabled={!step2Form.formState.isValid || isSubmitting}
+              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
+            >
+              {isSubmitting ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                '次に進む'
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   if (step === 3 && formData?.gender === 'men') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
