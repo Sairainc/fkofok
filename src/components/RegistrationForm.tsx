@@ -248,7 +248,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, _setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState<FormDataType | null>(null);
-  const [profile1Data, setProfile1Data] = useState<Profile1Data | null>(null);
+  const [_profile1Data, setProfile1Data] = useState<Profile1Data | null>(null);
   const [_dateOptions, setDateOptions] = useState<Array<{
     value: string;
     label: string;
