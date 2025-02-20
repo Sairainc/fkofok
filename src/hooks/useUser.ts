@@ -28,17 +28,39 @@ export const useUser = () => {
                 }
 
                 const profile = await liff.getProfile();
-                const { data: userData } = await supabase
+
+                // **DBにline_idがあるかチェック**
+                const { data: userData, error } = await supabase
                     .from('profiles')
-                    .select('gender')
+                    .select('*')
                     .eq('line_id', profile.userId)
                     .single();
-                
+
+                if (error && error.code !== 'PGRST116') {
+                    console.error("Supabaseエラー:", error);
+                }
+
+                // **DBにline_idがない場合、新規作成**
+                if (!userData) {
+                    console.log("⚠️ プロフィールが存在しないため、新しく作成します");
+
+                    const { error: insertError } = await supabase
+                        .from('profiles')
+                        .insert([
+                            { line_id: profile.userId, name: profile.displayName, gender: "men" } // `gender` を `men` に仮設定
+                        ]);
+
+                    if (insertError) {
+                        console.error("❌ プロフィール作成エラー:", insertError);
+                    }
+                }
+
                 setUser({ 
                     id: profile.userId, 
                     name: profile.displayName,
-                    gender: userData?.gender || 'men',
+                    gender: userData?.gender || "men",
                 });
+
             } catch (error) {
                 console.error("LIFF エラー:", error);
             } finally {
