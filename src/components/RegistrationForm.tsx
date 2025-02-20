@@ -190,9 +190,7 @@ const photoSchema = z.object({
 
 // 日程選択のスキーマ
 const availabilitySchema = z.object({
-  datetime: z.string({
-    required_error: '日時を選択してください'
-  }),
+  datetime: z.string().min(1, '日時を選択してください')
 });
 
 type Step1Data = z.infer<typeof step1Schema>;
@@ -246,7 +244,6 @@ const BackButton = ({ onClick }: { onClick: () => void }) => (
 export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState<FormDataType | null>(null);
   const [_profile1Data, setProfile1Data] = useState<Profile1Data | null>(null);
   const [dateOptions, setDateOptions] = useState<Array<{
@@ -513,9 +510,8 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
   // 日程選択フォームの追加
   const availabilityForm = useForm<{ datetime: string }>({
-    resolver: zodResolver(z.object({
-      datetime: z.string().min(1, '日時を選択してください')
-    }))
+    resolver: zodResolver(availabilitySchema),
+    mode: 'onChange'
   });
 
   if (isLoading) {
@@ -560,31 +556,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     );
   }
 
-  if (isSubmitted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-full max-w-md p-6 text-center">
-          <div className="mb-8">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900">登録完了しました</h2>
-            <p className="text-gray-600 mt-2">
-              ご登録ありがとうございます。<br />
-              マッチングが成立次第、LINEにてご連絡いたします。
-            </p>
-            <p className="text-sm text-primary mt-4">
-              ※マッチングが成立しましたら、<br />
-              合コンの詳細をLINEでお知らせいたします。
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const handleAvailabilitySubmit = async (data: { datetime: string }) => {
     if (!userId || !formData?.gender) return;
 
@@ -598,7 +569,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         .eq('line_id', userId);
 
       if (error) throw error;
-
       setStep(8); // 完了画面へ
     } catch (error) {
       console.error('Error updating datetime:', error);
