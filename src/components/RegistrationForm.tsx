@@ -276,12 +276,13 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     const checkRegistrationStatus = async () => {
       if (!userId) return;
       try {
-        // より多くのカラムをチェック
+        // プロフィールデータの取得
         const { data: profile, error } = await supabase
           .from('profiles')
           .select(`
             gender, 
             phone_number,
+            party_type,
             personality,
             mbti,
             appearance,
@@ -296,11 +297,27 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           .single();
 
         if (error) throw error;
+
+        // 写真の存在確認
+        const { data: photoData } = await supabase
+          .from('user_photos')
+          .select('photo_url')
+          .eq('line_id', userId)
+          .single();
+
+        // 性別に応じた preferences テーブルのチェック
+        const preferencesTable = profile?.gender === 'men' ? 'men_preferences' : 'women_preferences';
+        const { data: preferences } = await supabase
+          .from(preferencesTable)
+          .select('*')
+          .eq('line_id', userId)
+          .single();
         
         // すべての必須フィールドが存在するかチェック
         const isFullyRegistered = profile && 
           profile.gender &&
           profile.phone_number &&
+          profile.party_type &&
           profile.personality &&
           profile.mbti &&
           profile.appearance &&
@@ -309,9 +326,34 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           profile.study &&
           profile.occupation &&
           profile.income &&
-          profile.mail;
+          profile.mail &&
+          photoData?.photo_url &&
+          preferences?.preferred_age_min &&  // preferences のチェックを追加
+          preferences?.preferred_age_max &&
+          preferences?.preferred_personality &&
+          preferences?.preferred_body_type &&
+          preferences?.datetime;  // 日時選択も必須
 
         setIsRegistered(!!isFullyRegistered);
+
+        // 登録が途中の場合、適切なステップに移動
+        if (profile && !isFullyRegistered) {
+          if (!profile.gender || !profile.phone_number) {
+            setStep(1);
+          } else if (!profile.party_type) {
+            setStep(2);
+          } else if (!preferences?.preferred_age_min) {
+            setStep(3);  // preferences が未登録の場合
+          } else if (!profile.personality || !profile.mbti) {
+            setStep(4);
+          } else if (!photoData?.photo_url) {
+            setStep(7);
+          } else if (!profile.study || !profile.occupation || !profile.income || !profile.mail) {
+            setStep(8);
+          } else if (!preferences?.datetime) {
+            setStep(9);  // 日時未選択の場合
+          }
+        }
       } catch (error) {
         if (error instanceof Error && error.message !== 'No rows found') {
           console.error('Error checking registration status:', error);
@@ -322,6 +364,19 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     };
     checkRegistrationStatus();
   }, [userId]);
+
+  // フォームの初期値を設定
+  useEffect(() => {
+    if (formData) {
+      step1Form.reset(formData);
+      if (formData.party_type) {
+        step2Form.reset({ party_type: formData.party_type });
+      }
+    }
+    if (profile1Data) {
+      profile1Form.reset(profile1Data);
+    }
+  }, [formData, profile1Data]);
 
   const step1Form = useForm<Step1Data>({
     resolver: zodResolver(step1Schema),
@@ -569,88 +624,52 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     }
   };
 
-  const handleMenPreferenceSubmit = async (data: MenPreferenceData) => {
-    if (!formData) return;
+  // 共通の送信ハンドラー
+  const handlePreferenceSubmit = async (data: MenPreferenceData | WomenPreferenceData) => {
+    if (!formData || !userId) return;
     setIsSubmitting(true);
 
     try {
-      // 既存のレコードを確認
-      const { data: existingPref } = await supabase
-        .from('men_preferences')
-        .select('id')
-        .eq('line_id', userId)
-        .single();
-
-      const { error } = await supabase
-        .from('men_preferences')
+      // 1. まず profiles テーブルにユーザー基本情報を登録
+      const { error: profileError } = await supabase
+        .from('profiles')
         .upsert({
-          id: existingPref?.id || crypto.randomUUID(),
           line_id: userId,
-          party_type: formData.party_type,
-          preferred_age_min: data.preferred_age_min,
-          preferred_age_max: data.preferred_age_max,
-          preferred_personality: data.preferred_personality,
-          preferred_body_type: [data.preferred_body_type],
+          gender: formData.gender,
+          phone_number: formData.phone_number,
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'line_id'
         });
 
-      if (error) throw error;
-      setStep(4);
-    } catch (error) {
-      console.error('Error:', error);
-      if (error instanceof Error) {
-        alert(error.message);
-      } else {
-        alert('エラーが発生しました。もう一度お試しください。');
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+      if (profileError) throw profileError;
 
-  // 女性用の送信ハンドラーを追加
-  const handleWomenPreferenceSubmit = async (data: WomenPreferenceData) => {
-    if (!formData) return;
-    setIsSubmitting(true);
-
-    try {
-      const { data: existingPref } = await supabase
-        .from('women_preferences')
-        .select('id')
-        .eq('line_id', userId)
-        .single();
-
-      const { error } = await supabase
-        .from('women_preferences')
+      // 2. 次に性別に応じたpreferencesテーブルに登録
+      const preferencesTable = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
+      const { error: prefError } = await supabase
+        .from(preferencesTable)
         .upsert({
-          id: existingPref?.id || crypto.randomUUID(),
           line_id: userId,
+          ...data,
           party_type: formData.party_type,
-          preferred_age_min: data.preferred_age_min,
-          preferred_age_max: data.preferred_age_max,
-          preferred_personality: data.preferred_personality,
-          preferred_body_type: [data.preferred_body_type],
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'line_id'
         });
 
-      if (error) throw error;
-      // 次のステップに進む
+      if (prefError) throw prefError;
       setStep(4);
     } catch (error) {
       console.error('Error:', error);
-      if (error instanceof Error) {
-        alert(error.message);
-      } else {
-        alert('エラーが発生しました。もう一度お試しください。');
-      }
+      alert('エラーが発生しました。もう一度お試しください。');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // 既存のハンドラーを共通ハンドラーに置き換え
+  const handleMenPreferenceSubmit = handlePreferenceSubmit;
+  const handleWomenPreferenceSubmit = handlePreferenceSubmit;
 
   // レストラン選択の送信ハンドラー
   const handleRestaurantSubmit = async (data: RestaurantPreferenceData) => {
@@ -729,67 +748,39 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
   // 写真アップロードの送信ハンドラーを修正
   const handlePhotoSubmit = async (data: PhotoData) => {
+    if (!userId || !data.photo) return;
     setIsSubmitting(true);
 
     try {
-      if (!data.photo || !(data.photo instanceof File)) {
-        throw new Error('写真が選択されていません');
-      }
-
-      // ファイル名をユニークにする
+      // 1. Storage にファイルをアップロード
       const fileExt = data.photo.name.split('.').pop();
-      const fileName = `${userId}-${Date.now()}.${fileExt}`;
+      const fileName = `${userId}.${fileExt}`;
+      const filePath = `photos/${fileName}`;
 
-      // Supabaseのストレージにアップロード
       const { error: uploadError } = await supabase.storage
-        .from('profile-photos')
-        .upload(fileName, data.photo, {
-          cacheControl: '3600',
+        .from('profile-photos')  // バケット名を確認してください
+        .upload(filePath, data.photo, {
           upsert: true
         });
 
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
-      // 写真のURLを取得
-      const { data: urlData } = supabase.storage
-        .from('profile-photos')
-        .getPublicUrl(fileName);
-
-      if (!urlData || !urlData.publicUrl) {
-        throw new Error('写真URLの取得に失敗しました');
-      }
-
-      // user_photosテーブルに写真情報を保存
-      const { error: insertError } = await supabase
-        .from('user_photos')
-        .insert([{
-          line_id: userId,
-          photo_url: urlData.publicUrl,
-          is_main: true,
-          order_index: 0,
-          status: 'pending',
-          created_at: new Date().toISOString(),
+      // 2. profiles テーブルに写真のパスを保存
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          photo_url: filePath,
           updated_at: new Date().toISOString()
-        }])
-        .select();
+        })
+        .eq('line_id', userId);
 
-      if (insertError) {
-        console.error('Insert error:', insertError);
-        throw insertError;
-      }
+      if (updateError) throw updateError;
 
-      // 次のステップへ進む
-      setStep(9);
+      // 次のステップに進む
+      setStep(prevStep => prevStep + 1);
     } catch (error) {
-      console.error('Error:', error);
-      if (error instanceof Error) {
-        alert(`エラー: ${error.message}`);
-      } else {
-        alert('写真のアップロードに失敗しました。もう一度お試しください。');
-      }
+      console.error('Error uploading photo:', error);
+      alert('写真のアップロードに失敗しました。もう一度お試しください。');
     } finally {
       setIsSubmitting(false);
     }
@@ -1582,48 +1573,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="w-full max-w-md p-6">
           <div className="text-center mb-8">
-            <h2 className="text-xl font-bold text-gray-900">審査用写真の提出</h2>
-            <p className="text-sm text-gray-600 mt-2">
-              一切公開されません。<br />
-              ※マスクや過度な加工の写真は審査ができません。
-            </p>
-          </div>
-          
-          <form onSubmit={photoForm.handleSubmit(handlePhotoSubmit)} className="space-y-6">
-            <div className="space-y-4">
-              <input
-                type="file"
-                accept="image/*"
-                {...photoForm.register('photo')}
-                className="w-full"
-              />
-              {photoForm.formState.errors.photo && (
-                <p className="text-red-500 text-sm">{photoForm.formState.errors.photo.message}</p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              disabled={!photoForm.formState.isValid || isSubmitting}
-              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
-            >
-              {isSubmitting ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              ) : (
-                '次に進む'
-              )}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  if (step === 8) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-full max-w-md p-6">
-          <div className="text-center mb-8">
             <h2 className="text-xl font-bold text-gray-900">希望する合コンタイプ</h2>
             <p className="text-sm text-gray-600 mt-2">あなたの希望に合った合コンをご紹介します</p>
           </div>
@@ -1671,7 +1620,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     );
   }
 
-  if (step === 9) {
+  if (step === 8) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="w-full max-w-md p-6">
@@ -1693,7 +1642,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                     <input
                       type="radio"
                       value={option.value}
-                      {...availabilityForm.register('datetime')}
+                      {...availabilityForm.register('datetime', { required: '日時を選択してください' })}
                       className="sr-only"
                     />
                     <span>{option.label}</span>
@@ -1704,6 +1653,11 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                     )}
                   </label>
                 ))}
+              {availabilityForm.formState.errors.datetime && (
+                <p className="text-red-500 text-sm mt-1">
+                  {availabilityForm.formState.errors.datetime.message}
+                </p>
+              )}
             </div>
 
             <button
@@ -1723,7 +1677,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     );
   }
 
-  if (step === 10) {
+  if (step === 9) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="w-full max-w-md p-6 text-center">
