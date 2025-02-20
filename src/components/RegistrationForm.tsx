@@ -249,7 +249,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [isSubmitted, _setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState<FormDataType | null>(null);
   const [profile1Data, setProfile1Data] = useState<Profile1Data | null>(null);
-  const [dateOptions, setDateOptions] = useState<Array<{
+  const [_dateOptions, setDateOptions] = useState<Array<{
     value: string;
     label: string;
     isPopular: boolean;
@@ -261,16 +261,23 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   // maxStepsを使用していないため、_maxStepsにリネーム
   const _maxSteps = 9;
 
-  useEffect(() => {
-    if (step === 9) {
-      const fetchDates = async () => {
-        const options = await generateDateOptions();
-        setDateOptions(options);
-      };
-      fetchDates();
-    }
-  }, [step]);
+  // フォーム定義を先に移動
+  const step1Form = useForm<Step1Data>({
+    resolver: zodResolver(step1Schema),
+    mode: 'onChange',
+  });
 
+  const step2Form = useForm<Step2Data>({
+    resolver: zodResolver(step2Schema),
+    mode: 'onChange',
+  });
+
+  const profile1Form = useForm<Profile1Data>({
+    resolver: zodResolver(profile1Schema),
+    mode: 'onChange',
+  });
+
+  // その後にuseEffectを配置
   useEffect(() => {
     const checkRegistrationStatus = async () => {
       if (!userId) return;
@@ -370,35 +377,17 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     };
 
     checkRegistrationStatus();
-  }, [userId]);
-
-  // フォーム定義をまとめて配置
-  const step1Form = useForm<Step1Data>({
-    resolver: zodResolver(step1Schema),
-    mode: 'onChange',
-  });
-
-  const profile1Form = useForm<Profile1Data>({
-    resolver: zodResolver(profile1Schema),
-    mode: 'onChange',
-  });
-
-  const step2Form = useForm<Step2Data>({
-    resolver: zodResolver(step2Schema),
-    mode: 'onChange',
-  });
+  }, [userId, step1Form, step2Form]);
 
   useEffect(() => {
-    if (formData) {
-      step1Form.reset(formData);
-      if (formData.party_type) {
-        step2Form.reset({ party_type: formData.party_type });
-      }
+    if (step === 9) {
+      const fetchDates = async () => {
+        const options = await generateDateOptions();
+        setDateOptions(options);
+      };
+      fetchDates();
     }
-    if (profile1Data) {
-      profile1Form.reset(profile1Data);
-    }
-  }, [formData, profile1Data]);
+  }, [step]);
 
   // 既存のフォーム定義に加えて、Step3のフォームを追加
   const menPreferenceForm = useForm<MenPreferenceData>({
@@ -460,7 +449,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   });
 
   // 日程選択フォームの追加
-  const availabilityForm = useForm({
+  const _availabilityForm = useForm({
     resolver: zodResolver(availabilitySchema),
   });
 
@@ -531,7 +520,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     );
   }
 
-  const handleAvailabilitySubmit = async (data: { datetime: string }) => {
+  const _handleAvailabilitySubmit = async (data: { datetime: string }) => {
     setIsSubmitting(true);
     try {
       const gender = formData?.gender;
