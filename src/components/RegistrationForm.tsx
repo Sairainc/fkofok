@@ -288,7 +288,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           .select(`
             gender, 
             phone_number,
-            party_type,
             personality,
             mbti,
             appearance,
@@ -316,22 +315,26 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           }
 
           // Step 2: 合コンタイプ
-          if (profile.party_type) {
-            step2Form.setValue('party_type', profile.party_type);
-          } else {
+          const preferencesTable = profile.gender === 'men' ? 'men_preferences' : 'women_preferences';
+          const { data: partyPref } = await supabase
+            .from(preferencesTable)
+            .select('party_type')
+            .eq('line_id', userId)
+            .single();
+
+          if (!partyPref?.party_type) {
             setStep(2);
             return;
           }
 
-          // Step 3: 好みのタイプ（性別に応じたpreferencesテーブル）
-          const preferencesTable = profile.gender === 'men' ? 'men_preferences' : 'women_preferences';
-          const { data: preferences } = await supabase
+          // Step 3: 好みのタイプ
+          const { data: typePref } = await supabase
             .from(preferencesTable)
-            .select('*')
+            .select('preferred_age_min')
             .eq('line_id', userId)
             .single();
 
-          if (!preferences?.preferred_age_min) {
+          if (!typePref?.preferred_age_min) {
             setStep(3);
             return;
           }
@@ -361,7 +364,13 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           }
 
           // Step 9: 日時選択
-          if (!preferences?.datetime) {
+          const { data: datePref } = await supabase
+            .from(preferencesTable)
+            .select('datetime')
+            .eq('line_id', userId)
+            .single();
+
+          if (!datePref?.datetime) {
             setStep(9);
             return;
           }
