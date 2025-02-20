@@ -619,16 +619,17 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     setIsSubmitting(true);
   
     try {
-      // `preferred_personality` と `preferred_body_type` を配列として確実に処理
+      // 1️⃣ `preferred_personality` を配列として確実に処理
       const formattedPersonality = Array.isArray(data.preferred_personality)
-        ? data.preferred_personality
-        : [data.preferred_personality];
+        ? `{${data.preferred_personality.map((p) => `"${p}"`).join(",")}}`
+        : `{${data.preferred_personality}}`;
   
+      // 2️⃣ `preferred_body_type` も同様に配列変換
       const formattedBodyType = Array.isArray(data.preferred_body_type)
-        ? data.preferred_body_type
-        : [data.preferred_body_type];
+        ? `{${data.preferred_body_type.map((b) => `"${b}"`).join(",")}}`
+        : `{${data.preferred_body_type}}`;
   
-      console.log("送信データ:", {
+      console.log("🚀 送信データ:", {
         line_id: userId,
         preferred_age_min: data.preferred_age_min,
         preferred_age_max: data.preferred_age_max,
@@ -637,7 +638,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         party_type: formData.party_type,
       });
   
-      // 性別に応じたテーブルを選択
+      // 3️⃣ 性別に応じたテーブルを選択
       const preferencesTable = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
   
       const { error } = await supabase
@@ -646,8 +647,8 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           line_id: userId,
           preferred_age_min: data.preferred_age_min,
           preferred_age_max: data.preferred_age_max,
-          preferred_personality: formattedPersonality, // 修正: 必ず配列で送信
-          preferred_body_type: formattedBodyType, // 修正: 必ず配列で送信
+          preferred_personality: formattedPersonality, // ✅ PostgreSQL `text[]` 形式に変換
+          preferred_body_type: formattedBodyType, // ✅ PostgreSQL `text[]` 形式に変換
           party_type: formData.party_type,
           updated_at: new Date().toISOString(),
         }, {
@@ -657,14 +658,13 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       if (error) throw error;
       setStep(4);
     } catch (error) {
-      console.error('Error:', error);
-      alert('エラーが発生しました。もう一度お試しください。');
+      console.error("❌ エラー:", error);
+      alert("エラーが発生しました。もう一度お試しください。");
     } finally {
       setIsSubmitting(false);
     }
   };
   
-
   // 既存のハンドラーを共通ハンドラーに置き換え
   const handleMenPreferenceSubmit = handlePreferenceSubmit;
   const handleWomenPreferenceSubmit = handlePreferenceSubmit;
