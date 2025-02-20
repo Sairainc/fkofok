@@ -389,14 +389,65 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   }, [userId, step1Form, step2Form]);
 
   useEffect(() => {
-    if (step === 9) {
-      const fetchDates = async () => {
-        const options = await generateDateOptions();
-        setDateOptions(options);
-      };
-      fetchDates();
-    }
-  }, [step]);
+    const fetchDates = async () => {
+      if (step !== 9) return; // 条件チェックを内部に移動
+
+      const dates = [];
+      const today = new Date();
+      
+      // 来週の月曜日を取得
+      const nextMonday = new Date(today);
+      nextMonday.setDate(today.getDate() + (8 - today.getDay()));
+      
+      // 来週の金曜日を取得
+      const nextFriday = new Date(nextMonday);
+      while (nextFriday.getDay() !== 5) {
+        nextFriday.setDate(nextFriday.getDate() + 1);
+      }
+
+      // 来週から4週間分の金土を生成
+      for (let week = 0; week < 4; week++) {
+        // 金曜日を追加
+        const friday = new Date(nextFriday);
+        friday.setDate(friday.getDate() + (week * 7));
+        const fridayISO = friday.toISOString();
+
+        // 予約数を取得して人気判定
+        const { data: fridayCount } = await supabase
+          .from('availability')
+          .select('count')
+          .eq('datetime', fridayISO)
+          .single();
+
+        dates.push({
+          value: fridayISO,
+          label: `${friday.getMonth() + 1}月${friday.getDate()}日 (金) 19:00~`,
+          isPopular: (fridayCount?.count ?? 0) > 3
+        });
+
+        // 土曜日を追加
+        const saturday = new Date(friday);
+        saturday.setDate(saturday.getDate() + 1);
+        const saturdayISO = saturday.toISOString();
+
+        const { data: saturdayCount } = await supabase
+          .from('availability')
+          .select('count')
+          .eq('datetime', saturdayISO)
+          .single();
+
+        dates.push({
+          value: saturdayISO,
+          label: `${saturday.getMonth() + 1}月${saturday.getDate()}日 (土) 19:00~`,
+          isPopular: (saturdayCount?.count ?? 0) > 3
+        });
+      }
+
+      setDateOptions(dates);
+    };
+
+    fetchDates();
+  }, [step]); // step の変更を監視
 
   // 既存のフォーム定義に加えて、Step3のフォームを追加
   const menPreferenceForm = useForm<MenPreferenceData>({
@@ -462,7 +513,9 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
   // 日程選択フォームの追加
   const availabilityForm = useForm<{ datetime: string }>({
-    resolver: zodResolver(availabilitySchema)
+    resolver: zodResolver(z.object({
+      datetime: z.string().min(1, '日時を選択してください')
+    }))
   });
 
   if (isLoading) {
@@ -545,11 +598,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         .eq('line_id', userId);
 
       if (error) throw error;
-
-      // 予約数を更新
-      await supabase.rpc('increment_availability_count', {
-        target_datetime: data.datetime
-      });
 
       setStep(8); // 完了画面へ
     } catch (error) {
@@ -811,82 +859,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       setIsSubmitting(false);
     }
   };
-
-  // コンポーネント内で日付オプションを生成する関数を追加
-  const generateDateOptions = async () => {
-    const dates = [];
-    const today = new Date();
-    
-    // 来週の月曜日を取得
-    const nextMonday = new Date(today);
-    nextMonday.setDate(today.getDate() + (8 - today.getDay()));
-    
-    // 来週の金曜日を取得
-    const nextFriday = new Date(nextMonday);
-    while (nextFriday.getDay() !== 5) {
-      nextFriday.setDate(nextFriday.getDate() + 1);
-    }
-
-    // 来週から4週間分の金土を生成
-    for (let week = 0; week < 4; week++) {
-      // 金曜日を追加
-      const friday = new Date(nextFriday);
-      friday.setDate(friday.getDate() + (week * 7));
-      const fridayISO = friday.toISOString();
-
-      // 予約数を取得して人気判定
-      const { data: fridayCount } = await supabase
-        .from('availability')
-        .select('count')
-        .eq('datetime', fridayISO)
-        .single();
-
-      dates.push({
-        value: fridayISO,
-        label: `${friday.getMonth() + 1}月${friday.getDate()}日 (金) 19:00~`,
-        isPopular: (fridayCount?.count ?? 0) > 3
-      });
-
-      // 土曜日を追加
-      const saturday = new Date(friday);
-      saturday.setDate(saturday.getDate() + 1);
-      const saturdayISO = saturday.toISOString();
-
-      const { data: saturdayCount } = await supabase
-        .from('availability')
-        .select('count')
-        .eq('datetime', saturdayISO)
-        .single();
-
-      dates.push({
-        value: saturdayISO,
-        label: `${saturday.getMonth() + 1}月${saturday.getDate()}日 (土) 19:00~`,
-        isPopular: (saturdayCount?.count ?? 0) > 3
-      });
-    }
-
-    return dates;
-  };
-
-  // 登録完了チェックを追加
-  useEffect(() => {
-    const checkRegistrationCompletion = async () => {
-      if (!userId || !formData?.gender) return;
-      
-      const table = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
-      const { data, error } = await supabase
-        .from(table)
-        .select('datetime')
-        .eq('line_id', userId)
-        .single();
-
-      if (!error && data?.datetime) {
-        setIsSubmitted(true);
-      }
-    };
-
-    checkRegistrationCompletion();
-  }, [userId, formData?.gender]);
 
   if (step === 1) {
     return (
