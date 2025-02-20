@@ -365,7 +365,21 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     checkRegistrationStatus();
   }, [userId]);
 
-  // フォームの初期値を設定
+  const step1Form = useForm<Step1Data>({
+    resolver: zodResolver(step1Schema),
+    mode: 'onChange',
+  });
+
+  const step2Form = useForm<Step2Data>({
+    resolver: zodResolver(step2Schema),
+    mode: 'onChange',
+  });
+
+  const profile1Form = useForm<Profile1Data>({
+    resolver: zodResolver(profile1Schema),
+    mode: 'onChange',
+  });
+
   useEffect(() => {
     if (formData) {
       step1Form.reset(formData);
@@ -377,19 +391,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       profile1Form.reset(profile1Data);
     }
   }, [formData, profile1Data]);
-
-  const step1Form = useForm<Step1Data>({
-    resolver: zodResolver(step1Schema),
-    mode: 'onChange',
-  });
-
-  const step2Form = useForm<Step2Data>({
-    resolver: zodResolver(step2Schema),
-    mode: 'onChange',
-    defaultValues: {
-      party_type: undefined,
-    }
-  });
 
   // 既存のフォーム定義に加えて、Step3のフォームを追加
   const menPreferenceForm = useForm<MenPreferenceData>({
@@ -429,18 +430,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   });
 
   // プロフィールフォームの追加
-  const profile1Form = useForm<Profile1Data>({
-    resolver: zodResolver(profile1Schema),
-    mode: 'onChange',
-    defaultValues: {
-      personality: [],
-      mbti: undefined,
-      appearance: undefined,
-      style: undefined,
-      dating_experience: 0,
-    },
-  });
-
   const profile2Form = useForm<Profile2Data>({
     resolver: zodResolver(profile2Schema),
     mode: 'onChange',
@@ -457,7 +446,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   });
 
   // 写真アップロードフォームの追加
-  const photoForm = useForm<PhotoData>({
+  const _photoForm = useForm<PhotoData>({
     resolver: zodResolver(photoSchema),
     mode: 'onChange',
   });
@@ -747,7 +736,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   };
 
   // 写真アップロードの送信ハンドラーを修正
-  const handlePhotoSubmit = async (data: PhotoData) => {
+  const _handlePhotoSubmit = async (data: PhotoData) => {
     if (!userId || !data.photo) return;
     setIsSubmitting(true);
 
