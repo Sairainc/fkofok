@@ -617,7 +617,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const handlePreferenceSubmit = async (data: MenPreferenceData | WomenPreferenceData) => {
     if (!formData || !userId) return;
     setIsSubmitting(true);
-
+  
     try {
       // 性別に応じたテーブルを選択
       const preferencesTable = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
@@ -628,16 +628,14 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           line_id: userId,
           preferred_age_min: data.preferred_age_min,
           preferred_age_max: data.preferred_age_max,
-          preferred_personality: Array.isArray(data.preferred_personality) 
-            ? data.preferred_personality 
-            : [data.preferred_personality],
+          preferred_personality: data.preferred_personality, // ⚠️ 修正: そのまま渡す
           preferred_body_type: data.preferred_body_type,
           party_type: formData.party_type,
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'line_id'
         });
-
+  
       if (error) throw error;
       setStep(4);
     } catch (error) {
@@ -646,7 +644,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  };  
 
   // 既存のハンドラーを共通ハンドラーに置き換え
   const handleMenPreferenceSubmit = handlePreferenceSubmit;
@@ -1592,8 +1590,8 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
               {isSubmitting ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
               ) : (
-                  '次に進む'
-                )}
+                '次に進む'
+              )}
             </button>
           </form>
         </div>
