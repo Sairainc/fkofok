@@ -295,74 +295,82 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           .eq('line_id', userId)
           .single();
 
-        if (error) throw error;
+        if (error && error.code !== 'PGRST116') throw error;
 
-        // 写真の存在確認
-        const { data: photoData } = await supabase
-          .from('user_photos')
-          .select('photo_url')
-          .eq('line_id', userId)
-          .single();
-
-        // 性別に応じた preferences テーブルのチェック
-        const preferencesTable = profile?.gender === 'men' ? 'men_preferences' : 'women_preferences';
-        const { data: preferences } = await supabase
-          .from(preferencesTable)
-          .select('*')
-          .eq('line_id', userId)
-          .single();
-        
-        // すべての必須フィールドが存在するかチェック
-        const isFullyRegistered = profile && 
-          profile.gender &&
-          profile.phone_number &&
-          profile.party_type &&
-          profile.personality &&
-          profile.mbti &&
-          profile.appearance &&
-          profile.style &&
-          profile.dating_experience !== null &&
-          profile.study &&
-          profile.occupation &&
-          profile.income &&
-          profile.mail &&
-          photoData?.photo_url &&
-          preferences?.preferred_age_min &&  // preferences のチェックを追加
-          preferences?.preferred_age_max &&
-          preferences?.preferred_personality &&
-          preferences?.preferred_body_type &&
-          preferences?.datetime;  // 日時選択も必須
-
-        setIsRegistered(!!isFullyRegistered);
-
-        // 登録が途中の場合、適切なステップに移動
-        if (profile && !isFullyRegistered) {
-          if (!profile.gender || !profile.phone_number) {
+        if (profile) {
+          // Step 1: 性別と電話番号
+          if (profile.gender && profile.phone_number) {
+            step1Form.setValue('gender', profile.gender);
+            step1Form.setValue('phone_number', profile.phone_number);
+            setFormData({ gender: profile.gender, phone_number: profile.phone_number });
+          } else {
             setStep(1);
-          } else if (!profile.party_type) {
-            setStep(2);
-          } else if (!preferences?.preferred_age_min) {
-            setStep(3);  // preferences が未登録の場合
-          } else if (!profile.personality || !profile.mbti) {
-            setStep(4);
-          } else if (!photoData?.photo_url) {
-            setStep(7);
-          } else if (!profile.study || !profile.occupation || !profile.income || !profile.mail) {
-            setStep(8);
-          } else if (!preferences?.datetime) {
-            setStep(9);  // 日時未選択の場合
+            return;
           }
+
+          // Step 2: 合コンタイプ
+          if (profile.party_type) {
+            step2Form.setValue('party_type', profile.party_type);
+          } else {
+            setStep(2);
+            return;
+          }
+
+          // Step 3: 好みのタイプ（性別に応じたpreferencesテーブル）
+          const preferencesTable = profile.gender === 'men' ? 'men_preferences' : 'women_preferences';
+          const { data: preferences } = await supabase
+            .from(preferencesTable)
+            .select('*')
+            .eq('line_id', userId)
+            .single();
+
+          if (!preferences?.preferred_age_min) {
+            setStep(3);
+            return;
+          }
+
+          // Step 4-6: プロフィール情報
+          if (!profile.personality || !profile.mbti || !profile.appearance || !profile.style) {
+            setStep(4);
+            return;
+          }
+
+          // Step 7: 詳細プロフィール
+          if (!profile.study || !profile.occupation || !profile.income || !profile.mail) {
+            setStep(7);
+            return;
+          }
+
+          // Step 8: 写真の存在確認
+          const { data: photoData } = await supabase
+            .from('user_photos')
+            .select('photo_url')
+            .eq('line_id', userId)
+            .single();
+
+          if (!photoData?.photo_url) {
+            setStep(8);
+            return;
+          }
+
+          // Step 9: 日時選択
+          if (!preferences?.datetime) {
+            setStep(9);
+            return;
+          }
+
+          // すべて完了している場合
+          setIsRegistered(true);
         }
       } catch (error) {
-        if (error instanceof Error && error.message !== 'No rows found') {
-          console.error('Error checking registration status:', error);
-        }
+        console.error('登録状態チェックエラー:', error);
       } finally {
         setIsLoading(false);
       }
     };
+
     checkRegistrationStatus();
-  }, [userId, profile1Data]);
+  }, [userId]);
 
   // フォーム定義をまとめて配置
   const step1Form = useForm<Step1Data>({
@@ -446,7 +454,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   });
 
   // 写真アップロードフォームの追加
-  const _photoForm = useForm<PhotoData>({
+  const photoForm = useForm<PhotoData>({
     resolver: zodResolver(photoSchema),
     mode: 'onChange',
   });
@@ -455,17 +463,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const availabilityForm = useForm({
     resolver: zodResolver(availabilitySchema),
   });
-
-  // フォームの状態を監視するuseEffect
-  useEffect(() => {
-    console.log('Profile2 Form State:', {
-      isValid: profile2Form.formState.isValid,
-      errors: profile2Form.formState.errors,
-      dirtyFields: profile2Form.formState.dirtyFields,
-      touchedFields: profile2Form.formState.touchedFields,
-      values: profile2Form.getValues(),
-    });
-  }, [profile2Form.formState, profile2Form]);
 
   if (isLoading) {
     return (
@@ -564,21 +561,46 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   };
 
   const handleStep1Submit = async (data: Step1Data) => {
-    setFormData(data);
-    setStep(2);
+    try {
+      setIsSubmitting(true);
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          line_id: userId,
+          gender: data.gender,
+          phone_number: data.phone_number,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'line_id'
+        });
+
+      if (error) throw error;
+      setFormData(data);
+      setStep(2);
+    } catch (error) {
+      console.error('Error:', error);
+      alert('エラーが発生しました。もう一度お試しください。');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleStep2Submit = async (data: Step2Data) => {
-    if (!formData) return;
     try {
       setIsSubmitting(true);
-      setFormData({
-        ...formData,
-        party_type: data.party_type
-      });
-      setStep(prevStep => prevStep + 1);
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          party_type: data.party_type,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('line_id', userId);
+
+      if (error) throw error;
+      setStep(3);
     } catch (error) {
-      console.error('Error submitting step 2:', error);
+      console.error('Error:', error);
+      alert('エラーが発生しました。もう一度お試しください。');
     } finally {
       setIsSubmitting(false);
     }
@@ -684,28 +706,22 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
   // プロフィール1の送信ハンドラ
   const handleProfile1Submit = async (data: Profile1Data) => {
-    setProfile1Data(data);
-    setStep(step + 1);
-  };
-
-  // プロフィール2の送信ハンドラ
-  const handleProfile2Submit = async (data: Profile2Data) => {
-    if (!profile1Data) return;
-    setIsSubmitting(true);
-
     try {
+      setIsSubmitting(true);
       const { error } = await supabase
         .from('profiles')
-        .upsert({
-          line_id: userId,
-          ...profile1Data,
-          ...data,
+        .update({
+          personality: data.personality,
+          mbti: data.mbti,
+          appearance: data.appearance,
+          style: data.style,
+          dating_experience: data.dating_experience,
           updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'line_id'
-        });
+        })
+        .eq('line_id', userId);
 
       if (error) throw error;
+      setProfile1Data(data);
       setStep(step + 1);
     } catch (error) {
       console.error('Error:', error);
@@ -715,8 +731,37 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     }
   };
 
+  // プロフィール2の送信ハンドラ
+  const handleProfile2Submit = async (data: Profile2Data) => {
+    try {
+      setIsSubmitting(true);
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          study: data.study,
+          from: data.from,
+          birth_date: data.birth_date,
+          occupation: data.occupation,
+          prefecture: data.prefecture,
+          city: data.city,
+          income: data.income,
+          mail: data.mail,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('line_id', userId);
+
+      if (error) throw error;
+      setStep(7); // 写真アップロードステップへ
+    } catch (error) {
+      console.error('Error:', error);
+      alert('エラーが発生しました。もう一度お試しください。');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // 写真アップロードの送信ハンドラーを修正
-  const _handlePhotoSubmit = async (data: PhotoData) => {
+  const handlePhotoSubmit = async (data: PhotoData) => {
     if (!userId || !data.photo) return;
     setIsSubmitting(true);
 
@@ -734,7 +779,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       if (uploadError) throw uploadError;
 
       const { error: updateError } = await supabase
-        .from('profiles')
+        .from('user_photos')
         .update({
           photo_url: filePath,
           updated_at: new Date().toISOString()
@@ -742,10 +787,12 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         .eq('line_id', userId);
 
       if (updateError) throw updateError;
-      setStep(prevStep => prevStep + 1);
+      setStep(8);
     } catch (error) {
       console.error('Error uploading photo:', error);
       alert('写真のアップロードに失敗しました。もう一度お試しください。');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -1588,45 +1635,44 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="w-full max-w-md p-6">
           <div className="text-center mb-8">
-            <h2 className="text-xl font-bold text-gray-900">希望する合コンタイプ</h2>
-            <p className="text-sm text-gray-600 mt-2">あなたの希望に合った合コンをご紹介します</p>
+            <h2 className="text-xl font-bold text-gray-900">プロフィール写真</h2>
+            <p className="text-sm text-gray-600 mt-2">あなたの写真をアップロードしてください</p>
           </div>
           
-          <form onSubmit={step2Form.handleSubmit(handleStep2Submit)} className="space-y-6">
-            <div className="grid grid-cols-1 gap-4">
-              <label className={`flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-all
-                ${step2Form.formState.errors.party_type ? 'border-red-500' : 'border-gray-300'}
-                ${step2Form.watch('party_type') === 'fun' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
-                <input
-                  type="radio"
-                  value="fun"
-                  {...step2Form.register('party_type', { required: true })}
-                  className="sr-only"
-                />
-                ワイワイノリ重視
+          <form onSubmit={photoForm.handleSubmit(handlePhotoSubmit)} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                写真をアップロード
               </label>
-              <label className={`flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-all
-                ${step2Form.formState.errors.party_type ? 'border-red-500' : 'border-gray-300'}
-                ${step2Form.watch('party_type') === 'serious' ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}>
-                <input
-                  type="radio"
-                  value="serious"
-                  {...step2Form.register('party_type', { required: true })}
-                  className="sr-only"
-                />
-                真剣な恋愛
-              </label>
+              <input
+                type="file"
+                accept="image/*"
+                {...photoForm.register('photo', { required: '写真を選択してください' })}
+                className="w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-full file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-primary file:text-white
+                  hover:file:bg-primary/80"
+              />
+              {photoForm.formState.errors.photo && (
+                <p className="text-red-500 text-sm mt-1">
+                  {photoForm.formState.errors.photo.message}
+                </p>
+              )}
             </div>
 
             <button
               type="submit"
-              disabled={!step2Form.formState.isValid || isSubmitting}
-              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
+              disabled={!photoForm.formState.isValid || isSubmitting}
+              className="w-full p-3 bg-primary text-white rounded-lg font-medium 
+                disabled:bg-gray-200 disabled:text-gray-500 
+                flex items-center justify-center"
             >
               {isSubmitting ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
               ) : (
-                '次に進む'
+                'アップロード'
               )}
             </button>
           </form>
@@ -1636,63 +1682,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   }
 
   if (step === 8) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-full max-w-md p-6">
-          <div className="text-center mb-8">
-            <h2 className="text-xl font-bold text-gray-900">空いている日を教えて下さい</h2>
-            <p className="text-sm text-gray-600 mt-2">1つ選択してください</p>
-            <p className="text-primary font-medium mt-4">今だけ初回無料合コンをプレゼント！</p>
-          </div>
-          
-          <form onSubmit={availabilityForm.handleSubmit(handleAvailabilitySubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 gap-3">
-              {dateOptions.map((option) => (
-                <label
-                  key={option.value}
-                  className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all
-                    ${availabilityForm.formState.errors.datetime ? 'border-red-500' : 'border-gray-300'}
-                    ${availabilityForm.watch('datetime') === option.value ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}
-                  >
-                    <input
-                      type="radio"
-                      value={option.value}
-                      {...availabilityForm.register('datetime', { required: '日時を選択してください' })}
-                      className="sr-only"
-                    />
-                    <span>{option.label}</span>
-                    {option.isPopular && (
-                      <span className="text-xs px-2 py-1 bg-red-500 text-white rounded-full">
-                        人気
-                      </span>
-                    )}
-                  </label>
-                ))}
-              {availabilityForm.formState.errors.datetime && (
-                <p className="text-red-500 text-sm mt-1">
-                  {availabilityForm.formState.errors.datetime.message}
-                </p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              disabled={!availabilityForm.formState.isValid || isSubmitting}
-              className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
-            >
-              {isSubmitting ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              ) : (
-                '登録'
-              )}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  if (step === 9) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="w-full max-w-md p-6 text-center">
