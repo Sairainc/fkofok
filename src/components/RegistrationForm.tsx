@@ -272,17 +272,42 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     const checkRegistrationStatus = async () => {
       if (!userId) return;
       try {
-        // 必要なカラムのみを取得
+        // より多くのカラムをチェック
         const { data: profile, error } = await supabase
           .from('profiles')
-          .select('gender, phone_number')  // 必要なカラムのみを指定
+          .select(`
+            gender, 
+            phone_number,
+            personality,
+            mbti,
+            appearance,
+            style,
+            dating_experience,
+            study,
+            occupation,
+            income,
+            mail
+          `)
           .eq('line_id', userId)
           .single();
 
         if (error) throw error;
-        if (profile?.gender && profile?.phone_number) {
-          setIsRegistered(true);
-        }
+        
+        // すべての必須フィールドが存在するかチェック
+        const isFullyRegistered = profile && 
+          profile.gender &&
+          profile.phone_number &&
+          profile.personality &&
+          profile.mbti &&
+          profile.appearance &&
+          profile.style &&
+          profile.dating_experience !== null &&
+          profile.study &&
+          profile.occupation &&
+          profile.income &&
+          profile.mail;
+
+        setIsRegistered(!!isFullyRegistered);
       } catch (error) {
         if (error instanceof Error && error.message !== 'No rows found') {
           console.error('Error checking registration status:', error);
@@ -302,6 +327,9 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const step2Form = useForm<Step2Data>({
     resolver: zodResolver(step2Schema),
     mode: 'onChange',
+    defaultValues: {
+      party_type: undefined,
+    }
   });
 
   // 既存のフォーム定義に加えて、Step3のフォームを追加
@@ -520,64 +548,18 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
   const handleStep2Submit = async (data: Step2Data) => {
     if (!formData) return;
-    setIsSubmitting(true);
-
     try {
-      // 既存のプロフィールを確認
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('line_id', userId)
-        .single();
-
-      // プロフィールの更新
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: existingProfile?.id || crypto.randomUUID(),
-          line_id: userId,
-          gender: formData.gender,
-          phone_number: formData.phone_number,
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'line_id'
-        });
-
-      if (profileError) throw profileError;
-
-      // 選択した性別に応じてpreferencesテーブルを選択
-      const preferencesTable = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
+      setIsSubmitting(true);
       
-      // 既存のpreferencesを確認
-      const { data: existingPref } = await supabase
-        .from(preferencesTable)
-        .select('id')
-        .eq('line_id', userId)
-        .single();
+      // 型安全な方法でフォームデータを更新
+      setFormData({
+        ...formData,
+        party_type: data.party_type
+      });
 
-      // 好みの更新
-      const { error: prefError } = await supabase
-        .from(preferencesTable)
-        .upsert({
-          id: existingPref?.id || crypto.randomUUID(),
-          line_id: userId,
-          party_type: data.party_type,
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'line_id'
-        });
-
-      if (prefError) throw prefError;
-
-      setFormData({ ...formData, party_type: data.party_type });
-      setStep(3);
+      setStep(prevStep => prevStep + 1);
     } catch (error) {
-      console.error('Error:', error);
-      if (error instanceof Error) {
-        alert(error.message);
-      } else {
-        alert('エラーが発生しました。もう一度お試しください。');
-      }
+      console.error('Error submitting step 2:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -1625,7 +1607,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                 <input
                   type="radio"
                   value="fun"
-                  {...step2Form.register('party_type')}
+                  {...step2Form.register('party_type', { required: true })}
                   className="sr-only"
                 />
                 ワイワイノリ重視
@@ -1636,7 +1618,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                 <input
                   type="radio"
                   value="serious"
-                  {...step2Form.register('party_type')}
+                  {...step2Form.register('party_type', { required: true })}
                   className="sr-only"
                 />
                 真剣な恋愛
@@ -1753,7 +1735,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
               <input
                 type="radio"
                 value="fun"
-                {...step2Form.register('party_type')}
+                {...step2Form.register('party_type', { required: true })}
                 className="sr-only"
               />
               ワイワイノリ重視
@@ -1764,7 +1746,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
               <input
                 type="radio"
                 value="serious"
-                {...step2Form.register('party_type')}
+                {...step2Form.register('party_type', { required: true })}
                 className="sr-only"
               />
               真剣な恋愛
