@@ -586,13 +586,19 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const handleStep2Submit = async (data: Step2Data) => {
     try {
       setIsSubmitting(true);
+      const gender = formData?.gender;
+      if (!gender) throw new Error('性別が不明です');
+
+      const preferencesTable = gender === 'men' ? 'men_preferences' : 'women_preferences';
       const { error } = await supabase
-        .from('profiles')
-        .update({
+        .from(preferencesTable)
+        .upsert({
+          line_id: userId,
           party_type: data.party_type,
           updated_at: new Date().toISOString(),
-        })
-        .eq('line_id', userId);
+        }, {
+          onConflict: 'line_id'
+        });
 
       if (error) throw error;
       setStep(3);
