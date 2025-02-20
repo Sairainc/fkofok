@@ -6,7 +6,6 @@ import { supabase } from "../lib/supabase";
 
 type User = {
   id: string;
-  name: string;
   gender: "men" | "women";
 };
 
@@ -53,7 +52,6 @@ export const useUser = () => {
           const { error: insertError } = await supabase.from("profiles").insert([
             {
               line_id: profile.userId,
-              name: profile.displayName, // 🔹 LINEの表示名を保存
               gender: "men", // 🔹 仮に "men" をデフォルトとして設定
             },
           ]);
@@ -63,11 +61,10 @@ export const useUser = () => {
           }
         }
 
-        // **取得したデータを user ステートにセット**
+        // **取得したデータを user ステートにセット（name を削除）**
         setUser({
           id: profile.userId,
-          name: profile.displayName,
-          gender: userData?.gender || "men", // 🔹 gender を取得できなければデフォルトを設定
+          gender: userData?.gender || "men",
         });
 
       } catch (error) {

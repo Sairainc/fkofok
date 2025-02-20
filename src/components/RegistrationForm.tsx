@@ -537,55 +537,29 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const handleAvailabilitySubmit = async (data: { datetime: string }) => {
     setIsSubmitting(true);
     try {
-      // フォームデータから性別を取得
       const gender = formData?.gender;
       if (!gender) throw new Error('性別が不明です');
 
-      // タイムスタンプをUTCからJSTに変換
       const jstDate = new Date(data.datetime);
       const jstTimestamp = jstDate.toISOString().slice(0, 19).replace('T', ' ');
 
-      if (gender === 'men') {
-        const { error } = await supabase
-          .from('men_preferences')
-          .upsert({
-            line_id: userId,
-            datetime: jstTimestamp,
-            count: 1,
-            updated_at: new Date().toISOString(),
-          }, {
-            onConflict: 'line_id'
-          });
+      const table = gender === 'men' ? 'men_preferences' : 'women_preferences';
+      const { error } = await supabase
+        .from(table)
+        .upsert({
+          line_id: userId,
+          datetime: jstTimestamp,
+          count: 1,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'line_id'
+        });
 
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('women_preferences')
-          .upsert({
-            line_id: userId,
-            datetime: jstTimestamp,
-            count: 1,
-            updated_at: new Date().toISOString(),
-          }, {
-            onConflict: 'line_id'
-          });
-
-        if (error) throw error;
-      }
-
-      // マッチング処理を実行
-      const matchResult = await findMatch(jstTimestamp);
-      if (matchResult.success) {
-        console.log('マッチング成功:', matchResult.match);
-      }
-
-      // 登録完了画面に遷移
+      if (error) throw error;
       setStep(10);
     } catch (error) {
       console.error('Error:', error);
       alert(error instanceof Error ? error.message : 'エラーが発生しました');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -598,13 +572,10 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     if (!formData) return;
     try {
       setIsSubmitting(true);
-      
-      // 型安全な方法でフォームデータを更新
       setFormData({
         ...formData,
         party_type: data.party_type
       });
-
       setStep(prevStep => prevStep + 1);
     } catch (error) {
       console.error('Error submitting step 2:', error);
@@ -647,8 +618,8 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           line_id: userId,
           preferred_age_min: data.preferred_age_min,
           preferred_age_max: data.preferred_age_max,
-          preferred_personality: formattedPersonality, // ✅ PostgreSQL `text[]` 形式に変換
-          preferred_body_type: formattedBodyType, // ✅ PostgreSQL `text[]` 形式に変換
+          preferred_personality: formattedPersonality,
+          preferred_body_type: formattedBodyType,
           party_type: formData.party_type,
           updated_at: new Date().toISOString(),
         }, {
@@ -745,25 +716,23 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   };
 
   // 写真アップロードの送信ハンドラーを修正
-  const _handlePhotoSubmit = async (data: PhotoData) => {
+  const handlePhotoSubmit = async (data: PhotoData) => {
     if (!userId || !data.photo) return;
     setIsSubmitting(true);
 
     try {
-      // 1. Storage にファイルをアップロード
       const fileExt = data.photo.name.split('.').pop();
       const fileName = `${userId}.${fileExt}`;
       const filePath = `photos/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('profile-photos')  // バケット名を確認してください
+        .from('profile-photos')
         .upload(filePath, data.photo, {
           upsert: true
         });
 
       if (uploadError) throw uploadError;
 
-      // 2. profiles テーブルに写真のパスを保存
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
@@ -773,14 +742,10 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         .eq('line_id', userId);
 
       if (updateError) throw updateError;
-
-      // 次のステップに進む
       setStep(prevStep => prevStep + 1);
     } catch (error) {
       console.error('Error uploading photo:', error);
       alert('写真のアップロードに失敗しました。もう一度お試しください。');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
