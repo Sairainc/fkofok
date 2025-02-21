@@ -951,7 +951,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                   style={{
                     backgroundColor:
                       watchStep1('gender') === 'men'
-                        ? '#3b82f6'
+                        ? 'border-red-500'
                         : '#fff',
                     color:
                       watchStep1('gender') === 'men'
@@ -973,7 +973,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                   style={{
                     backgroundColor:
                       watchStep1('gender') === 'women'
-                        ? '#3b82f6'
+                        ? 'border-red-500'
                         : '#fff',
                     color:
                       watchStep1('gender') === 'women'
