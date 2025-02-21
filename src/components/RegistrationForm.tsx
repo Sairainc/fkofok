@@ -67,15 +67,16 @@ const womenPreferenceSchema = z.object({
   ]),
 });
 
-// Step4 (レストラン選択)
+// Step4 (レストラン選択) — 修正
 const restaurantPreferenceSchema = z.object({
   restaurant_preference: z.array(z.enum([
     '安旨居酒屋',
     'おしゃれダイニング'
   ])).min(1, '1つ以上選択してください'),
-  agree_to_split: z.boolean().refine((val) => val === true, {
-    message: '同意が必要です',
-  }),
+
+  // "formData" は schema 内では参照しない
+  agree_to_split: z.boolean(),
+
   preferred_1areas: z.enum(['恵比寿', '新橋・銀座', 'どちらでもOK']),
   preferred_2areas: z.enum(['恵比寿', '新橋・銀座', 'どちらでもOK']),
   preferred_3areas: z.enum(['恵比寿', '新橋・銀座', 'どちらでもOK']),
@@ -578,6 +579,13 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const handleRestaurantSubmitFn = async (data: RestaurantPreferenceData) => {
     if (!formData) return;
     setIsSubmitting(true);
+
+    // 「男性」の場合は agree_to_split が true である必要がある
+    if (formData.gender === 'men' && !data.agree_to_split) {
+      alert('女性の飲食代を男性が負担することに同意してください。');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const table = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
@@ -1215,6 +1223,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
               ))}
             </div>
 
+            {/* 性別が男性の場合は「女性の飲食代負担に同意」チェックを表示 */}
             {formData?.gender === 'men' && (
               <div className="flex items-start mt-4">
                 <div className="flex items-center h-5">
@@ -1225,7 +1234,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                   />
                 </div>
                 <label className="ml-2 text-sm text-gray-600">
-                  女性の飲食代はペア男性と負担してください。
+                  女性の飲食代はペア男性で負担することに同意します。
                 </label>
               </div>
             )}
