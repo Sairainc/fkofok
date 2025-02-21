@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';  // ← ファイル最上部で import
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { findMatch } from '@/lib/matching';
 
@@ -269,7 +268,7 @@ const personalityOptions = [
 export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+
   const [formData, setFormData] = useState<FormDataType | null>(null);
   const [profile1Data, setProfile1Data] = useState<Profile1Data | null>(null);
   const [dateOptions, setDateOptions] = useState<Array<{
@@ -279,8 +278,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   }>>([]);
   const [isRegistered, setIsRegistered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  const router = useRouter();
 
   // 日程選択
   useEffect(() => {
@@ -316,6 +313,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     };
     checkRegistrationStatus();
   }, [userId]);
+
   const { register: registerStep1, handleSubmit: handleSubmitStep1, formState: formStateStep1, watch: watchStep1 } =
     useForm<Step1Data>({ resolver: zodResolver(step1Schema), mode: 'onChange' });
 
@@ -421,37 +419,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
             <p className="text-gray-600 mt-2">
               ご登録ありがとうございます。<br />
               マッチングをお待ちください。
-            </p>
-            <p className="text-sm text-primary mt-4">
-              ※マッチングが成立しましたら、<br />
-              合コンの詳細をLINEでお知らせいたします。
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 全完了
-  if (isSubmitted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-full max-w-md p-6 text-center">
-          <div className="mb-8">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth="2" 
-                  d="M5 13l4 4L19 7" 
-                />
-              </svg>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900">登録完了しました</h2>
-            <p className="text-gray-600 mt-2">
-              ご登録ありがとうございます。<br />
-              マッチングが成立次第、LINEにてご連絡いたします。
             </p>
             <p className="text-sm text-primary mt-4">
               ※マッチングが成立しましたら、<br />
@@ -852,21 +819,16 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
               <div className="grid grid-cols-2 gap-4">
                 <label
                   className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
-                    ${formStateStep1.errors.gender ? 'border-red-500' : 'border-gray-300'}
-                    ${formStateStep1.dirtyFields.gender && registerStep1('gender') ? '??' : ''}
-                    ${(formStateStep1.errors.gender
-                      ? ''
-                      : formStateStep1.dirtyFields.gender
-                    )}`}
+                    ${formStateStep1.errors.gender ? 'border-red-500' : 'border-gray-300'}`}
                   style={{
                     backgroundColor:
                       watchStep1('gender') === 'men'
-                        ? '#3b82f6' /* bg-primary */
+                        ? '#3b82f6'
                         : '#fff',
                     color:
                       watchStep1('gender') === 'men'
                         ? '#fff'
-                        : '#374151' /* text-gray-700 */
+                        : '#374151'
                   }}
                 >
                   <input
@@ -879,8 +841,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                 </label>
                 <label
                   className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
-                    ${formStateStep1.errors.gender ? 'border-red-500' : 'border-gray-300'}
-                  `}
+                    ${formStateStep1.errors.gender ? 'border-red-500' : 'border-gray-300'}`}
                   style={{
                     backgroundColor:
                       watchStep1('gender') === 'women'
