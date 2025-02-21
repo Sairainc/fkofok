@@ -31,8 +31,8 @@ const step2Schema = z.object({
 
 // Step3 (男性用好み)
 const menPreferenceSchema = z.object({
-  preferred_age_min: z.number().min(18).max(60),
-  preferred_age_max: z.number().min(18).max(60),
+  preferred_age_min: z.number().min(20).max(60),
+  preferred_age_max: z.number().min(20).max(60),
   preferred_personality: z.array(z.enum([
     '明るい盛り上げタイプ',
     '気遣いできる',
@@ -53,11 +53,10 @@ const womenPreferenceSchema = z.object({
   preferred_age_min: z.number().min(20).max(60),
   preferred_age_max: z.number().min(20).max(60),
   preferred_personality: z.array(z.enum([
-    '優しい',
-    '向上心がある',
-    '面白い',
-    '知的',
-    '紳士的'
+    '明るい盛り上げタイプ',
+    '気遣いできるタイプ',
+    '天然いじられタイプ',
+    'クールなタイプ'
   ])).min(1, '1つ以上選択してください'),
   preferred_body_type: z.enum([
     'クール',
@@ -247,11 +246,10 @@ const menPersonalityValues = [
 ] as const;
 
 const womenPersonalityValues = [
-  '優しい',
-  '向上心がある',
-  '面白い',
-  '知的',
-  '紳士的'
+  '明るい盛り上げタイプ',
+  '気遣いできるタイプ',
+  '天然いじられタイプ',
+  'クールなタイプ'
 ] as const;
 
 // プロフィール1 で使う
@@ -375,7 +373,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     resolver: zodResolver(menPreferenceSchema),
     mode: 'onChange',
     defaultValues: {
-      preferred_age_min: 18,
+      preferred_age_min: 20,
       preferred_age_max: 30,
       preferred_personality: [],
       preferred_body_type: '気にしない',
@@ -1033,7 +1031,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                     {...menPreferenceForm.register('preferred_age_min', { valueAsNumber: true })}
                     className="w-full p-2 border rounded-lg"
                   >
-                    {Array.from({ length: 43 }, (_, i) => i + 18).map((age) => (
+                    {Array.from({ length: 43 }, (_, i) => i + 20).map((age) => (
                       <option key={age} value={age}>{age}歳</option>
                     ))}
                   </select>
@@ -1044,7 +1042,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                     {...menPreferenceForm.register('preferred_age_max', { valueAsNumber: true })}
                     className="w-full p-2 border rounded-lg"
                   >
-                    {Array.from({ length: 43 }, (_, i) => i + 18).map((age) => (
+                    {Array.from({ length: 43 }, (_, i) => i + 20).map((age) => (
                       <option key={age} value={age}>{age}歳</option>
                     ))}
                   </select>
