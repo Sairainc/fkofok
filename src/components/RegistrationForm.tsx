@@ -278,7 +278,9 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   }>>([]);
   const [isRegistered, setIsRegistered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [profileGender, setProfileGender] = useState<'men' | 'women' | null>(null);
+
+  // 「profileGender」を _profileGender にリネームする
+  const [_profileGender, setProfileGender] = useState<'men' | 'women' | null>(null);
 
   // 日程選択
   useEffect(() => {
@@ -291,12 +293,11 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     }
   }, [step]);
 
-  // 登録状況を確認 (ただし「プロフィール+日時」まで完了しているかをチェック)
+  // 登録状況を確認 (「プロフィール+日時」まで完了しているか)
   useEffect(() => {
     const checkRegistrationStatus = async () => {
       if (!userId) return;
       try {
-        // まずprofileを確認
         const { data: profile, error: profileErr } = await supabase
           .from('profiles')
           .select('*')
@@ -304,11 +305,9 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           .single();
 
         if (profileErr) {
-          // profileが無ければ何もしない
           throw profileErr;
         }
 
-        // まだgenderやphone_numberが無ければ未完了扱い
         if (!profile?.gender || !profile?.phone_number) {
           setIsRegistered(false);
           setIsLoading(false);
@@ -327,7 +326,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
 
           if (menErr) throw menErr;
 
-          // datetime が入っていれば「最終ステップ完了」
           if (menData?.datetime) {
             setIsRegistered(true);
           } else {
@@ -349,7 +347,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           }
         }
       } catch (error) {
-        // profileが無い場合など
         setIsRegistered(false);
         console.error('Error checking registration status:', error);
       } finally {
@@ -359,7 +356,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     checkRegistrationStatus();
   }, [userId]);
 
-  // フォーム
   const {
     register: registerStep1,
     handleSubmit: handleSubmitStep1,
