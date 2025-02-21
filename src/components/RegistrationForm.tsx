@@ -1268,7 +1268,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                 好みのスタイル
               </label>
               <div className="grid grid-cols-2 gap-3">
-                {['クール','カジュアル','ビジネス','気にしない'].map((value) => (
+                {['筋肉質', '普通', 'スリム', '気にしない'].map((value) => (
                   <label
                     key={value}
                     className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
