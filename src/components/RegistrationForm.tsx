@@ -38,8 +38,8 @@ const menPreferenceSchema = z.object({
       z.enum([
         '明るい盛り上げタイプ',
         '気遣いできる',
-        '天然',
-        'クール',
+        '天然いじられタイプ',
+        'クールなタイプ',
         '小悪魔',
       ])
     )
@@ -61,7 +61,7 @@ const womenPreferenceSchema = z.object({
       ])
     )
     .min(1, '1つ以上選択してください'),
-  preferred_body_type: z.enum(['クール', 'カジュアル', 'ビジネス', '気にしない']),
+  preferred_body_type: z.enum(['筋肉質', '普通', 'スリム', '気にしない']),
 });
 
 // Step4 (レストラン選択)
@@ -159,6 +159,7 @@ const womenProfile1Schema = z.object({
         '気遣いできる',
         '天然いじられタイプ',
         'クールなタイプ',
+        '小悪魔'
       ])
     )
     .min(1, '1つ以上選択してください'),
@@ -166,12 +167,12 @@ const womenProfile1Schema = z.object({
     required_error: 'MBTIを選択してください',
   }),
   appearance: z.enum([
-    'ノリの良い体育会系',
-    'こなれた港区系',
-    'クールなエリート系',
-    '個性あふれるクリエイティブ系',
+    'ノリの良い元気系',
+    '華やかなキラキラ系',
+    '知的で落ち着いたキャリア系',
+    '個性的でアーティスティック系',
   ]),
-  style: z.enum(['筋肉質', 'がっしり', 'スリム', '普通']),
+  style: z.enum(['グラマー', '普通', 'スリム']),
   dating_experience: z.number().min(0).max(10),
 });
 
@@ -262,8 +263,8 @@ const BackButton = ({ onClick }: { onClick: () => void }) => (
 const menPersonalityValues = [
   '明るい盛り上げタイプ',
   '気遣いできる',
-  '天然',
-  'クール',
+  '天然いじられタイプ',
+  'クールなタイプ',
   '小悪魔'
 ] as const;
 
@@ -1267,7 +1268,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                 好みのスタイル
               </label>
               <div className="grid grid-cols-2 gap-3">
-                {['クー尔','カジュア尔','ビジネス','気にしない'].map((value) => (
+                {['クール','カジュアル','ビジネス','気にしない'].map((value) => (
                   <label
                     key={value}
                     className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all
@@ -1489,7 +1490,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                   {[
                     'ノリの良い体育会系',
                     'こなれた港区系',
-                    'クー尔なエリート系',
+                    'クールなエリート系',
                     '個性あふれるクリエイティブ系',
                   ].map((val) => (
                     <label
@@ -1640,10 +1641,10 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                 </label>
                 <div className="grid grid-cols-1 gap-3">
                   {[
-                    'ノリの良い体育会系',
-                    'こなれた港区系',
-                    'クー尔なエリート系',
-                    '個性あふれるクリエイティブ系',
+                    'ノリの良い元気系',
+                    '華やかなキラキラ系',
+                    '知的で落ち着いたキャリア系',
+                    '個性的でアーティスティック系',
                   ].map((val) => (
                     <label
                       key={val}
@@ -1671,7 +1672,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                   自分のスタイル
                 </label>
                 <div className="grid grid-cols-2 gap-3">
-                  {['筋肉質', 'がっしり', 'スリム', '普通'].map((val) => (
+                  {['スリム', '普通', 'グラマー'].map((val) => (
                     <label
                       key={val}
                       className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all ${
