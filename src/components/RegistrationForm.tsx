@@ -279,7 +279,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   const [isRegistered, setIsRegistered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 「profileGender」を _profileGender にリネームする
+  // 「profileGender」を _profileGender にリネームする（未使用変数エラー回避）
   const [_profileGender, setProfileGender] = useState<'men' | 'women' | null>(null);
 
   // 日程選択
@@ -293,7 +293,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     }
   }, [step]);
 
-  // 登録状況を確認 (「プロフィール+日時」まで完了しているか)
+  // 登録状況チェック（プロフィール+日付）
   useEffect(() => {
     const checkRegistrationStatus = async () => {
       if (!userId) return;
@@ -304,9 +304,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           .eq('line_id', userId)
           .single();
 
-        if (profileErr) {
-          throw profileErr;
-        }
+        if (profileErr) throw profileErr;
 
         if (!profile?.gender || !profile?.phone_number) {
           setIsRegistered(false);
@@ -314,16 +312,13 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
           return;
         }
 
-        // 性別に応じて men_preferences / women_preferences を確認
         setProfileGender(profile.gender);
-
         if (profile.gender === 'men') {
           const { data: menData, error: menErr } = await supabase
             .from('men_preferences')
             .select('datetime')
             .eq('line_id', userId)
             .single();
-
           if (menErr) throw menErr;
 
           if (menData?.datetime) {
@@ -337,7 +332,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
             .select('datetime')
             .eq('line_id', userId)
             .single();
-
           if (womenErr) throw womenErr;
 
           if (womenData?.datetime) {
@@ -356,6 +350,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     checkRegistrationStatus();
   }, [userId]);
 
+  // react-hook-form フォーム設定
   const {
     register: registerStep1,
     handleSubmit: handleSubmitStep1,
@@ -455,7 +450,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     );
   }
 
-  // もし「プロフィール + 日付」両方完了しているなら「マッチング待ち」画面を表示
+  // プロフィール + 日付完了 → マッチング待ち
   if (isRegistered) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -487,7 +482,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   }
 
   /* ---------------------------------------------------
-   *   ここからステップごとの送信ハンドラー (submit)
+   *   各ステップ送信ハンドラ
    * --------------------------------------------------- */
 
   // Step1
@@ -502,14 +497,12 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     setIsSubmitting(true);
 
     try {
-      // 既存の profiles レコード
       const { data: existingProfile } = await supabase
         .from('profiles')
         .select('id')
         .eq('line_id', userId)
         .single();
 
-      // profiles テーブル upsert
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -523,7 +516,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         });
       if (profileError) throw profileError;
 
-      // men_preferences or women_preferences
       const prefTable = formData.gender === 'men' ? 'men_preferences' : 'women_preferences';
       const { data: existingPref } = await supabase
         .from(prefTable)
@@ -553,7 +545,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     }
   };
 
-  // Step3: 男性用
+  // Step3: 男性
   const handleMenPreferenceSubmit = async (data: MenPreferenceData) => {
     if (!formData) return;
     setIsSubmitting(true);
@@ -590,7 +582,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     }
   };
 
-  // Step3: 女性用
+  // Step3: 女性
   const handleWomenPreferenceSubmitFn = async (data: WomenPreferenceData) => {
     if (!formData) return;
     setIsSubmitting(true);
@@ -618,7 +610,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         });
       if (error) throw error;
 
-      // 女性もステップ4へ
       setStep(4);
     } catch (error) {
       console.error(error);
@@ -635,7 +626,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     if (!formData) return;
     setIsSubmitting(true);
 
-    // 「男性」の場合は agree_to_split が true である必要がある
+    // 男性なら agree_to_split 必須
     if (formData.gender === 'men' && !data.agree_to_split) {
       alert('女性の飲食代を男性が負担することに同意してください。');
       setIsSubmitting(false);
@@ -716,6 +707,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         throw new Error('写真が選択されていません');
       }
 
+      // S3バケットへのアップロード
       const fileExt = data.photo.name.split('.').pop();
       const fileName = `${userId}-${Date.now()}.${fileExt}`;
 
@@ -727,26 +719,28 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         });
       if (uploadError) throw uploadError;
 
+      // アップロードされたファイルのパブリックURL
       const { data: urlData } = supabase.storage
         .from('profile-photos')
         .getPublicUrl(fileName);
-
       if (!urlData || !urlData.publicUrl) {
         throw new Error('写真URLの取得に失敗しました');
       }
 
+      // ここで .select() は呼ばず、挿入権限があればINSERTだけにする
       const { error: insertError } = await supabase
         .from('user_photos')
-        .insert([{
-          line_id: userId,
-          photo_url: urlData.publicUrl,
-          is_main: true,
-          order_index: 0,
-          status: 'pending',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }])
-        .select();
+        .insert([
+          {
+            line_id: userId,
+            photo_url: urlData.publicUrl,
+            is_main: true,
+            order_index: 0,
+            status: 'pending',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        ]);
       if (insertError) throw insertError;
 
       setStep(9);
@@ -808,7 +802,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     }
   };
 
-  // 日付オプション生成（Step9）
+  // 日付オプション生成
   const generateDateOptions = async () => {
     const dates = [];
     const today = new Date();
@@ -864,7 +858,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
    *   ここからステップごとの画面表示
    * -------------------------------------- */
 
-  // Step1: 性別・電話番号
+  // Step1
   if (step === 1) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -952,11 +946,10 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
                 disabled={!formStateStep1.isValid || isSubmitting}
                 className="w-full p-3 bg-primary text-white rounded-lg font-medium disabled:bg-gray-200 disabled:text-gray-500 flex items-center justify-center"
               >
-                {isSubmitting ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                ) : (
-                  '次に進む'
-                )}
+                {isSubmitting
+                  ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  : '次に進む'
+                }
               </button>
             </div>
           </form>
