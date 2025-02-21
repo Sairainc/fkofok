@@ -16,23 +16,33 @@ export const useUser = () => {
   useEffect(() => {
     const initLiff = async () => {
       try {
-        console.log("📢 LIFF 初期化開始");
+        if (process.env.NODE_ENV === 'development') {
+          console.log("📢 LIFF 初期化開始");
+        }
         await liff.init({
           liffId: process.env.NEXT_PUBLIC_LIFF_ID as string,
           withLoginOnExternalBrowser: true,
         });
 
-        console.log("✅ LIFF 初期化成功");
+        if (process.env.NODE_ENV === 'development') {
+          console.log("✅ LIFF 初期化成功");
+        }
 
         if (!liff.isLoggedIn()) {
-          console.log("⚠️ ユーザーがログインしていません。ログイン処理を開始");
+          if (process.env.NODE_ENV === 'development') {
+            console.log("⚠️ ユーザーがログインしていません。ログイン処理を開始");
+          }
           liff.login({ redirectUri: window.location.href });
           return;
         }
 
-        console.log("✅ ユーザーがログイン済み");
+        if (process.env.NODE_ENV === 'development') {
+          console.log("✅ ユーザーがログイン済み");
+        }
         const profile = await liff.getProfile();
-        console.log("✅ ユーザープロフィール取得成功:", profile);
+        if (process.env.NODE_ENV === 'development') {
+          console.log("✅ ユーザープロフィール取得成功:", profile);
+        }
 
         // **DBにline_idがあるかチェック**
         const { data: userData, error } = await supabase
@@ -41,13 +51,15 @@ export const useUser = () => {
           .eq("line_id", profile.userId)
           .single();
 
-        if (error && error.code !== "PGRST116") {
+        if (error && error.code !== "PGRST116" && process.env.NODE_ENV === 'development') {
           console.error("❌ Supabaseエラー:", error);
         }
 
         // **DBにline_idがない場合、新規作成**
         if (!userData) {
-          console.log("⚠️ プロフィールが存在しないため、新しく作成します");
+          if (process.env.NODE_ENV === 'development') {
+            console.log("⚠️ プロフィールが存在しないため、新しく作成します");
+          }
 
           const { error: insertError } = await supabase.from("profiles").insert([
             {
@@ -56,7 +68,7 @@ export const useUser = () => {
             },
           ]);
 
-          if (insertError) {
+          if (insertError && process.env.NODE_ENV === 'development') {
             console.error("❌ プロフィール作成エラー:", insertError);
           }
         }
@@ -68,7 +80,9 @@ export const useUser = () => {
         });
 
       } catch (error) {
-        console.error("❌ LIFF 初期化エラー:", error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("❌ LIFF 初期化エラー:", error);
+        }
       } finally {
         setLoading(false);
       }
