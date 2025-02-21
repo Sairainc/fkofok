@@ -67,14 +67,13 @@ const womenPreferenceSchema = z.object({
   ]),
 });
 
-// Step4 (レストラン選択) — 修正
+// Step4 (レストラン選択)
 const restaurantPreferenceSchema = z.object({
   restaurant_preference: z.array(z.enum([
     '安旨居酒屋',
     'おしゃれダイニング'
   ])).min(1, '1つ以上選択してください'),
 
-  // "formData" は schema 内では参照しない
   agree_to_split: z.boolean(),
 
   preferred_1areas: z.enum(['恵比寿', '新橋・銀座', 'どちらでもOK']),
@@ -279,6 +278,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
   }>>([]);
   const [isRegistered, setIsRegistered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [profileGender, setProfileGender] = useState<'men' | 'women' | null>(null);
 
   // 日程選択
   useEffect(() => {
@@ -291,22 +291,66 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     }
   }, [step]);
 
-  // 登録済みチェック
+  // 登録状況を確認 (ただし「プロフィール+日時」まで完了しているかをチェック)
   useEffect(() => {
     const checkRegistrationStatus = async () => {
       if (!userId) return;
       try {
-        const { data: profile, error } = await supabase
+        // まずprofileを確認
+        const { data: profile, error: profileErr } = await supabase
           .from('profiles')
           .select('*')
           .eq('line_id', userId)
           .single();
 
-        if (error) throw error;
-        if (profile && profile.gender && profile.phone_number) {
-          setIsRegistered(true);
+        if (profileErr) {
+          // profileが無ければ何もしない
+          throw profileErr;
+        }
+
+        // まだgenderやphone_numberが無ければ未完了扱い
+        if (!profile?.gender || !profile?.phone_number) {
+          setIsRegistered(false);
+          setIsLoading(false);
+          return;
+        }
+
+        // 性別に応じて men_preferences / women_preferences を確認
+        setProfileGender(profile.gender);
+
+        if (profile.gender === 'men') {
+          const { data: menData, error: menErr } = await supabase
+            .from('men_preferences')
+            .select('datetime')
+            .eq('line_id', userId)
+            .single();
+
+          if (menErr) throw menErr;
+
+          // datetime が入っていれば「最終ステップ完了」
+          if (menData?.datetime) {
+            setIsRegistered(true);
+          } else {
+            setIsRegistered(false);
+          }
+        } else {
+          const { data: womenData, error: womenErr } = await supabase
+            .from('women_preferences')
+            .select('datetime')
+            .eq('line_id', userId)
+            .single();
+
+          if (womenErr) throw womenErr;
+
+          if (womenData?.datetime) {
+            setIsRegistered(true);
+          } else {
+            setIsRegistered(false);
+          }
         }
       } catch (error) {
+        // profileが無い場合など
+        setIsRegistered(false);
         console.error('Error checking registration status:', error);
       } finally {
         setIsLoading(false);
@@ -315,11 +359,26 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     checkRegistrationStatus();
   }, [userId]);
 
-  const { register: registerStep1, handleSubmit: handleSubmitStep1, formState: formStateStep1, watch: watchStep1 } =
-    useForm<Step1Data>({ resolver: zodResolver(step1Schema), mode: 'onChange' });
+  // フォーム
+  const {
+    register: registerStep1,
+    handleSubmit: handleSubmitStep1,
+    formState: formStateStep1,
+    watch: watchStep1,
+  } = useForm<Step1Data>({
+    resolver: zodResolver(step1Schema),
+    mode: 'onChange',
+  });
 
-  const { register: registerStep2, handleSubmit: handleSubmitStep2, formState: formStateStep2, watch: watchStep2 } =
-    useForm<Step2Data>({ resolver: zodResolver(step2Schema), mode: 'onChange' });
+  const {
+    register: registerStep2,
+    handleSubmit: handleSubmitStep2,
+    formState: formStateStep2,
+    watch: watchStep2,
+  } = useForm<Step2Data>({
+    resolver: zodResolver(step2Schema),
+    mode: 'onChange',
+  });
 
   const menPreferenceForm = useForm<MenPreferenceData>({
     resolver: zodResolver(menPreferenceSchema),
@@ -400,7 +459,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     );
   }
 
-  // 登録済み
+  // もし「プロフィール + 日付」両方完了しているなら「マッチング待ち」画面を表示
   if (isRegistered) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -1245,7 +1304,6 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
               </label>
               <div className="space-y-4">
                 {[1, 2, 3].map((order) => {
-                  // as constでユニオンにアサート
                   const fieldName = `preferred_${order}areas` as PreferredAreaKeys;
                   return (
                     <div key={order}>
