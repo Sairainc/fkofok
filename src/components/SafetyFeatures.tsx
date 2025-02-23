@@ -27,58 +27,12 @@ export const SafetyFeatures = ({ features }: SafetyFeaturesProps) => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 rounded-full bg-[rgba(255,108,180,0.1)] flex items-center justify-center">
-                  <CheckBadgeIcon className="w-6 h-6 text-[rgba(255,108,180,0.8)]" />
-                </div>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-3">完全審査制</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  プロフィール・写真の確認、本人確認書類での身分証明書の確認など、厳格な審査を実施しています。
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
-                    <CheckBadgeIcon className="w-4 h-4 text-[rgba(255,108,180,0.8)]" />
-                    身分証明書確認
-                  </span>
-                  <span className="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
-                    <UserGroupIcon className="w-4 h-4 text-[rgba(255,108,180,0.8)]" />
-                    プロフィール審査
-                  </span>
-                </div>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {features.map((feature, index) => (
+            <div key={index} className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all">
+              {/* Feature content */}
             </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 rounded-full bg-[rgba(255,108,180,0.1)] flex items-center justify-center">
-                  <LockClosedIcon className="w-6 h-6 text-[rgba(255,108,180,0.8)]" />
-                </div>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-3">サービス管理体制</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  イベント後の相互評価システムを導入し、問題のある会員は即座に利用停止とする厳格な管理を行っています。
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
-                    <ShieldCheckIcon className="w-4 h-4 text-[rgba(255,108,180,0.8)]" />
-                    24時間監視体制
-                  </span>
-                  <span className="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
-                    <LockClosedIcon className="w-4 h-4 text-[rgba(255,108,180,0.8)]" />
-                    厳格な利用停止制度
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>

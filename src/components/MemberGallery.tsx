@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Image from 'next/image'
 
 interface Member {
   id: number
@@ -25,10 +26,12 @@ export const MemberGallery = ({ members }: MemberGalleryProps) => {
               className="flex-none w-72 bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-300"
             >
               <div className="relative aspect-[3/4] overflow-hidden">
-                <img
+                <Image
                   src={member.image}
                   alt={`Member ${member.id}`}
-                  className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-300"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               </div>

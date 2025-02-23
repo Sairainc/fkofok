@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import Image from 'next/image'
 
 interface FloatingCTAProps {
   _text: string
@@ -33,9 +34,11 @@ export const FloatingCTA = ({ _text, buttonText }: FloatingCTAProps) => {
         rel="noopener noreferrer"
         className="flex items-center gap-2 bg-[#06C755] text-white px-8 py-4 rounded-full font-bold hover:opacity-90 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
       >
-        <img 
-          src="/images/line-icon.png" 
-          alt="LINE" 
+        <Image
+          src="/images/line-icon.png"
+          alt="LINE"
+          width={24}
+          height={24}
           className="w-6 h-6"
         />
         {buttonText}

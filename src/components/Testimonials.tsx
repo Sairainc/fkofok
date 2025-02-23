@@ -1,6 +1,7 @@
 'use client'
 
 import { ChatBubbleBottomCenterTextIcon } from '@heroicons/react/24/outline'
+import Image from 'next/image'
 
 interface TestimonialProps {
   gender: string
@@ -24,10 +25,12 @@ export const Testimonials = ({ testimonials }: TestimonialsProps) => {
           <div key={index} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary/20">
-                <img 
-                  src={testimonial.image} 
-                  alt={`${testimonial.occupation}${testimonial.age}`}
-                  className="w-full h-full object-cover"
+                <Image
+                  src={testimonial.image}
+                  alt={`${testimonial.gender} ${testimonial.age}`}
+                  width={80}
+                  height={80}
+                  className="w-20 h-20 rounded-full object-cover"
                 />
               </div>
               <div>

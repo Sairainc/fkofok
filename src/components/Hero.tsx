@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 interface HeroProps {
   title: string
   subtitle: string
@@ -21,10 +23,12 @@ export const Hero = ({ title, subtitle, imageUrl, overlay }: HeroProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white flex flex-col items-center gap-12">
           {/* レイヤー画像 (上部に配置) */}
           <div className="w-full max-w-[600px] mt-20">
-            <img 
-              src={imageUrl} 
-              alt="Facebook Image.png"
-              className="w-full h-auto object-contain"
+            <Image
+              src={imageUrl}
+              alt="Hero image"
+              fill
+              className="object-cover"
+              priority
             />
           </div>
           
