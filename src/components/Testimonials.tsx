@@ -1,28 +1,54 @@
 'use client'
 
+import { ChatBubbleBottomCenterTextIcon } from '@heroicons/react/24/outline'
+
 interface TestimonialProps {
-  testimonials: {
-    gender: string
-    age: string
-    occupation: string
-    comment: string
-  }[]
+  gender: string
+  age: string
+  occupation: string
+  location: string
+  image: string
+  comment: string
+  point: string
 }
 
-export const Testimonials = ({ testimonials }: TestimonialProps) => {
+interface TestimonialsProps {
+  testimonials: TestimonialProps[]
+}
+
+export const Testimonials = ({ testimonials }: TestimonialsProps) => {
   return (
-    <section className="py-20">
-      <h2 className="text-3xl font-bold text-center mb-12">参加者の声</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto px-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {testimonials.map((testimonial, index) => (
-          <div key={index} className="bg-white p-6 rounded-lg shadow">
-            <p className="text-gray-600 mb-4">{testimonial.comment}</p>
-            <div className="text-sm text-gray-500">
-              {testimonial.gender}・{testimonial.age}・{testimonial.occupation}
+          <div key={index} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary/20">
+                <img 
+                  src={testimonial.image} 
+                  alt={`${testimonial.occupation}${testimonial.age}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <div className="font-bold text-lg">{testimonial.age}</div>
+                <div className="text-gray-600">{testimonial.occupation}</div>
+                <div className="text-gray-600">{testimonial.location}</div>
+              </div>
+            </div>
+            
+            <div className="mb-4">
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-4">
+                <ChatBubbleBottomCenterTextIcon className="w-4 h-4" />
+                {testimonial.point}
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                {testimonial.comment}
+              </p>
             </div>
           </div>
         ))}
       </div>
-    </section>
+    </div>
   )
 } 

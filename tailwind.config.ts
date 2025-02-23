@@ -15,9 +15,9 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         primary: {
-          DEFAULT: '#2563eb', // 男性向け
-          dark: '#1d4ed8',
-          women: '#e11d48', // 女性向け
+          DEFAULT: 'rgba(255, 108, 180, 0.8)', // 共通カラー
+          dark: 'rgba(229, 97, 162, 0.8)',     // より濃いピンク
+          women: 'rgba(255, 108, 180, 0.8)',   // 同じ色を使用
         },
       },
     },

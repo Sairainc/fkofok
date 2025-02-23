@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Header } from '@/components/Header'
+// import { Header } from '@/components/Header'
 import { Features } from '@/components/Features'
 import { ShieldCheckIcon, HeartIcon, UserGroupIcon } from '@heroicons/react/24/outline'
 
@@ -24,7 +24,7 @@ export default function Home() {
 
   return (
     <>
-      <Header />
+      {/* <Header /> */}
       <main>
         <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gradient-to-b from-white to-gray-50">
           <div className="max-w-4xl w-full text-center mb-12">

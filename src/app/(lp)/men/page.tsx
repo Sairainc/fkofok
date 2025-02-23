@@ -1,10 +1,10 @@
-'use client'
+// 'use client'
 
 import React from 'react'
-import { Header } from '@/components/Header'
+// import { Header } from '@/components/Header'
 import { Hero } from '@/components/Hero'
 import { Features } from '@/components/Features'
-import { PieChart } from '@/components/Charts'
+import { PieChart, BarChart } from '@/components/Charts'
 import { Testimonials } from '@/components/Testimonials'
 import { PricingPlan } from '@/components/PricingPlan'
 import { ComparisonTable } from '@/components/ComparisonTable'
@@ -15,24 +15,36 @@ import {
   ClockIcon, 
   UserGroupIcon, 
   BuildingOfficeIcon,
-  ShieldCheckIcon 
+  ShieldCheckIcon,
+  LockClosedIcon,
+  ChatBubbleBottomCenterTextIcon,
+  StarIcon,
+  ChartBarIcon,
+  MapPinIcon,
+  CurrencyYenIcon,
+  ScaleIcon,
+  CalendarIcon,
+  BriefcaseIcon,
+  UserIcon,
+  CheckCircleIcon
 } from '@heroicons/react/24/outline'
+import { MemberGallery } from '@/components/MemberGallery'
 
 export default function MenLP() {
   const howToUse = [
     {
-      title: "仕事が終わったら参加",
-      description: "合コンの日時を選ぶ",
+      title: "Step 1: LINEで友だち追加",
+      description: "まずはLINEで友だち追加をして、簡単な質問に答えるだけ！",
       icon: React.createElement(ClockIcon),
     },
     {
-      title: "AIが合コンを自動でセッティング",
-      description: "自動でマッチングを行います",
+      title: "Step 2: 合コン日時を選択",
+      description: "参加可能な日時を選んで、あとはAIにお任せ",
       icon: React.createElement(UserGroupIcon),
     },
     {
-      title: "待ち合わせのお店に集合！",
-      description: "合コン開始",
+      title: "Step 3: 当日お店に集合",
+      description: "指定された時間に、お店に集合するだけでOK！",
       icon: React.createElement(BuildingOfficeIcon),
     },
   ]
@@ -56,13 +68,27 @@ export default function MenLP() {
   ]
 
   const womenAgeData = {
-    labels: ['20代前半', '20代後半', '30代前半', '30代後半'],
-    data: [30, 45, 17, 18],
+    labels: ['20-22歳', '23-25歳', '26-28歳', '29-31歳', '32-34歳'],
+    data: [15, 35, 30, 15, 5],
+    colors: [
+      'rgba(255, 108, 180, 0.3)',  // 薄い
+      'rgba(255, 108, 180, 0.8)',    // 濃い（メインターゲット）
+      'rgba(255, 108, 180, 0.3)',  // 薄い
+      'rgba(255, 108, 180, 0.4)',  // 薄い
+      'rgba(255, 108, 180, 0.1)'   // 薄い
+    ]
   }
 
   const menAgeData = {
-    labels: ['20代前半', '20代後半', '30代前半', '30代後半'],
-    data: [10, 25, 46, 19],
+    labels: ['20-22歳', '23-25歳', '26-28歳', '29-31歳', '32-34歳'],
+    data: [15, 35, 30, 15, 5],
+    colors: [
+      'rgba(255, 108, 180, 0.3)',  // 薄い
+      'rgba(255, 108, 180, 0.8)',  // 濃い（メインターゲット）
+      'rgba(255, 108, 180, 0.3)',  // 薄い
+      'rgba(255, 108, 180, 0.4)',  // 薄い
+      'rgba(255, 108, 180, 0.1)'   // 薄い
+    ]
   }
 
   const testimonials = [
@@ -70,80 +96,474 @@ export default function MenLP() {
       gender: "男性",
       age: "28歳",
       occupation: "IT企業勤務",
-      comment: "仕事終わりに気軽に参加できて、素敵な出会いがありました！",
+      location: "渋谷区",
+      image: "/images/testimonials/male1.jpg",
+      comment: "仕事が忙しく、出会いの機会を探すのが難しかったのですが、コンパるのおかげで気軽に素敵な出会いができました。特に、参加者全員が身分証明書で本人確認済みなので、安心して参加できたのが良かったです。実際に出会った女性も皆さん魅力的で、今でも仲良くさせていただいています。",
+      point: "身バレの心配なく、安全に参加できる"
     },
     {
       gender: "女性",
       age: "25歳",
       occupation: "看護師",
-      comment: "安心して参加できる環境で、楽しい時間を過ごせました。",
+      location: "港区",
+      image: "/images/testimonials/female1.jpg",
+      comment: "友人に勧められて参加してみましたが、想像以上に素敵な体験でした。男性陣は皆さん礼儀正しく、楽しい会話が弾みました。収入証明書の確認があるので、しっかりとした方々ばかりで安心感がありました。また、運営側のフォローも手厚く、初参加でも緊張せずに楽しめました。",
+      point: "高収入で誠実な男性と出会える"
     },
+    {
+      gender: "男性",
+      age: "32歳",
+      occupation: "経営者",
+      location: "中央区",
+      image: "/images/testimonials/male2.jpg",
+      comment: "普段は仕事が忙しく、合コンの日程調整が大変でしたが、コンパるは空いている時間に気軽に参加できるのが魅力です。実際に参加してみると、共通の話題も多く、とても充実した時間を過ごせました。特に、同じ価値観を持った方々と出会えたのが良かったです。",
+      point: "忙しい社会人でも気軽に参加できる"
+    }
   ]
 
   const safetyFeatures = [
     {
       title: "完全審査制",
-      description: "プロフィールや写真を確認、審査を通過した方のみ利用可能",
+      description: "プロフィール・写真を確認、本人確認書類での身分証明書の確認など、厳格な審査を実施しています。",
       icon: React.createElement(ShieldCheckIcon),
     },
     {
       title: "サービス管理体制",
-      description: "コンパるの後に相互評価。問題の報告を受けた会員様は利用停止",
-      icon: React.createElement(ShieldCheckIcon),
+      description: "イベント後の相互評価システムを導入し、問題のある会員は即座に利用停止とする厳格な管理を行っています。",
+      icon: React.createElement(LockClosedIcon),
     },
+    {
+      title: "男性同士で参加可能",
+      description: "お友達と一緒に参加できるので、初めての方でも緊張せずリラックスして楽しめます。",
+      icon: React.createElement(UserGroupIcon),
+    },
+  ]
+
+  const heroProps = {
+    imageUrl: '/images/men_back.png',
+    title: "男性向けのタイトル",
+    // ...
+  }
+
+  const registeredMembers = [
+    {
+      id: 1,
+      image: "/images/members/member1.jpg",
+      age: 24,
+      occupation: "美容師",
+      location: "恵比寿"
+    },
+    {
+      id: 2,
+      image: "/images/members/member2.jpg",
+      age: 27,
+      occupation: "看護師",
+      location: "銀座"
+    },
+    {
+      id: 3,
+      image: "/images/members/member3.jpg",
+      age: 25,
+      occupation: "会社員",
+      location: "新橋"
+    },
+    {
+      id: 4,
+      image: "/images/members/member4.jpg",
+      age: 29,
+      occupation: "モデル",
+      location: "恵比寿"
+    },
+    // 必要に応じて追加
   ]
 
   return (
     <>
-      <Header />
+      {/* <Header /> */}
       <main>
         <Hero
           title="理想の出会いを見つけよう"
           subtitle="厳選された女性会員との出会いをお届けします"
-          imageUrl="/images/men-hero.jpg"
+          imageUrl="/images/Facebook Image.png"
           overlay={true}
         />
         
-        <section className="py-20">
-          <h2 className="text-3xl font-bold text-center mb-12">How to Use</h2>
-          <Features features={howToUse} />
-        </section>
-
-        <section className="py-20 bg-gray-50">
-          <h2 className="text-3xl font-bold text-center mb-12">コンパるが選ばれる理由</h2>
-          <Features features={whyChooseUs} />
-        </section>
-
-        <section className="py-20">
-          <h2 className="text-3xl font-bold text-center mb-12">会員データ</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-2xl font-bold mb-6">女性会員</h3>
-              <PieChart data={womenAgeData} />
+        <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
+                <ClockIcon className="w-5 h-5" />
+                <span className="font-medium">簡単3ステップ</span>
+              </div>
+              <h2 className="text-3xl font-bold mb-4">今すぐ始められる</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                LINEで友だち追加から参加までわずか3ステップ。面倒な手続きは一切ありません。
+              </p>
             </div>
-            <div>
-              <h3 className="text-2xl font-bold mb-6">男性会員</h3>
-              <PieChart data={menAgeData} />
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              {howToUse.map((step, index) => (
+                <div key={index} className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative">
+                  <div className="absolute -top-3 -left-3 w-10 h-10 bg-[rgba(255,108,180,0.8)] text-white rounded-full flex items-center justify-center font-bold">
+                    {index + 1}
+                  </div>
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-16 h-16 rounded-full bg-[rgba(255,108,180,0.1)] flex items-center justify-center mb-6">
+                      <div className="w-8 h-8 text-[rgba(255,108,180,0.8)]">
+                        {step.icon}
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-3">{step.title}</h3>
+                    <p className="text-gray-600">{step.description}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        <Testimonials testimonials={testimonials} />
-        
-        <section className="py-20 bg-gray-50">
-          <h2 className="text-3xl font-bold text-center mb-12">開催エリア</h2>
-          <div className="text-center text-xl">
-            恵比寿、銀座・新橋
+        <section className="py-20 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
+              <StarIcon className="w-5 h-5" />
+              <span className="font-medium">選ばれる3つの理由</span>
+            </div>
+            <h2 className="text-3xl font-bold mb-4">コンパるが選ばれる理由</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              多くのお客様に支持されている3つの特徴をご紹介します
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {whyChooseUs.map((feature, index) => (
+              <div key={index} className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-all hover:-translate-y-1">
+                <div className="w-16 h-16 rounded-full bg-[rgba(255,108,180,0.1)] flex items-center justify-center mb-6 mx-auto">
+                  <div className="w-8 h-8 text-[rgba(255,108,180,0.8)]">
+                    {feature.icon}
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-center">{feature.title}</h3>
+                <p className="text-gray-600 text-center">{feature.description}</p>
+              </div>
+            ))}
           </div>
         </section>
 
-        <PricingPlan 
-          price={4980}
-          features={["初回無料合コン付き", "月額プラン", "いつでもキャンセル可能"]}
-        />
+        <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
+                <UserGroupIcon className="w-5 h-5" />
+                <span className="font-medium">厳選された女性会員</span>
+              </div>
+              <h2 className="text-3xl font-bold mb-4">理想の出会いが待っている</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                身元確認済みの信頼できる会員のみが参加しています
+              </p>
+            </div>
 
-        <ComparisonTable />
-        
+            <MemberGallery members={registeredMembers} />
+
+            <div className="mt-20">
+              <div className="text-center mb-16">
+                <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
+                  <ChartBarIcon className="w-5 h-5" />
+                  <span className="font-medium">20代後半が中心</span>
+                </div>
+                <h2 className="text-3xl font-bold mb-4">魅力的な年齢層が集まる</h2>
+                <p className="text-gray-600 max-w-2xl mx-auto">
+                  理想的な年齢層の会員様が多数在籍しています
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <div className="bg-white rounded-2xl p-8 shadow-sm">
+                  <PieChart data={womenAgeData} />
+                </div>
+
+                <div className="bg-white rounded-2xl p-8 shadow-sm">
+                  <div className="space-y-6">
+                    <div>
+                      <div className="text-2xl font-bold text-[rgba(255,108,180,0.8)] mb-2">80%</div>
+                      <p className="text-gray-700">が20代の女性会員</p>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-[rgba(255,108,180,0.8)] mb-2">65%</div>
+                      <p className="text-gray-700">が社会人女性</p>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-[rgba(255,108,180,0.8)] mb-2">TOP3</div>
+                      <p className="text-gray-700">人気職種</p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <span className="bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-3 py-1 rounded-full text-sm">看護師</span>
+                        <span className="bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-3 py-1 rounded-full text-sm">美容師</span>
+                        <span className="bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-3 py-1 rounded-full text-sm">事務職</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 text-center text-gray-600">
+                <p className="text-sm">※2024年2月時点のデータです</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
+                <UserGroupIcon className="w-5 h-5" />
+                <span className="font-medium">厳選された男性会員</span>
+              </div>
+              <h2 className="text-3xl font-bold mb-4">信頼できる男性会員</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                身元確認済みの男性会員をご紹介
+              </p>
+            </div>
+
+            <div className="mt-16">
+              <div className="max-w-2xl mx-auto">
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-sm">
+                  <BarChart data={menAgeData} />
+                </div>
+                <p className="text-center text-gray-600 mt-4">
+                  ※20代後半〜30代前半が中心の会員構成です
+                </p>
+              </div>
+
+              <h3 className="text-2xl font-bold text-center mb-8 mt-16">入会条件</h3>
+              <div className="max-w-4xl mx-auto px-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-16 h-16 rounded-full bg-[rgba(255,108,180,0.1)] flex items-center justify-center mb-6">
+                        <CalendarIcon className="w-8 h-8 text-[rgba(255,108,180,0.8)]" />
+                      </div>
+                      <h4 className="text-xl font-bold mb-4 text-gray-900">年齢</h4>
+                      <div className="text-3xl font-bold text-[rgba(255,108,180,0.8)] mb-4">20歳以上</div>
+                      <p className="text-gray-600">
+                        社会人としての経験と<br />成熟した人間性を重視
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-16 h-16 rounded-full bg-[rgba(255,108,180,0.1)] flex items-center justify-center mb-6">
+                        <BriefcaseIcon className="w-8 h-8 text-[rgba(255,108,180,0.8)]" />
+                      </div>
+                      <h4 className="text-xl font-bold mb-4 text-gray-900">職業</h4>
+                      <div className="space-y-3">
+                        <span className="inline-block bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full text-sm">優良企業社員</span>
+                        <span className="inline-block bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full text-sm">経営者・管理職</span>
+                        <span className="inline-block bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full text-sm">公務員</span>
+                        <span className="inline-block bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full text-sm">士業</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-16 h-16 rounded-full bg-[rgba(255,108,180,0.1)] flex items-center justify-center mb-6">
+                        <UserIcon className="w-8 h-8 text-[rgba(255,108,180,0.8)]" />
+                      </div>
+                      <h4 className="text-xl font-bold mb-4 text-gray-900">人物像</h4>
+                      <ul className="space-y-3 text-gray-600">
+                        <li className="flex items-center justify-center gap-2">
+                          <CheckCircleIcon className="w-5 h-5 text-[rgba(255,108,180,0.8)]" />
+                          <span>内面が洗練されている</span>
+                        </li>
+                        <li className="flex items-center justify-center gap-2">
+                          <CheckCircleIcon className="w-5 h-5 text-[rgba(255,108,180,0.8)]" />
+                          <span>清潔感がある</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
+                <ChatBubbleBottomCenterTextIcon className="w-5 h-5" />
+                <span className="font-medium">98%が満足</span>
+              </div>
+              <h2 className="text-3xl font-bold mb-4">実際の参加者の声</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                実際に参加された方々の生の声をご紹介します。<br />
+                多くの方にご満足いただいております。
+              </p>
+            </div>
+            <div className="max-w-5xl mx-auto">
+              <Testimonials testimonials={testimonials} />
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
+                <CurrencyYenIcon className="w-5 h-5" />
+                <span className="font-medium">料金プラン</span>
+              </div>
+              <h2 className="text-3xl font-bold mb-4">明確な料金体系</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                追加料金や隠れた費用は一切ありません
+              </p>
+            </div>
+
+            <div className="max-w-5xl mx-auto">
+              <div className="bg-[rgba(255,108,180,0.05)] rounded-2xl p-8 shadow-sm border-2 border-[rgba(255,108,180,0.2)] relative mx-auto max-w-md">
+                <div className="absolute -top-3 -right-3 bg-[rgba(255,108,180,0.8)] text-white px-4 py-1 rounded-full text-sm">おすすめ</div>
+                <h3 className="text-xl font-bold mb-4">月額プラン</h3>
+                <div className="text-3xl font-bold mb-4">¥4,980<span className="text-base font-normal text-gray-600">/月（税込）</span></div>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-center gap-2">
+                    <CheckCircleIcon className="w-5 h-5 text-[rgba(255,108,180,0.8)]" />
+                    <span>合コン保証付き</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircleIcon className="w-5 h-5 text-[rgba(255,108,180,0.8)]" />
+                    <span>いつでもキャンセル可能</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircleIcon className="w-5 h-5 text-[rgba(255,108,180,0.8)]" />
+                    <span>全機能利用可能</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircleIcon className="w-5 h-5 text-[rgba(255,108,180,0.8)]" />
+                    <span>月額制サブスクリプション</span>
+                  </li>
+                </ul>
+                <button className="w-full py-2 px-4 rounded-full bg-[rgba(255,108,180,0.8)] text-white hover:bg-[rgba(255,108,180,0.9)] transition-colors">
+                  今すぐ始める
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
+                <ShieldCheckIcon className="w-5 h-5" />
+                <span className="font-medium">厳選された会場</span>
+              </div>
+              <h2 className="text-3xl font-bold mb-4">人気エリアで開催</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                おしゃれな雰囲気のお店を厳選してご用意しています
+              </p>
+            </div>
+            <div className="max-w-5xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="relative h-64 rounded-2xl overflow-hidden group">
+                <img 
+                  src="/images/恵比寿ガーデンプレイス フリー写真.jpg" 
+                  alt="恵比寿エリア" 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/20" />
+                <div className="absolute bottom-0 left-0 p-6">
+                  <h3 className="text-2xl font-bold text-white mb-2">恵比寿</h3>
+                  <p className="text-white/80">
+                    洗練された雰囲気のレストラン・カフェを厳選
+                  </p>
+                </div>
+              </div>
+              
+              <div className="relative h-64 rounded-2xl overflow-hidden group">
+                <img 
+                  src="/images/夜の銀座 フリー写真素材.jpg" 
+                  alt="銀座・新橋エリア" 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/20" />
+                <div className="absolute bottom-0 left-0 p-6">
+                  <h3 className="text-2xl font-bold text-white mb-2">銀座・新橋</h3>
+                  <p className="text-white/80">
+                    上質な空間で大人の出会いを演出
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
+                <ScaleIcon className="w-5 h-5" />
+                <span className="font-medium">選ばれる理由</span>
+              </div>
+              <h2 className="text-3xl font-bold mb-4">他にはない特別な体験</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                コンパるならではの特徴をご紹介します
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+              {/* 従来の合コン */}
+              <div className="bg-white rounded-2xl p-8 shadow-sm">
+                <div className="text-xl font-bold text-gray-400 mb-6">従来の合コン</div>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-red-500 text-xl">×</span>
+                    <p className="text-gray-600">日程調整に時間がかかる</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-red-500 text-xl">×</span>
+                    <p className="text-gray-600">参加者の身元が不明確</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-red-500 text-xl">×</span>
+                    <p className="text-gray-600">キャンセルが多発</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-red-500 text-xl">×</span>
+                    <p className="text-gray-600">会場選びが面倒</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* コンパる */}
+              <div className="bg-[rgba(255,108,180,0.05)] rounded-2xl p-8 shadow-sm border-2 border-[rgba(255,108,180,0.2)] relative">
+                <div className="absolute -top-3 -right-3 bg-[rgba(255,108,180,0.8)] text-white px-4 py-1 rounded-full text-sm">
+                  おすすめ
+                </div>
+                <div className="text-xl font-bold text-[rgba(255,108,180,0.8)] mb-6">コンパる</div>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-[rgba(255,108,180,0.8)] text-xl">○</span>
+                    <p className="text-gray-700">空いている時間に気軽に参加可能</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-[rgba(255,108,180,0.8)] text-xl">○</span>
+                    <p className="text-gray-700">身分証明書で本人確認済み</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-[rgba(255,108,180,0.8)] text-xl">○</span>
+                    <p className="text-gray-700">キャンセル保証制度あり</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-[rgba(255,108,180,0.8)] text-xl">○</span>
+                    <p className="text-gray-700">厳選された会場を事前に用意</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <SafetyFeatures features={safetyFeatures} />
 
         <FloatingCTA 
