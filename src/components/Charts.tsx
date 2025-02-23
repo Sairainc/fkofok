@@ -10,7 +10,7 @@ import {
   Tooltip,
   Legend,
   ArcElement,
-  ChartData as ChartJSData
+  ChartData as _ChartJSData
 } from 'chart.js'
 import { Bar, Pie } from 'react-chartjs-2'
 import ChartDataLabels from 'chartjs-plugin-datalabels'

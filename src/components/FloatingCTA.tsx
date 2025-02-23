@@ -3,11 +3,11 @@
 import React, { useEffect, useState } from 'react'
 
 interface FloatingCTAProps {
-  text: string
+  _text: string
   buttonText: string
 }
 
-export const FloatingCTA = ({ text, buttonText }: FloatingCTAProps) => {
+export const FloatingCTA = ({ _text, buttonText }: FloatingCTAProps) => {
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
 

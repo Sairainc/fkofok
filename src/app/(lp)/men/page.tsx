@@ -29,6 +29,7 @@ import {
   CheckCircleIcon
 } from '@heroicons/react/24/outline'
 import { MemberGallery } from '@/components/MemberGallery'
+import Image from 'next/image'
 
 export default function MenLP() {
   const howToUse = [
@@ -67,7 +68,7 @@ export default function MenLP() {
     },
   ]
 
-  const womenAgeData = {
+  const _womenAgeData = {
     labels: ['20-22歳', '23-25歳', '26-28歳', '29-31歳', '32-34歳'],
     data: [15, 35, 30, 15, 5],
     colors: [
@@ -139,7 +140,7 @@ export default function MenLP() {
     },
   ]
 
-  const heroProps = {
+  const _heroProps = {
     imageUrl: '/images/men_back.png',
     title: "男性向けのタイトル",
     // ...
@@ -278,7 +279,7 @@ export default function MenLP() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                 <div className="bg-white rounded-2xl p-8 shadow-sm">
-                  <PieChart data={womenAgeData} />
+                  <PieChart data={_womenAgeData} />
                 </div>
 
                 <div className="bg-white rounded-2xl p-8 shadow-sm">
@@ -466,9 +467,11 @@ export default function MenLP() {
             </div>
             <div className="max-w-5xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="relative h-64 rounded-2xl overflow-hidden group">
-                <img 
-                  src="/images/恵比寿ガーデンプレイス フリー写真.jpg" 
+                <Image 
+                  src="/images/恵比寿ガーデンプレイス フリー写真.jpg" 
                   alt="恵比寿エリア" 
+                  width={800}
+                  height={600}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/20" />
@@ -481,9 +484,11 @@ export default function MenLP() {
               </div>
               
               <div className="relative h-64 rounded-2xl overflow-hidden group">
-                <img 
+                <Image 
                   src="/images/夜の銀座 フリー写真素材.jpg" 
                   alt="銀座・新橋エリア" 
+                  width={800}
+                  height={600}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/20" />
@@ -567,7 +572,7 @@ export default function MenLP() {
         <SafetyFeatures features={safetyFeatures} />
 
         <FloatingCTA 
-          text="今LINE登録した方限定 初回合コン無料！"
+          _text="今LINE登録した方限定 初回合コン無料！"
           buttonText="今すぐLINEで始める"
         />
       </main>

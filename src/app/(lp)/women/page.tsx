@@ -29,6 +29,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { BarChart } from '@/components/Charts'
 import { MemberGallery } from '@/components/MemberGallery'
+import Image from 'next/image'
 
 export default function WomenLP() {
   const howToUse = [
@@ -79,7 +80,7 @@ export default function WomenLP() {
     ]
   }
 
-  const womenAgeData = {
+  const _womenAgeData = {
     labels: ['20代前半', '20代後半', '30代前半', '30代後半'],
     data: [10, 25, 46, 19],
   }
@@ -370,9 +371,11 @@ export default function WomenLP() {
             </div>
             <div className="max-w-5xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="relative h-64 rounded-2xl overflow-hidden group">
-                <img 
+                <Image 
                   src="/images/恵比寿ガーデンプレイス フリー写真.jpg" 
                   alt="恵比寿エリア" 
+                  width={800}
+                  height={600}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/20" />
@@ -385,9 +388,11 @@ export default function WomenLP() {
               </div>
               
               <div className="relative h-64 rounded-2xl overflow-hidden group">
-                <img 
+                <Image 
                   src="/images/夜の銀座 フリー写真素材.jpg" 
                   alt="銀座・新橋エリア" 
+                  width={800}
+                  height={600}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/20" />
@@ -469,7 +474,7 @@ export default function WomenLP() {
         <SafetyFeatures features={safetyFeatures} />
 
         <FloatingCTA 
-          text="今LINE登録した方限定 初回合コン無料！"
+          _text="今LINE登録した方限定 初回合コン無料！"
           buttonText="今すぐLINEで始める"
         />
       </main>
