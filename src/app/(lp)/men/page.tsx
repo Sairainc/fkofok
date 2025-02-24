@@ -3,11 +3,8 @@
 import React from 'react'
 // import { Header } from '@/components/Header'
 import { Hero } from '@/components/Hero'
-import { Features } from '@/components/Features'
 import { PieChart, BarChart } from '@/components/Charts'
 import { Testimonials } from '@/components/Testimonials'
-import { PricingPlan } from '@/components/PricingPlan'
-import { ComparisonTable } from '@/components/ComparisonTable'
 import { SafetyFeatures } from '@/components/SafetyFeatures'
 import { Footer } from '@/components/Footer'
 import { FloatingCTA } from '@/components/FloatingCTA'
@@ -20,7 +17,6 @@ import {
   ChatBubbleBottomCenterTextIcon,
   StarIcon,
   ChartBarIcon,
-  MapPinIcon,
   CurrencyYenIcon,
   ScaleIcon,
   CalendarIcon,
