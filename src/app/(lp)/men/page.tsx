@@ -132,12 +132,7 @@ export default function MenLP() {
       title: "サービス管理体制",
       description: "イベント後の相互評価システムを導入し、問題のある会員は即座に利用停止とする厳格な管理を行っています。",
       icon: React.createElement(LockClosedIcon),
-    },
-    {
-      title: "男性同士で参加可能",
-      description: "お友達と一緒に参加できるので、初めての方でも緊張せずリラックスして楽しめます。",
-      icon: React.createElement(UserGroupIcon),
-    },
+    }
   ]
 
   const _heroProps = {
