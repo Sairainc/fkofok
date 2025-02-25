@@ -143,28 +143,28 @@ export default function MenLP() {
   const registeredMembers = [
     {
       id: 1,
-      image: "/images/.jpg",
+      image: "/images/名称未設定のデザイン (39).png",
       age: 24,
       occupation: "美容師",
       location: "恵比寿"
     },
     {
       id: 2,
-      image: "/images/.jpg",
+      image: "/images/25歳 日本人女性 看護師.jpg",
       age: 27,
       occupation: "看護師",
       location: "銀座"
     },
     {
       id: 3,
-      image: "/images/members/member3.jpg",
+      image: "/images/25歳 日本人女性 会社員.jpg",
       age: 25,
       occupation: "会社員",
       location: "新橋"
     },
     {
       id: 4,
-      image: "/images/members/member4.jpg",
+      image: "/images/25歳 日本人女性モデル.jpg",
       age: 29,
       occupation: "モデル",
       location: "恵比寿"
