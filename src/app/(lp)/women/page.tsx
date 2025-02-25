@@ -25,6 +25,15 @@ import { MemberGallery } from '@/components/MemberGallery'
 import Image from 'next/image'
 
 export default function WomenLP() {
+  const heroProps = {
+    title: "女性に人気の合コンマッチング",
+    subtitle: "完全審査制で安心、お友達と一緒に参加できます",
+    description: "完全審査制で安心、お友達と一緒に参加できます",
+    imageUrl: "/images/women_hero.jpg",
+    buttonText: "今すぐLINEで始める",
+    overlay: true
+  }
+
   const howToUse = [
     {
       title: "Step 1: LINEで友だち追加",
@@ -161,12 +170,7 @@ export default function WomenLP() {
     <>
       {/* <Header /> */}
       <main>
-        <Hero
-          title="理想の出会いを見つけよう"
-          subtitle="厳選された男性会員との出会いをお届けします"
-          imageUrl="/images/Facebook Image.png"
-          overlay={true}
-        />
+        <Hero {...heroProps} />
         
         <section className="py-20 bg-gradient-to-b from-white to-gray-50">
           <div className="max-w-7xl mx-auto px-4">

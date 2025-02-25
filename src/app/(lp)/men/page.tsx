@@ -131,23 +131,26 @@ export default function MenLP() {
     }
   ]
 
-  const _heroProps = {
-    imageUrl: '/images/men_back.png',
-    title: "男性向けのタイトル",
-    // ...
+  const heroProps = {
+    title: "1人参加限定の合コンマッチング",
+    subtitle: "プロフィール審査制で安心、LINEで簡単参加",
+    description: "プロフィール審査制で安心、LINEで簡単参加",
+    imageUrl: "/images/men_hero.jpg",
+    buttonText: "今すぐLINEで始める",
+    overlay: true
   }
 
   const registeredMembers = [
     {
       id: 1,
-      image: "/images/members/member1.jpg",
+      image: "/images/.jpg",
       age: 24,
       occupation: "美容師",
       location: "恵比寿"
     },
     {
       id: 2,
-      image: "/images/members/member2.jpg",
+      image: "/images/.jpg",
       age: 27,
       occupation: "看護師",
       location: "銀座"
@@ -173,12 +176,7 @@ export default function MenLP() {
     <>
       {/* <Header /> */}
       <main>
-        <Hero
-          title="理想の出会いを見つけよう"
-          subtitle="厳選された女性会員との出会いをお届けします"
-          imageUrl="/images/Facebook Image.png"
-          overlay={true}
-        />
+        <Hero {...heroProps} />
         
         <section className="py-20 bg-gradient-to-b from-white to-gray-50">
           <div className="max-w-7xl mx-auto px-4">
