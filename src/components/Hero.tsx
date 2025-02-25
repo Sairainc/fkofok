@@ -7,7 +7,7 @@ interface HeroProps {
   overlay?: boolean
 }
 
-export const Hero = ({ title, subtitle, imageUrl, overlay }: HeroProps) => {
+export const Hero = ({ title, subtitle, imageUrl: _imageUrl, overlay }: HeroProps) => {
   return (
     <div className="relative h-screen">
       {/* 背景画像 */}
