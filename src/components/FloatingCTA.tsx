@@ -31,8 +31,13 @@ export const FloatingCTA: React.FC<FloatingCTAProps> = ({ _text, buttonText }) =
     }
   }, [lastScrollY])
 
+  const handleClick = () => {
+    window.open('https://lin.ee/DbYkkhn', '_blank')
+  }
+
   return (
     <button 
+      onClick={handleClick}
       className={`fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#06C755] text-white px-12 py-4 rounded-full font-bold hover:bg-[#06C755]/90 transition-all text-lg flex items-center gap-3 shadow-lg transform duration-300 ${isVisible ? 'translate-y-0' : 'translate-y-[200%]'}`}
     >
       {buttonText}
