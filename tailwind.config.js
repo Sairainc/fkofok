@@ -8,6 +8,7 @@ module.exports = {
         primary: {
           DEFAULT: '#FF4B91',
           dark: '#FF1F71',
+          women: '#FF6CB4',
         }
       },
       animation: {

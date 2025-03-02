@@ -2,23 +2,24 @@ import Link from "next/link"
 // import { Header } from '@/components/Header'
 import { Features } from '@/components/Features'
 import { ShieldCheckIcon, HeartIcon, UserGroupIcon } from '@heroicons/react/24/outline'
+import React from 'react'
 
 export default function Home() {
   const features = [
     {
       title: "安心・安全",
       description: "身分証明書による本人確認で、安全な出会いを提供します",
-      icon: <ShieldCheckIcon className="w-6 h-6" />,
+      icon: React.createElement(ShieldCheckIcon, { className: "w-6 h-6" }),
     },
     {
       title: "厳選されたマッチング",
       description: "プロフィール審査済みの会員同士で、質の高い出会いを実現",
-      icon: <HeartIcon className="w-6 h-6" />,
+      icon: React.createElement(HeartIcon, { className: "w-6 h-6" }),
     },
     {
       title: "24時間サポート",
       description: "専門スタッフによる手厚いサポートで、安心してご利用いただけます",
-      icon: <UserGroupIcon className="w-6 h-6" />,
+      icon: React.createElement(UserGroupIcon, { className: "w-6 h-6" }),
     },
   ]
 
@@ -36,21 +37,19 @@ export default function Home() {
             </p>
             
             <div className="flex gap-6 justify-center">
-              <Link
-                href="/men"
-                className="px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-              >
-                男性の方はこちら
-              </Link>
-              <Link
-                href="/women"
-                className="px-8 py-4 bg-primary-women text-white rounded-lg hover:opacity-90 transition-colors"
-              >
-                女性の方はこちら
-              </Link>
+              {React.createElement(Link, {
+                href: "/men",
+                className: "px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors",
+                children: "男性の方はこちら"
+              })}
+              {React.createElement(Link, {
+                href: "/women",
+                className: "px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors",
+                children: "女性の方はこちら"
+              })}
             </div>
           </div>
-          <Features features={features} />
+          {React.createElement(Features, { features })}
         </div>
       </main>
     </>

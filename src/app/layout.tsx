@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   title: 'コンパる',
   description: 'コンパるは、合コンマッチングサービスです。',
   keywords: 'マッチング,婚活,恋活,出会い,安心,安全',
+  icons: {
+    icon: '/images/iconfav.png',
+    apple: '/images/iconfav.png',
+  },
   openGraph: {
     title: 'マッチングサービス | 安心・安全な出会いを',
     description: '厳選されたマッチングサービス。プロフィール審査済みの会員同士で、安心・安全な出会いを提供します。',
