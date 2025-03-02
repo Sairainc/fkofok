@@ -39,14 +39,12 @@ export default function Home() {
             <div className="flex gap-6 justify-center">
               {React.createElement(Link, {
                 href: "/men",
-                className: "px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors",
-                children: "男性の方はこちら"
-              })}
+                className: "px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+              }, "男性の方はこちら")}
               {React.createElement(Link, {
                 href: "/women",
-                className: "px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors",
-                children: "女性の方はこちら"
-              })}
+                className: "px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+              }, "女性の方はこちら")}
             </div>
           </div>
           {React.createElement(Features, { features })}
