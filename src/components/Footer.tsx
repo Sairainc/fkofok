@@ -1,6 +1,8 @@
 'use client'
 
-export const Footer = () => {
+import React from 'react'
+
+export const Footer: React.FC = () => {
   return (
     <footer className="bg-gray-50 py-12">
       <div className="max-w-7xl mx-auto px-4 text-center">

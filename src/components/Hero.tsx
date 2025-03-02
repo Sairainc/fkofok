@@ -1,4 +1,6 @@
-import Image from 'next/image'
+'use client'
+
+import React from 'react'
 
 interface HeroProps {
   title: string
@@ -7,7 +9,7 @@ interface HeroProps {
   overlay?: boolean
 }
 
-export const Hero = ({ title, subtitle, imageUrl: _imageUrl, overlay }: HeroProps) => {
+export const Hero: React.FC<HeroProps> = ({ title, subtitle, imageUrl: _imageUrl, overlay }) => {
   return (
     <div className="relative h-screen">
       {/* 背景画像 */}
@@ -23,12 +25,10 @@ export const Hero = ({ title, subtitle, imageUrl: _imageUrl, overlay }: HeroProp
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white flex flex-col items-center gap-12">
           {/* ロゴ画像 */}
           <div className="w-full max-w-[600px] mt-20 relative h-[200px]">
-            <Image
+            <img
               src="/images/Facebook Image.png"
               alt="コンパるロゴ"
-              fill
-              className="object-contain"
-              priority
+              className="object-contain w-full h-full"
             />
           </div>
           

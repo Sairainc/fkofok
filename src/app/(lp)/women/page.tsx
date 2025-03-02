@@ -93,7 +93,7 @@ export default function WomenLP() {
       age: "25歳",
       occupation: "看護師",
       location: "港区",
-      image: "/images/testimonials/female1.jpg",
+      image: "/images/25歳 日本人女性 看護師.jpg",
       comment: "友人に勧められて参加してみましたが、想像以上に素敵な体験でした。男性陣は皆さん礼儀正しく、楽しい会話が弾みました。収入証明書の確認があるので、しっかりとした方々ばかりで安心感がありました。また、運営側のフォローも手厚く、初参加でも緊張せずに楽しめました。",
       point: "高収入で誠実な男性と出会える"
     },
@@ -102,7 +102,7 @@ export default function WomenLP() {
       age: "28歳",
       occupation: "会社員",
       location: "渋谷区",
-      image: "/images/testimonials/female2.jpg",
+      image: "/images/28歳 日本人女性.jpg",
       comment: "仕事が忙しく、出会いの機会を探すのが難しかったのですが、コンパるのおかげで気軽に素敵な出会いができました。特に、参加者全員が身分証明書で本人確認済みなので、安心して参加できたのが良かったです。",
       point: "身バレの心配なく、安全に参加できる"
     },
@@ -111,7 +111,7 @@ export default function WomenLP() {
       age: "32歳",
       occupation: "経営者",
       location: "中央区",
-      image: "/images/testimonials/female3.jpg",
+      image: "/images/28歳 日本人女性 経営者.jpg",
       comment: "普段は仕事が忙しく、合コンの日程調整が大変でしたが、コンパるは空いている時間に気軽に参加できるのが魅力です。実際に参加してみると、共通の話題も多く、とても充実した時間を過ごせました。",
       point: "忙しい社会人でも気軽に参加できる"
     }
@@ -138,28 +138,28 @@ export default function WomenLP() {
   const registeredMembers = [
     {
       id: 1,
-      image: "/images/members/male1.jpg",
+      image: "/images/28歳 IT企業勤務 メガネ.jpg",
       age: 28,
       occupation: "IT企業勤務",
       location: "渋谷区"
     },
     {
       id: 2,
-      image: "/images/members/male2.jpg",
+      image: "/images/24歳 CEO.jpg",
       age: 32,
       occupation: "経営者",
       location: "中央区"
     },
     {
       id: 3,
-      image: "/images/members/male3.jpg",
+      image: "/images/30歳 商社マン.jpg",
       age: 30,
       occupation: "商社",
       location: "港区"
     },
     {
       id: 4,
-      image: "/images/members/male4.jpg",
+      image: "/images/日本人男性 35歳 医者.jpg",
       age: 35,
       occupation: "医師",
       location: "新宿区"
@@ -170,13 +170,13 @@ export default function WomenLP() {
     <>
       {/* <Header /> */}
       <main>
-        <Hero {...heroProps} />
+        {React.createElement(Hero, heroProps)}
         
         <section className="py-20 bg-gradient-to-b from-white to-gray-50">
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
-                <ClockIcon className="w-5 h-5" />
+                {React.createElement(ClockIcon, { className: "w-5 h-5" })}
                 <span className="font-medium">簡単3ステップ</span>
               </div>
               <h2 className="text-3xl font-bold mb-4">今すぐ始められる</h2>
@@ -209,7 +209,7 @@ export default function WomenLP() {
         <section className="py-20 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
-              <StarIcon className="w-5 h-5" />
+              {React.createElement(StarIcon, { className: "w-5 h-5" })}
               <span className="font-medium">選ばれる3つの理由</span>
             </div>
             <h2 className="text-3xl font-bold mb-4">コンパるが選ばれる理由</h2>
@@ -237,7 +237,7 @@ export default function WomenLP() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
-                <UserGroupIcon className="w-5 h-5" />
+                {React.createElement(UserGroupIcon, { className: "w-5 h-5" })}
                 <span className="font-medium">厳選された男性会員</span>
               </div>
               <h2 className="text-3xl font-bold mb-4">理想の出会いが待っている</h2>
@@ -246,12 +246,12 @@ export default function WomenLP() {
               </p>
             </div>
 
-            <MemberGallery members={registeredMembers} />
+            {React.createElement(MemberGallery, { members: registeredMembers })}
 
             <div className="mt-20">
               <div className="text-center mb-16">
                 <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
-                  <ChartBarIcon className="w-5 h-5" />
+                  {React.createElement(ChartBarIcon, { className: "w-5 h-5" })}
                   <span className="font-medium">20代後半が中心</span>
                 </div>
                 <h2 className="text-3xl font-bold mb-4">魅力的な年齢層が集まる</h2>
@@ -262,7 +262,7 @@ export default function WomenLP() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                 <div className="bg-white rounded-2xl p-8 shadow-sm">
-                  <PieChart data={menAgeData} />
+                  {React.createElement(PieChart, { data: menAgeData })}
                 </div>
 
                 <div className="bg-white rounded-2xl p-8 shadow-sm">
@@ -295,7 +295,7 @@ export default function WomenLP() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
-                <ChatBubbleBottomCenterTextIcon className="w-5 h-5" />
+                {React.createElement(ChatBubbleBottomCenterTextIcon, { className: "w-5 h-5" })}
                 <span className="font-medium">98%が満足</span>
               </div>
               <h2 className="text-3xl font-bold mb-4">実際の参加者の声</h2>
@@ -305,7 +305,7 @@ export default function WomenLP() {
               </p>
             </div>
             <div className="max-w-5xl mx-auto">
-              <Testimonials testimonials={testimonials} />
+              {React.createElement(Testimonials, { testimonials })}
             </div>
           </div>
         </section>
@@ -314,7 +314,7 @@ export default function WomenLP() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
-                <CurrencyYenIcon className="w-5 h-5" />
+                {React.createElement(CurrencyYenIcon, { className: "w-5 h-5" })}
                 <span className="font-medium">料金プラン</span>
               </div>
               <h2 className="text-3xl font-bold mb-4">明確な料金体系</h2>
@@ -330,19 +330,19 @@ export default function WomenLP() {
                 <div className="text-3xl font-bold mb-4">¥2,980<span className="text-base font-normal text-gray-600">/月（税込）</span></div>
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-center gap-2">
-                    <CheckCircleIcon className="w-5 h-5 text-[rgba(255,108,180,0.8)]" />
+                    {React.createElement(CheckCircleIcon, { className: "w-5 h-5 text-[rgba(255,108,180,0.8)]" })}
                     <span>合コン保証付き</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircleIcon className="w-5 h-5 text-[rgba(255,108,180,0.8)]" />
+                    {React.createElement(CheckCircleIcon, { className: "w-5 h-5 text-[rgba(255,108,180,0.8)]" })}
                     <span>いつでもキャンセル可能</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircleIcon className="w-5 h-5 text-[rgba(255,108,180,0.8)]" />
+                    {React.createElement(CheckCircleIcon, { className: "w-5 h-5 text-[rgba(255,108,180,0.8)]" })}
                     <span>全機能利用可能</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircleIcon className="w-5 h-5 text-[rgba(255,108,180,0.8)]" />
+                    {React.createElement(CheckCircleIcon, { className: "w-5 h-5 text-[rgba(255,108,180,0.8)]" })}
                     <span>月額制サブスクリプション</span>
                   </li>
                 </ul>
@@ -358,7 +358,7 @@ export default function WomenLP() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
-                <ShieldCheckIcon className="w-5 h-5" />
+                {React.createElement(ShieldCheckIcon, { className: "w-5 h-5" })}
                 <span className="font-medium">厳選された会場</span>
               </div>
               <h2 className="text-3xl font-bold mb-4">人気エリアで開催</h2>
@@ -368,13 +368,13 @@ export default function WomenLP() {
             </div>
             <div className="max-w-5xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="relative h-64 rounded-2xl overflow-hidden group">
-                <Image 
-                  src="/images/恵比寿ガーデンプレイス フリー写真.jpg" 
-                  alt="恵比寿エリア" 
-                  width={800}
-                  height={600}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                />
+                {React.createElement(Image, { 
+                  src: "/images/恵比寿ガーデンプレイス フリー写真.jpg",
+                  alt: "恵比寿エリア",
+                  width: 800,
+                  height: 600,
+                  className: "w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                })}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/20" />
                 <div className="absolute bottom-0 left-0 p-6">
                   <h3 className="text-2xl font-bold text-white mb-2">恵比寿</h3>
@@ -385,13 +385,13 @@ export default function WomenLP() {
               </div>
               
               <div className="relative h-64 rounded-2xl overflow-hidden group">
-                <Image 
-                  src="/images/夜の銀座 フリー写真素材.jpg" 
-                  alt="銀座・新橋エリア" 
-                  width={800}
-                  height={600}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                />
+                {React.createElement(Image, { 
+                  src: "/images/夜の銀座 フリー写真素材.jpg",
+                  alt: "銀座・新橋エリア",
+                  width: 800,
+                  height: 600,
+                  className: "w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                })}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/20" />
                 <div className="absolute bottom-0 left-0 p-6">
                   <h3 className="text-2xl font-bold text-white mb-2">銀座・新橋</h3>
@@ -408,7 +408,7 @@ export default function WomenLP() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
-                <ScaleIcon className="w-5 h-5" />
+                {React.createElement(ScaleIcon, { className: "w-5 h-5" })}
                 <span className="font-medium">選ばれる理由</span>
               </div>
               <h2 className="text-3xl font-bold mb-4">他にはない特別な体験</h2>
@@ -468,15 +468,15 @@ export default function WomenLP() {
           </div>
         </section>
 
-        <SafetyFeatures features={safetyFeatures} />
+        {React.createElement(SafetyFeatures, { features: safetyFeatures })}
 
-        <FloatingCTA 
-          _text="今LINE登録した方限定 初回合コン無料！"
-          buttonText="今すぐLINEで始める"
-        />
+        {React.createElement(FloatingCTA, { 
+          _text: "今LINE登録した方限定 初回合コン無料！",
+          buttonText: "今すぐLINEで始める"
+        })}
       </main>
       
-      <Footer />
+      {React.createElement(Footer)}
     </>
   )
 } 

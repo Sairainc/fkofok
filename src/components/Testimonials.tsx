@@ -2,6 +2,7 @@
 
 import { ChatBubbleBottomCenterTextIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
+import React from 'react'
 
 interface TestimonialProps {
   gender: string
@@ -25,13 +26,13 @@ export const Testimonials = ({ testimonials }: TestimonialsProps) => {
           <div key={index} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary/20">
-                <Image
-                  src={testimonial.image}
-                  alt={`${testimonial.gender} ${testimonial.age}`}
-                  width={80}
-                  height={80}
-                  className="w-20 h-20 rounded-full object-cover"
-                />
+                {React.createElement(Image, {
+                  src: testimonial.image,
+                  alt: `${testimonial.gender} ${testimonial.age}`,
+                  width: 160,
+                  height: 160,
+                  className: "w-20 h-20 rounded-full object-cover object-top"
+                })}
               </div>
               <div>
                 <div className="font-bold text-lg">{testimonial.age}</div>
@@ -42,7 +43,7 @@ export const Testimonials = ({ testimonials }: TestimonialsProps) => {
             
             <div className="mb-4">
               <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-4">
-                <ChatBubbleBottomCenterTextIcon className="w-4 h-4" />
+                {React.createElement(ChatBubbleBottomCenterTextIcon, { className: "w-4 h-4" })}
                 {testimonial.point}
               </div>
               <p className="text-gray-700 leading-relaxed">

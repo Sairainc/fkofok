@@ -35,7 +35,7 @@ interface ChartProps {
   data: CustomChartData
 }
 
-export const BarChart = ({ data }: ChartProps) => {
+export const BarChart: React.FC<ChartProps> = ({ data }) => {
   const chartData = {
     labels: data.labels,
     datasets: [
@@ -99,7 +99,7 @@ export const BarChart = ({ data }: ChartProps) => {
   )
 }
 
-export const PieChart = ({ data }: { data: CustomChartData & { colors?: string[] } }) => {
+export const PieChart: React.FC<ChartProps> = ({ data }) => {
   const chartData = {
     labels: data.labels,
     datasets: [

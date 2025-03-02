@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { ShieldCheckIcon } from '@heroicons/react/24/solid'
 
 interface SafetyFeatureProps {
@@ -12,13 +13,13 @@ interface SafetyFeaturesProps {
   features: SafetyFeatureProps[]
 }
 
-export const SafetyFeatures = ({ features }: SafetyFeaturesProps) => {
+export const SafetyFeatures: React.FC<SafetyFeaturesProps> = ({ features }) => {
   return (
     <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 bg-[rgba(255,108,180,0.1)] text-[rgba(255,108,180,0.8)] px-4 py-2 rounded-full mb-4">
-            <ShieldCheckIcon className="w-5 h-5" />
+            {React.createElement(ShieldCheckIcon, { className: "w-5 h-5" })}
             <span className="font-medium">安心・安全への取り組み</span>
           </div>
           <h2 className="text-3xl font-bold mb-4">徹底した身元確認で安全な環境を提供</h2>
