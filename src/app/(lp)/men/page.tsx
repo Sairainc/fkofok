@@ -93,7 +93,7 @@ export default function MenLP() {
       age: "28歳",
       occupation: "IT企業勤務",
       location: "渋谷区",
-      image: "/images/28歳 IT企業勤務 メガネ.jpg",
+      image: "/images/it.jpg",
       comment: "仕事が忙しく、出会いの機会を探すのが難しかったのですが、コンパるのおかげで気軽に素敵な出会いができました。特に、参加者全員が身分証明書で本人確認済みなので、安心して参加できたのが良かったです。実際に出会った女性も皆さん魅力的で、今でも仲良くさせていただいています。",
       point: "身バレの心配なく、安全に参加できる"
     },
@@ -111,7 +111,7 @@ export default function MenLP() {
       age: "32歳",
       occupation: "経営者",
       location: "中央区",
-      image: "/images/24歳 CEO.jpg",
+      image: "/images/ceo.jpg",
       comment: "普段は仕事が忙しく、合コンの日程調整が大変でしたが、コンパるは空いている時間に気軽に参加できるのが魅力です。実際に参加してみると、共通の話題も多く、とても充実した時間を過ごせました。特に、同じ価値観を持った方々と出会えたのが良かったです。",
       point: "忙しい社会人でも気軽に参加できる"
     }
@@ -142,7 +142,7 @@ export default function MenLP() {
   const registeredMembers = [
     {
       id: 1,
-      image: "/images/名称未設定のデザイン (39).png",
+      image: "/images/hair.png",
       age: 24,
       occupation: "美容師",
       location: "恵比寿"
@@ -163,7 +163,7 @@ export default function MenLP() {
     },
     {
       id: 4,
-      image: "/images/25歳 日本人女性モデル.jpg",
+      image: "/images/25model.jpg",
       age: 29,
       occupation: "モデル",
       location: "恵比寿"

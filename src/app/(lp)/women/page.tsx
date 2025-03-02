@@ -138,7 +138,7 @@ export default function WomenLP() {
   const registeredMembers = [
     {
       id: 1,
-      image: "/images/28歳 IT企業勤務 メガネ.jpg",
+      image: "/images/it.jpg",
       age: 28,
       occupation: "IT企業勤務",
       location: "渋谷区"
