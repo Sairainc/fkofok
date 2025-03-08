@@ -60,14 +60,14 @@ export default function MenPayment() {
               <li>新機能優先アクセス</li>
             </ul>
 
-            <button
-              onClick={() => {
-                window.location.href = process.env.NEXT_PUBLIC_SQUARE_MEN_PAYMENT_LINK || '';
-              }}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            <a
+              href={process.env.NEXT_PUBLIC_SQUARE_MEN_PAYMENT_LINK || ''}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
             >
               支払いに進む
-            </button>
+            </a>
           </div>
         </div>
       </div>

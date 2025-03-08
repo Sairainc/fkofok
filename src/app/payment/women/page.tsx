@@ -50,16 +50,15 @@ export default function WomenPayment() {
                 <li>新機能優先アクセス</li>
               </ul>
 
-              {/* インラインボタン */}
-              <button
-                onClick={() => {
-                  // 直接Square決済リンクに遷移
-                  window.location.href = process.env.NEXT_PUBLIC_SQUARE_WOMEN_PAYMENT_LINK || '';
-                }}
-                className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              {/* JavaScriptリダイレクトではなく直接リンクを使用 */}
+              <a
+                href={process.env.NEXT_PUBLIC_SQUARE_WOMEN_PAYMENT_LINK || ''}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-center"
               >
                 支払いに進む
-              </button>
+              </a>
             </div>
           </div>
         </div>
