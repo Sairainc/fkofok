@@ -1,11 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
-import { useUser } from '@/hooks/useUser'
+import React from 'react'
 
 export default function TestPaymentPage() {
-  const { user, loading } = useUser()
-  
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">支払いテスト</h1>

@@ -25,6 +25,7 @@ export const MemberGallery: React.FC<MemberGalleryProps> = ({ members }) => {
               className="flex-none w-72 bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-300"
             >
               <div className="relative aspect-[3/4] overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={member.image}
                   alt={`Member ${member.id}`}

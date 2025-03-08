@@ -25,6 +25,7 @@ export const Hero: React.FC<HeroProps> = ({ title, subtitle, imageUrl: _imageUrl
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white flex flex-col items-center gap-12">
           {/* ロゴ画像 */}
           <div className="w-full max-w-[600px] mt-20 relative h-[200px]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/images/Facebook Image.png"
               alt="コンパるロゴ"

@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { SquarePaymentButton } from '@/components/SquarePaymentButton'
 import { useUser } from '@/hooks/useUser'
 
 export default function MenPayment() {

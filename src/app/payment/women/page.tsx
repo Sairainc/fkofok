@@ -7,7 +7,6 @@ import { useUser } from '@/hooks/useUser'
 export default function WomenPayment() {
   const { user, loading } = useUser()
   const router = useRouter()
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!loading && user && user.gender !== 'women') {
@@ -61,10 +60,6 @@ export default function WomenPayment() {
               >
                 支払いに進む
               </button>
-              
-              {error && (
-                <div className="mt-3 text-red-500 text-sm">{error}</div>
-              )}
             </div>
           </div>
         </div>
