@@ -61,7 +61,7 @@ export default function MenPayment() {
             </ul>
 
             <a
-              href={process.env.NEXT_PUBLIC_SQUARE_MEN_PAYMENT_LINK || ''}
+              href="https://square.link/u/6bklVkRk"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"

@@ -50,9 +50,9 @@ export default function WomenPayment() {
                 <li>新機能優先アクセス</li>
               </ul>
 
-              {/* JavaScriptリダイレクトではなく直接リンクを使用 */}
+              {/* 直接URLをハードコード */}
               <a
-                href={process.env.NEXT_PUBLIC_SQUARE_WOMEN_PAYMENT_LINK || ''}
+                href="https://square.link/u/jeoxIt7N"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-center"

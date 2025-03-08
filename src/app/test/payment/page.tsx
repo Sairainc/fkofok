@@ -12,9 +12,9 @@ export default function TestPaymentPage() {
           <h2 className="text-xl font-semibold mb-4">男性プラン</h2>
           <p className="mb-4">¥5,000/月</p>
           
-          {/* 男性プラン決済リンク */}
+          {/* 男性プラン決済リンク - 直接URLをハードコード */}
           <a
-            href={process.env.NEXT_PUBLIC_SQUARE_MEN_PAYMENT_LINK || ''}
+            href="https://square.link/u/6bklVkRk"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
@@ -27,9 +27,9 @@ export default function TestPaymentPage() {
           <h2 className="text-xl font-semibold mb-4">女性プラン</h2>
           <p className="mb-4">¥3,000/月</p>
           
-          {/* 女性プラン決済リンク */}
+          {/* 女性プラン決済リンク - 直接URLをハードコード */}
           <a
-            href={process.env.NEXT_PUBLIC_SQUARE_WOMEN_PAYMENT_LINK || ''}
+            href="https://square.link/u/jeoxIt7N"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
