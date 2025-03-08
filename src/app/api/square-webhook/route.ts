@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
-import { supabase } from '@/lib/supabase'
 
 const webhookSignatureKey = process.env.SQUARE_WEBHOOK_SIGNATURE_KEY!
 
