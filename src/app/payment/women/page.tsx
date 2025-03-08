@@ -1,64 +1,71 @@
 'use client'
 
-import React from 'react'
-import { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { PaymentButton } from '@/components/PaymentButton'
 import { useUser } from '@/hooks/useUser'
 
 export default function WomenPayment() {
   const { user, loading } = useUser()
   const router = useRouter()
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth')
+    if (!loading && user && user.gender !== 'women') {
+      router.push('/payment/men')
     }
   }, [user, loading, router])
 
   if (loading) {
+    return <div className="text-center py-10">Loading...</div>
+  }
+
+  if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="text-center py-10">
+        <h2 className="text-xl font-semibold mb-4">ログインが必要です</h2>
+        <p>このページを表示するにはログインしてください。</p>
       </div>
     )
   }
 
-  if (!user) return null
-
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">女性会員プラン</h1>
-        
-        <div className="bg-white rounded-lg shadow-sm p-8">
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-semibold">スタンダードプラン</h2>
-                <p className="text-gray-600 mt-2">収入証明書確認済みの男性会員とマッチング</p>
+    <div className="bg-gray-50 min-h-screen">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-center mb-8">女性会員プラン</h1>
+        <div className="max-w-md mx-auto">
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="p-6">
+              <h2 className="text-2xl font-semibold text-center mb-6">女性プラン</h2>
+              <div className="text-center mb-6">
+                <span className="text-4xl font-bold">¥3,000</span>
+                <span className="text-gray-600">/月</span>
               </div>
-              <div className="text-3xl font-bold">¥2,980</div>
-            </div>
-            
-            <ul className="space-y-3">
-              <li className="flex items-center">
-                <span className="text-green-500 mr-2">✓</span>
-                収入証明書確認済みの男性会員とマッチング
-              </li>
-              <li className="flex items-center">
-                <span className="text-green-500 mr-2">✓</span>
-                プライバシー保護
-              </li>
-              <li className="flex items-center">
-                <span className="text-green-500 mr-2">✓</span>
-                24時間のサポート
-              </li>
-            </ul>
+              
+              <p className="text-gray-700 mb-6">
+                女性向けプランでは以下の特典が含まれています：
+              </p>
+              
+              <ul className="list-disc pl-5 mb-4">
+                <li>すべての機能にアクセス可能</li>
+                <li>プレミアムサポート</li>
+                <li>新機能優先アクセス</li>
+              </ul>
 
-            <PaymentButton 
-              priceId={process.env.NEXT_PUBLIC_STRIPE_WOMEN_PRICE_ID!}
-            />
+              {/* インラインボタン */}
+              <button
+                onClick={() => {
+                  // 直接Square決済リンクに遷移
+                  window.location.href = process.env.NEXT_PUBLIC_SQUARE_WOMEN_PAYMENT_LINK || '';
+                }}
+                className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              >
+                支払いに進む
+              </button>
+              
+              {error && (
+                <div className="mt-3 text-red-500 text-sm">{error}</div>
+              )}
+            </div>
           </div>
         </div>
       </div>

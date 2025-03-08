@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { PaymentButton } from '@/components/PaymentButton'
+import { SquarePaymentButton } from '@/components/SquarePaymentButton'
 import { useUser } from '@/hooks/useUser'
 
 export default function MenPayment() {
@@ -55,9 +55,20 @@ export default function MenPayment() {
               </li>
             </ul>
 
-            <PaymentButton 
-              priceId={process.env.NEXT_PUBLIC_STRIPE_MEN_PRICE_ID!}
-            />
+            <ul className="list-disc pl-5 mb-4">
+              <li>すべての機能にアクセス可能</li>
+              <li>プレミアムサポート</li>
+              <li>新機能優先アクセス</li>
+            </ul>
+
+            <button
+              onClick={() => {
+                window.location.href = process.env.NEXT_PUBLIC_SQUARE_MEN_PAYMENT_LINK || '';
+              }}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            >
+              支払いに進む
+            </button>
           </div>
         </div>
       </div>
