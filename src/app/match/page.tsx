@@ -143,21 +143,15 @@ export default function MatchConfirmation() {
     return null // すでにリダイレクト処理されているので何も表示しない
   }
 
-  // ユーザーの役割を判定（男性1、男性2、女性1、女性2のいずれか）
-  const userRole = user?.id === matchInfo.male_user_1_id 
-    ? '男性1' 
-    : user?.id === matchInfo.male_user_2_id 
-      ? '男性2' 
-      : user?.id === matchInfo.female_user_1_id 
-        ? '女性1' 
-        : '女性2'
-
   // 日付をフォーマット
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     const year = date.getFullYear()
     const month = date.getMonth() + 1
     const day = date.getDate()
+    const hours = date.getHours()
+    const minutes = date.getMinutes()
+
     
     return `${year}年${month}月${day}日 19時〜`
   }
