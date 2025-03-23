@@ -6,14 +6,25 @@ import { useEffect } from "react";
 import { RegistrationForm } from "@/components/RegistrationForm";
 
 export default function Form() {
-    const { user, loading } = useUser();
+    const { user, loading, hasMatch } = useUser();
     const router = useRouter();
 
     useEffect(() => {
-        if (!loading && !user) {
+        if (loading) return;
+        
+        if (!user) {
             router.push('/auth');
+            return;
         }
-    }, [user, loading, router]);
+        
+        if (hasMatch) {
+            if (process.env.NODE_ENV === 'development') {
+                console.log("🔄 マッチが見つかりました。マッチページへリダイレクト");
+            }
+            router.push('/match');
+            return;
+        }
+    }, [user, loading, router, hasMatch]);
 
     if (loading) {
         return (

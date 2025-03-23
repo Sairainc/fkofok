@@ -12,6 +12,7 @@ type User = {
 export const useUser = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasMatch, setHasMatch] = useState(false);
 
   useEffect(() => {
     const initLiff = async () => {
@@ -55,6 +56,20 @@ export const useUser = () => {
           console.error("❌ Supabaseエラー:", error);
         }
 
+        // **マッチングテーブルをチェック**
+        const { data: matchData } = await supabase
+          .from('matches')
+          .select('*')
+          .or(`male_user_1_id.eq."${profile.userId}",male_user_2_id.eq."${profile.userId}",female_user_1_id.eq."${profile.userId}",female_user_2_id.eq."${profile.userId}"`)
+          .limit(1);
+
+        if (matchData && matchData.length > 0) {
+          setHasMatch(true);
+          if (process.env.NODE_ENV === 'development') {
+            console.log("✅ マッチが見つかりました:", matchData);
+          }
+        }
+
         // **DBにline_idがない場合、新規作成**
         if (!userData) {
           if (process.env.NODE_ENV === 'development') {
@@ -91,5 +106,5 @@ export const useUser = () => {
     initLiff();
   }, []);
 
-  return { user, loading };
+  return { user, loading, hasMatch };
 };

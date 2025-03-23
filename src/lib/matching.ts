@@ -34,10 +34,10 @@ export const findMatch = async (preferredDate: string) => {
         const { error: matchError } = await supabase
           .from('matches')
           .insert({
-            male_user_1: maleCandidates[0].line_id,
-            male_user_2: maleCandidates[1].line_id,
-            female_user_1: femaleCandidates[0].line_id,
-            female_user_2: femaleCandidates[1].line_id,
+            male_user_1_id: maleCandidates[0].line_id,
+            male_user_2_id: maleCandidates[1].line_id,
+            female_user_1_id: femaleCandidates[0].line_id,
+            female_user_2_id: femaleCandidates[1].line_id,
             match_date: preferredDate,
             status: 'pending',
             created_at: new Date().toISOString(),
