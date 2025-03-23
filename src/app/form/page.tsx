@@ -4,6 +4,7 @@ import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { RegistrationForm } from "@/components/RegistrationForm";
+import { Navigation } from "@/components/Navigation";
 
 export default function Form() {
     const { user, loading, hasMatch } = useUser();
@@ -36,5 +37,12 @@ export default function Form() {
     
     if (!user) return null;
 
-    return <RegistrationForm userId={user.id} />;
+    return (
+        <>
+            <Navigation />
+            <div className="pt-16">
+                <RegistrationForm userId={user.id} />
+            </div>
+        </>
+    );
 }
