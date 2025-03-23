@@ -6,7 +6,6 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { format } from 'date-fns';
 
 // エリア
 const areaOptions = ['恵比寿', '新橋・銀座', 'どちらでもOK'] as const;
@@ -204,7 +203,7 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
       const tableName = userGender === 'men' ? 'men_preferences' : 'women_preferences';
       
       // 既存のデータを確認
-      const { data: existingData, error: checkError } = await supabase
+      const { data: _existingData, error: checkError } = await supabase
         .from(tableName)
         .select('id')
         .eq('line_id', userId)
