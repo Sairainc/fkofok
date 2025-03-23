@@ -25,19 +25,6 @@ export default function MatchConfirmation() {
     const checkMatch = async () => {
       try {
         if (!user?.id) return
-
-        console.log("🔍 マッチング確認を開始します - ユーザーID:", user.id);
-        
-        // デバッグ: テーブル構造を確認
-        const { data: tableInfo, error: tableError } = await supabase
-          .from('matches')
-          .select('*')
-          .limit(1);
-          
-        console.log("📋 テーブル情報:", tableInfo);
-        if (tableError) {
-          console.error("❌ テーブル情報取得エラー:", tableError);
-        }
         
         // matchesテーブルから自分のLINE IDを含むマッチを検索 - 4つの別々のクエリ
         let matchData = null;
@@ -51,9 +38,8 @@ export default function MatchConfirmation() {
           .limit(1);
           
         if (error1) {
-          console.error("❌ male_user_1_id検索エラー:", error1);
+          console.error('male_user_1_id検索エラー:', error1);
         } else if (data1 && data1.length > 0) {
-          console.log("✅ male_user_1_id一致:", data1);
           matchData = data1[0];
         }
         
@@ -67,9 +53,8 @@ export default function MatchConfirmation() {
             .limit(1);
             
           if (error2) {
-            console.error("❌ male_user_2_id検索エラー:", error2);
+            console.error('male_user_2_id検索エラー:', error2);
           } else if (data2 && data2.length > 0) {
-            console.log("✅ male_user_2_id一致:", data2);
             matchData = data2[0];
           }
         }
@@ -84,9 +69,8 @@ export default function MatchConfirmation() {
             .limit(1);
             
           if (error3) {
-            console.error("❌ female_user_1_id検索エラー:", error3);
+            console.error('female_user_1_id検索エラー:', error3);
           } else if (data3 && data3.length > 0) {
-            console.log("✅ female_user_1_id一致:", data3);
             matchData = data3[0];
           }
         }
@@ -101,20 +85,16 @@ export default function MatchConfirmation() {
             .limit(1);
             
           if (error4) {
-            console.error("❌ female_user_2_id検索エラー:", error4);
+            console.error('female_user_2_id検索エラー:', error4);
           } else if (data4 && data4.length > 0) {
-            console.log("✅ female_user_2_id一致:", data4);
             matchData = data4[0];
           }
         }
-
-        console.log("✅ 最終マッチ情報:", matchData);
 
         if (matchData) {
           setMatchInfo(matchData as MatchInfo);
         } else {
           // マッチが見つからない場合はホームページにリダイレクト
-          console.log("⚠️ マッチが見つかりません。ホームにリダイレクトします。");
           router.push('/');
         }
       } catch (error) {
