@@ -335,7 +335,7 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
         const { data: matchData } = await supabase
           .from('matches')
           .select('*')
-          .or(`male_user_1.eq."${userId}",male_user_2.eq."${userId}",female_user_1.eq."${userId}",female_user_2.eq."${userId}"`)
+          .or(`male_user_1_id.eq."${userId}",male_user_2_id.eq."${userId}",female_user_1_id.eq."${userId}",female_user_2_id.eq."${userId}"`)
           .limit(1);
 
         // マッチが見つかった場合は/matchページにリダイレクト

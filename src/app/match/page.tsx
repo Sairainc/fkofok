@@ -7,10 +7,10 @@ import { supabase } from '@/lib/supabase'
 
 type MatchInfo = {
   id: string
-  male_user_1: string
-  male_user_2: string
-  female_user_1: string
-  female_user_2: string
+  male_user_1_id: string
+  male_user_2_id: string
+  female_user_1_id: string
+  female_user_2_id: string
   match_date: string
   status: 'pending' | 'confirmed' | 'cancelled'
 }
@@ -30,7 +30,7 @@ export default function MatchConfirmation() {
         const { data, error } = await supabase
           .from('matches')
           .select('*')
-          .or(`male_user_1.eq."${user.id}",male_user_2.eq."${user.id}",female_user_1.eq."${user.id}",female_user_2.eq."${user.id}"`)
+          .or(`male_user_1_id.eq."${user.id}",male_user_2_id.eq."${user.id}",female_user_1_id.eq."${user.id}",female_user_2_id.eq."${user.id}"`)
           .order('created_at', { ascending: false })
           .limit(1)
           .single()
@@ -74,11 +74,11 @@ export default function MatchConfirmation() {
   }
 
   // ユーザーの役割を判定（男性1、男性2、女性1、女性2のいずれか）
-  const userRole = user?.id === matchInfo.male_user_1 
+  const userRole = user?.id === matchInfo.male_user_1_id 
     ? '男性1' 
-    : user?.id === matchInfo.male_user_2 
+    : user?.id === matchInfo.male_user_2_id 
       ? '男性2' 
-      : user?.id === matchInfo.female_user_1 
+      : user?.id === matchInfo.female_user_1_id 
         ? '女性1' 
         : '女性2'
 
