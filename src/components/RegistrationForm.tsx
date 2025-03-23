@@ -331,6 +331,20 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
     const checkRegistrationStatus = async () => {
       if (!userId) return;
       try {
+        // まずmatchesテーブルをチェック - DBに登録されているmatchesに含まれているかどうか
+        const { data: matchData } = await supabase
+          .from('matches')
+          .select('*')
+          .or(`male_user_1.eq."${userId}",male_user_2.eq."${userId}",female_user_1.eq."${userId}",female_user_2.eq."${userId}"`)
+          .limit(1);
+
+        // マッチが見つかった場合は/matchページにリダイレクト
+        if (matchData && matchData.length > 0) {
+          window.location.href = '/match';
+          return;
+        }
+
+        // 以下は既存の処理
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
@@ -369,7 +383,8 @@ export const RegistrationForm = ({ userId }: RegistrationFormProps) => {
             setIsRegistered(false);
           }
         }
-      } catch (_) {
+      } catch (error) {
+        console.error('ステータスチェックエラー:', error);
         setIsRegistered(false);
       } finally {
         setIsLoading(false);
