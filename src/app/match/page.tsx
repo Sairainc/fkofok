@@ -26,26 +26,96 @@ export default function MatchConfirmation() {
       try {
         if (!user?.id) return
 
-        // matchesテーブルから自分のLINE IDを含むマッチを検索
-        const { data, error } = await supabase
+        console.log("🔍 マッチング確認を開始します - ユーザーID:", user.id);
+        
+        // デバッグ: テーブル構造を確認
+        const { data: tableInfo, error: tableError } = await supabase
           .from('matches')
           .select('*')
-          .or(`male_user_1_id.eq."${user.id}",male_user_2_id.eq."${user.id}",female_user_1_id.eq."${user.id}",female_user_2_id.eq."${user.id}"`)
+          .limit(1);
+          
+        console.log("📋 テーブル情報:", tableInfo);
+        if (tableError) {
+          console.error("❌ テーブル情報取得エラー:", tableError);
+        }
+        
+        // matchesテーブルから自分のLINE IDを含むマッチを検索 - 4つの別々のクエリ
+        let matchData = null;
+        
+        // male_user_1_id
+        const { data: data1, error: error1 } = await supabase
+          .from('matches')
+          .select('*')
+          .eq('male_user_1_id', user.id)
           .order('created_at', { ascending: false })
-          .limit(1)
-          .single()
-
-        if (error && error.code !== 'PGRST116') {
-          console.error('マッチ情報取得エラー:', error)
-          router.push('/')
-          return
+          .limit(1);
+          
+        if (error1) {
+          console.error("❌ male_user_1_id検索エラー:", error1);
+        } else if (data1 && data1.length > 0) {
+          console.log("✅ male_user_1_id一致:", data1);
+          matchData = data1[0];
+        }
+        
+        // male_user_2_id
+        if (!matchData) {
+          const { data: data2, error: error2 } = await supabase
+            .from('matches')
+            .select('*')
+            .eq('male_user_2_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1);
+            
+          if (error2) {
+            console.error("❌ male_user_2_id検索エラー:", error2);
+          } else if (data2 && data2.length > 0) {
+            console.log("✅ male_user_2_id一致:", data2);
+            matchData = data2[0];
+          }
+        }
+        
+        // female_user_1_id
+        if (!matchData) {
+          const { data: data3, error: error3 } = await supabase
+            .from('matches')
+            .select('*')
+            .eq('female_user_1_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1);
+            
+          if (error3) {
+            console.error("❌ female_user_1_id検索エラー:", error3);
+          } else if (data3 && data3.length > 0) {
+            console.log("✅ female_user_1_id一致:", data3);
+            matchData = data3[0];
+          }
+        }
+        
+        // female_user_2_id
+        if (!matchData) {
+          const { data: data4, error: error4 } = await supabase
+            .from('matches')
+            .select('*')
+            .eq('female_user_2_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1);
+            
+          if (error4) {
+            console.error("❌ female_user_2_id検索エラー:", error4);
+          } else if (data4 && data4.length > 0) {
+            console.log("✅ female_user_2_id一致:", data4);
+            matchData = data4[0];
+          }
         }
 
-        if (data) {
-          setMatchInfo(data as MatchInfo)
+        console.log("✅ 最終マッチ情報:", matchData);
+
+        if (matchData) {
+          setMatchInfo(matchData as MatchInfo);
         } else {
           // マッチが見つからない場合はホームページにリダイレクト
-          router.push('/')
+          console.log("⚠️ マッチが見つかりません。ホームにリダイレクトします。");
+          router.push('/');
         }
       } catch (error) {
         console.error('マッチ確認エラー:', error)
