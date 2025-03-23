@@ -28,44 +28,6 @@ export default function MatchConfirmation() {
 
         console.log("🔍 マッチング確認を開始します - ユーザーID:", user.id);
         
-        // ユーザーIDの詳細情報
-        console.log("🔍 ユーザーID詳細:", {
-          id: user.id,
-          length: user.id?.length,
-          firstChar: user.id?.charAt(0),
-          lastChar: user.id?.charAt(user.id?.length - 1)
-        });
-        
-        // 固定IDでのテスト検索
-        const testUserId = 'U0f788633558622c41f051d026147a8e9';
-        console.log("🧪 テスト検索 - 固定ID:", testUserId);
-        
-        const { data: testData, error: testError } = await supabase
-          .from('matches')
-          .select('*')
-          .eq('male_user_1_id', testUserId)
-          .limit(1);
-          
-        if (testError) {
-          console.error("❌ テスト検索エラー:", testError);
-        } else {
-          console.log("📋 テスト検索結果:", testData);
-          console.log("📏 テスト結果数:", testData ? testData.length : 0);
-        }
-        
-        // 文字列比較のテスト
-        console.log("🔄 文字列一致テスト:", user.id === testUserId);
-        
-        // SQL直接実行テスト
-        const { data: sqlData, error: sqlError } = await supabase
-          .rpc('find_match_by_id', { user_id_param: user.id });
-          
-        if (sqlError) {
-          console.error("❌ SQL実行エラー:", sqlError);
-        } else {
-          console.log("🔧 SQL実行結果:", sqlData);
-        }
-        
         // デバッグ: テーブル構造を確認
         const { data: tableInfo, error: tableError } = await supabase
           .from('matches')
@@ -196,10 +158,8 @@ export default function MatchConfirmation() {
     const year = date.getFullYear()
     const month = date.getMonth() + 1
     const day = date.getDate()
-    const hours = date.getHours()
-    const minutes = date.getMinutes()
     
-    return `${year}年${month}月${day}日 ${hours}時${minutes}分`
+    return `${year}年${month}月${day}日 19時〜`
   }
 
   return (
@@ -228,11 +188,6 @@ export default function MatchConfirmation() {
           </div>
           
           <div className="border-t border-b border-gray-200 py-4 space-y-3">
-            <div>
-              <h2 className="text-sm font-medium text-gray-500">あなたの役割</h2>
-              <p className="text-lg font-medium text-gray-900">{userRole}</p>
-            </div>
-            
             <div>
               <h2 className="text-sm font-medium text-gray-500">合コン日時</h2>
               <p className="text-lg font-medium text-gray-900">{formatDate(matchInfo.match_date)}</p>
