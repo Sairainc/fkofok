@@ -57,58 +57,17 @@ export const useUser = () => {
         }
 
         // **マッチングテーブルをチェック**
-        try {
-          // 4つの個別のクエリを実行
-          const { data: matchData1, error: matchError1 } = await supabase
-            .from('matches')
-            .select('*')
-            .eq('male_user_1_id', profile.userId)
-            .limit(1);
-          
-          const { data: matchData2, error: matchError2 } = await supabase
-            .from('matches')
-            .select('*')
-            .eq('male_user_2_id', profile.userId)
-            .limit(1);
-            
-          const { data: matchData3, error: matchError3 } = await supabase
-            .from('matches')
-            .select('*')
-            .eq('female_user_1_id', profile.userId)
-            .limit(1);
-            
-          const { data: matchData4, error: matchError4 } = await supabase
-            .from('matches')
-            .select('*')
-            .eq('female_user_2_id', profile.userId)
-            .limit(1);
-          
-          // エラーがあれば出力
-          if (matchError1) console.error("❌ male_user_1_id検索エラー:", matchError1);
-          if (matchError2) console.error("❌ male_user_2_id検索エラー:", matchError2);
-          if (matchError3) console.error("❌ female_user_1_id検索エラー:", matchError3);
-          if (matchError4) console.error("❌ female_user_2_id検索エラー:", matchError4);
-          
-          // どれかにマッチすればhasMatchをtrue
-          if (
-            (matchData1 && matchData1.length > 0) || 
-            (matchData2 && matchData2.length > 0) || 
-            (matchData3 && matchData3.length > 0) || 
-            (matchData4 && matchData4.length > 0)
-          ) {
-            setHasMatch(true);
-            console.log("✅ マッチが見つかりました");
-            
-            // デバッグ用に詳細表示
-            if (matchData1 && matchData1.length > 0) console.log("🔍 male_user_1_id:", matchData1);
-            if (matchData2 && matchData2.length > 0) console.log("🔍 male_user_2_id:", matchData2);
-            if (matchData3 && matchData3.length > 0) console.log("🔍 female_user_1_id:", matchData3);
-            if (matchData4 && matchData4.length > 0) console.log("🔍 female_user_2_id:", matchData4);
-          } else {
-            console.log("⚠️ マッチが見つかりませんでした");
+        const { data: matchData } = await supabase
+          .from('matches')
+          .select('*')
+          .or(`male_user_1_id.eq."${profile.userId}",male_user_2_id.eq."${profile.userId}",female_user_1_id.eq."${profile.userId}",female_user_2_id.eq."${profile.userId}"`)
+          .limit(1);
+
+        if (matchData && matchData.length > 0) {
+          setHasMatch(true);
+          if (process.env.NODE_ENV === 'development') {
+            console.log("✅ マッチが見つかりました:", matchData);
           }
-        } catch (matchCheckError) {
-          console.error("❌ マッチチェック例外:", matchCheckError);
         }
 
         // **DBにline_idがない場合、新規作成**
