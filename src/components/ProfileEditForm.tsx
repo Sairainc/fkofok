@@ -142,8 +142,6 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
-    reset,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
