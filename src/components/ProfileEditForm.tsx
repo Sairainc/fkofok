@@ -96,32 +96,34 @@ const womenAppearanceOptions = [
 
 // プロフィールスキーマ
 const profileSchema = z.object({
-  gender: z.enum(['men', 'women']),
+  gender: z.enum(['men', 'women']).optional(),
   phone_number: z
     .string()
     .min(10, '電話番号が短すぎます')
     .max(11, '電話番号が長すぎます')
-    .regex(/^[0-9]+$/, '数字のみ入力してください'),
-  personality: z.array(z.string()).min(1, '1つ以上選択してください'),
-  mbti: z.enum(mbtiOptions),
-  appearance: z.string(),
-  style: z.string(),
-  dating_experience: z.string(),
-  education: z.enum(educationOptions),
-  hometown_prefecture: z.enum(prefectures),
-  hometown_city: z.string().min(1, '市区町村を入力してください'),
-  prefecture: z.enum(prefectures),
-  current_city: z.string().min(1, '市区町村を入力してください'),
+    .regex(/^[0-9]+$/, '数字のみ入力してください')
+    .optional(),
+  personality: z.array(z.string()).optional(),
+  mbti: z.enum(mbtiOptions).optional(),
+  appearance: z.string().optional(),
+  style: z.string().optional(),
+  dating_experience: z.string().optional(),
+  education: z.enum(educationOptions).optional(),
+  hometown_prefecture: z.enum(prefectures).optional(),
+  hometown_city: z.string().min(1, '市区町村を入力してください').optional(),
+  prefecture: z.enum(prefectures).optional(),
+  current_city: z.string().min(1, '市区町村を入力してください').optional(),
   birth_date: z.string()
-    .min(1, '生年月日を入力してください')
     .regex(/^\d{4}\/\d{2}\/\d{2}$/, '正しい形式で入力してください（例：2000/01/01）')
     .refine((date) => {
+      if (!date) return true; // 空の場合は検証をスキップ
       const [year, month, day] = date.split('/').map(Number);
       const inputDate = new Date(year, month - 1, day);
       return inputDate instanceof Date && !isNaN(inputDate.getTime());
-    }, '正しい日付を入力してください'),
-  occupation: z.enum(occupations),
-  income: z.enum(incomeRanges),
+    }, '正しい日付を入力してください')
+    .optional(),
+  occupation: z.enum(occupations).optional(),
+  income: z.enum(incomeRanges).optional(),
   email: z.string().email('正しいメールアドレスを入力してください'),
 });
 
@@ -169,10 +171,13 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
         }
 
         if (data) {
-          setGender(data.gender);
+          // 性別の設定（存在する場合のみ）
+          if (data.gender) {
+            setGender(data.gender);
+            setValue('gender', data.gender);
+          }
           
-          // フォームに値をセット
-          setValue('gender', data.gender);
+          // その他のフォーム値を設定
           setValue('phone_number', data.phone_number || '');
           setValue('personality', data.personality || []);
           setValue('mbti', data.mbti as any || '');
@@ -202,42 +207,51 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
   const onSubmit = async (data: ProfileFormData) => {
     try {
       setSubmitting(true);
+
+      // 送信データを準備
+      const updatedData: Record<string, any> = { 
+        gender: gender, // 性別は常に含める
+        updated_at: new Date().toISOString()
+      };
+
+      // 未入力でないフィールドのみを送信データに含める
+      Object.entries(data).forEach(([key, value]) => {
+        // 配列の場合は空配列でなければ含める
+        if (Array.isArray(value)) {
+          if (value.length > 0) {
+            updatedData[key] = value;
+          }
+        } 
+        // 文字列の場合は空文字でなければ含める
+        else if (typeof value === 'string') {
+          if (value.trim() !== '') {
+            // birth_dateフィールドの場合は形式を変換
+            if (key === 'birth_date') {
+              updatedData['birthdate'] = value.replace(/\//g, '-');
+            } else {
+              updatedData[key] = value;
+            }
+          }
+        }
+        // その他の値タイプ（null以外）
+        else if (value !== null && value !== undefined) {
+          updatedData[key] = value;
+        }
+      });
       
-      // Supabase形式に変換
-      const formattedBirthDate = data.birth_date.replace(/\//g, '-');
-      
+      // データ更新処理
       const { error } = await supabase
         .from('profiles')
-        .update({
-          gender: data.gender,
-          phone_number: data.phone_number,
-          personality: data.personality,
-          mbti: data.mbti,
-          appearance: data.appearance,
-          style: data.style,
-          dating_experience: data.dating_experience,
-          education: data.education,
-          hometown_prefecture: data.hometown_prefecture,
-          hometown_city: data.hometown_city,
-          prefecture: data.prefecture,
-          current_city: data.current_city,
-          birthdate: formattedBirthDate,
-          occupation: data.occupation,
-          income: data.income,
-          email: data.email,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updatedData)
         .eq('id', userId);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      alert('プロフィールが更新されました');
+      alert('プロフィールが更新されました！');
       router.refresh();
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('エラーが発生しました。もう一度お試しください。');
+      alert('プロフィールの更新中にエラーが発生しました。');
     } finally {
       setSubmitting(false);
     }
@@ -435,7 +449,7 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
         {/* 交際経験 */}
         <div className="space-y-2">
           <label htmlFor="dating_experience" className="block font-medium">
-            交際経験
+            合コン経験
           </label>
           <input
             id="dating_experience"

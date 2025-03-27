@@ -36,6 +36,30 @@ export default function MyPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-4xl mx-auto px-4">
+        {/* 戻るアイコン */}
+        <div className="mb-4 flex items-center">
+          <a 
+            href="https://www.comparu.net" 
+            className="flex items-center text-gray-600 hover:text-primary transition-colors"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-6 w-6 mr-1" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M10 19l-7-7m0 0l7-7m-7 7h18" 
+              />
+            </svg>
+            <span>戻る</span>
+          </a>
+        </div>
+
         <h1 className="text-3xl font-bold text-gray-900 mb-8">マイページ</h1>
         
         {/* タブナビゲーション */}

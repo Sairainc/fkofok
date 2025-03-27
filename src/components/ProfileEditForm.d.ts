@@ -1,4 +1,6 @@
 declare module '@/components/ProfileEditForm' {
+  import { ReactNode } from 'react';
+  
   interface ProfileEditFormProps {
     userId: string;
   }
