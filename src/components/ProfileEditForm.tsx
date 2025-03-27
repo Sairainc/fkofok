@@ -208,6 +208,11 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
     try {
       setSubmitting(true);
 
+      // 性別のエラーチェックを削除（常に送信する）
+
+      // birthdate形式の変換
+      const formattedBirthDate = data.birth_date?.replace(/\//g, '-');
+
       // 送信データを準備
       const updatedData: Record<string, any> = { 
         gender: gender, // 性別は常に含める
@@ -216,6 +221,9 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
 
       // 未入力でないフィールドのみを送信データに含める
       Object.entries(data).forEach(([key, value]) => {
+        // genderキーはすでに設定済みのためスキップ
+        if (key === 'gender') return;
+        
         // 配列の場合は空配列でなければ含める
         if (Array.isArray(value)) {
           if (value.length > 0) {
@@ -238,6 +246,10 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
           updatedData[key] = value;
         }
       });
+
+      // 性別に関するフォールバックチェックを削除
+      
+      console.log('Updating profile with data:', updatedData);
       
       // データ更新処理
       const { error } = await supabase
@@ -271,38 +283,9 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
       <div className="space-y-6">
         <h3 className="text-xl font-semibold border-b pb-2">基本情報</h3>
         
-        {/* 性別 */}
-        <div className="space-y-2">
-          <label className="block font-medium">性別</label>
-          <div className="flex space-x-4">
-            <label className="flex items-center">
-              <input
-                type="radio"
-                value="men"
-                {...register('gender')}
-                onChange={() => setGender('men')}
-                className="mr-2"
-                disabled
-              />
-              男性
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                value="women"
-                {...register('gender')}
-                onChange={() => setGender('women')}
-                className="mr-2"
-                disabled
-              />
-              女性
-            </label>
-          </div>
-          {errors.gender && (
-            <p className="text-red-500 text-sm">{errors.gender.message}</p>
-          )}
-        </div>
-
+        {/* 性別フィールドを削除 - 表示しないが値は送信するための隠しフィールド */}
+        <input type="hidden" {...register('gender')} value={gender} />
+        
         {/* 電話番号 */}
         <div className="space-y-2">
           <label htmlFor="phone_number" className="block font-medium">
