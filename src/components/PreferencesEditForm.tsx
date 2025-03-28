@@ -69,6 +69,13 @@ type MenPreferencesData = z.infer<typeof menPreferencesSchema>;
 type WomenPreferencesData = z.infer<typeof womenPreferencesSchema>;
 type PreferenceData = MenPreferencesData | WomenPreferencesData;
 
+// データベースレコードの型定義
+interface PreferenceRecord {
+  id?: number;
+  line_id: string;
+  [key: string]: any; // データベースの他のフィールド用
+}
+
 type PreferencesEditFormProps = {
   userId: string;
   userGender: 'men' | 'women';
@@ -106,7 +113,6 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
   const [submitting, setSubmitting] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
-  const [originalData, setOriginalData] = useState<any>(null); // 元のデータを保存
   const router = useRouter();
   const dateOptions = generateDateOptions();
 
@@ -118,7 +124,6 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
   } = useForm<PreferenceData>({
     resolver: zodResolver(preferencesSchema as any),
     defaultValues: {
@@ -161,9 +166,6 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
         }
 
         if (data) {
-          // 元のデータを保存
-          setOriginalData(data);
-          
           // フォームに値をセット
           setValue('party_type', data.party_type);
           setValue('preferred_age_min', data.preferred_age_min);
@@ -260,7 +262,11 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
       } else {
         // データが存在する場合はUPDATE
         // 既存データとマージして入力されていないフィールドを保持
-        const mergedData = { ...existingData, ...processedData, updated_at: new Date().toISOString() };
+        const mergedData = { 
+          ...(existingData as PreferenceRecord), 
+          ...processedData, 
+          updated_at: new Date().toISOString() 
+        };
         
         // IDとline_idフィールドはUPDATEに含めない
         delete mergedData.id;
