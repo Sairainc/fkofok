@@ -13,11 +13,11 @@ const areaOptions = ['恵比寿', '新橋・銀座', 'どちらでもOK'] as con
 // レストラン選択
 const restaurantOptions = ['安旨居酒屋', 'おしゃれダイニング'] as const;
 
-// 男性用好み用スキーマ
+// 男性用好み用スキーマ - すべてオプショナルに変更
 const menPreferencesSchema = z.object({
-  party_type: z.enum(['fun', 'serious']),
-  preferred_age_min: z.number().min(20).max(60),
-  preferred_age_max: z.number().min(20).max(60),
+  party_type: z.enum(['fun', 'serious']).optional(),
+  preferred_age_min: z.number().min(20).max(60).optional(),
+  preferred_age_max: z.number().min(20).max(60).optional(),
   preferred_personality: z
     .array(
       z.enum([
@@ -28,22 +28,22 @@ const menPreferencesSchema = z.object({
         '小悪魔',
       ])
     )
-    .min(1, '1つ以上選択してください'),
-  preferred_body_type: z.enum(['スリム', '普通', 'グラマー', '気にしない']),
+    .optional(),
+  preferred_body_type: z.enum(['スリム', '普通', 'グラマー', '気にしない']).optional(),
   restaurant_preference: z
     .array(z.enum(restaurantOptions))
-    .min(1, '1つ以上選択してください'),
-  preferred_1areas: z.enum(areaOptions),
-  preferred_2areas: z.enum(areaOptions),
-  preferred_3areas: z.enum(areaOptions),
-  datetime: z.string().min(1, '希望日時を選択してください'),
+    .optional(),
+  preferred_1areas: z.enum(areaOptions).optional(),
+  preferred_2areas: z.enum(areaOptions).optional(),
+  preferred_3areas: z.enum(areaOptions).optional(),
+  datetime: z.string().optional(),
 });
 
-// 女性用好み用スキーマ
+// 女性用好み用スキーマ - すべてオプショナルに変更
 const womenPreferencesSchema = z.object({
-  party_type: z.enum(['fun', 'serious']),
-  preferred_age_min: z.number().min(20).max(60),
-  preferred_age_max: z.number().min(20).max(60),
+  party_type: z.enum(['fun', 'serious']).optional(),
+  preferred_age_min: z.number().min(20).max(60).optional(),
+  preferred_age_max: z.number().min(20).max(60).optional(),
   preferred_personality: z
     .array(
       z.enum([
@@ -53,15 +53,15 @@ const womenPreferencesSchema = z.object({
         'クールなタイプ',
       ])
     )
-    .min(1, '1つ以上選択してください'),
-  preferred_body_type: z.enum(['筋肉質', '普通', 'スリム', '気にしない']),
+    .optional(),
+  preferred_body_type: z.enum(['筋肉質', '普通', 'スリム', '気にしない']).optional(),
   restaurant_preference: z
     .array(z.enum(restaurantOptions))
-    .min(1, '1つ以上選択してください'),
-  preferred_1areas: z.enum(areaOptions),
-  preferred_2areas: z.enum(areaOptions),
-  preferred_3areas: z.enum(areaOptions),
-  datetime: z.string().min(1, '希望日時を選択してください'),
+    .optional(),
+  preferred_1areas: z.enum(areaOptions).optional(),
+  preferred_2areas: z.enum(areaOptions).optional(),
+  preferred_3areas: z.enum(areaOptions).optional(),
+  datetime: z.string().optional(),
 });
 
 // 型定義
@@ -106,6 +106,7 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
   const [submitting, setSubmitting] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
+  const [originalData, setOriginalData] = useState<any>(null); // 元のデータを保存
   const router = useRouter();
   const dateOptions = generateDateOptions();
 
@@ -117,6 +118,7 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
     handleSubmit,
     formState: { errors },
     setValue,
+    watch,
   } = useForm<PreferenceData>({
     resolver: zodResolver(preferencesSchema as any),
     defaultValues: {
@@ -159,6 +161,9 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
         }
 
         if (data) {
+          // 元のデータを保存
+          setOriginalData(data);
+          
           // フォームに値をセット
           setValue('party_type', data.party_type);
           setValue('preferred_age_min', data.preferred_age_min);
@@ -196,16 +201,45 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
     }
   }, [selectedDate, selectedTime, setValue]);
 
-  const onSubmit = async (data: PreferenceData) => {
+  const onSubmit = async (formData: PreferenceData) => {
     try {
       setSubmitting(true);
       
       const tableName = userGender === 'men' ? 'men_preferences' : 'women_preferences';
       
+      // 入力されたデータを処理
+      const processedData: Record<string, any> = {};
+      
+      // フォームデータから入力されたフィールドのみを抽出
+      Object.entries(formData).forEach(([key, value]) => {
+        // 配列の場合（パーソナリティ、レストラン選択など）
+        if (Array.isArray(value)) {
+          if (value.length > 0) {
+            processedData[key] = value;
+          }
+        } 
+        // 数値の場合
+        else if (typeof value === 'number') {
+          if (!isNaN(value)) {
+            processedData[key] = value;
+          }
+        }
+        // 文字列の場合
+        else if (typeof value === 'string') {
+          if (value.trim() !== '') {
+            processedData[key] = value.trim();
+          }
+        }
+        // その他の値タイプ（nullやundefined以外）
+        else if (value !== null && value !== undefined) {
+          processedData[key] = value;
+        }
+      });
+      
       // 既存のデータを確認
-      const { data: _existingData, error: checkError } = await supabase
+      const { data: existingData, error: checkError } = await supabase
         .from(tableName)
-        .select('id')
+        .select('*')
         .eq('line_id', userId)
         .single();
       
@@ -217,7 +251,7 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
           .from(tableName)
           .insert({
             line_id: userId,
-            ...data,
+            ...processedData,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           });
@@ -225,12 +259,15 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
         updateError = error;
       } else {
         // データが存在する場合はUPDATE
+        // 既存データとマージして入力されていないフィールドを保持
+        const mergedData = { ...existingData, ...processedData, updated_at: new Date().toISOString() };
+        
+        // IDとline_idフィールドはUPDATEに含めない
+        delete mergedData.id;
+        
         const { error } = await supabase
           .from(tableName)
-          .update({
-            ...data,
-            updated_at: new Date().toISOString(),
-          })
+          .update(mergedData)
           .eq('line_id', userId);
         
         updateError = error;
@@ -301,7 +338,10 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
           <div className="flex items-center space-x-2">
             <input
               type="number"
-              {...register('preferred_age_min', { valueAsNumber: true })}
+              {...register('preferred_age_min', { 
+                setValueAs: v => v === "" ? undefined : parseInt(v),
+                valueAsNumber: true 
+              })}
               className="w-20 p-2 border rounded-md"
               min={20}
               max={60}
@@ -309,7 +349,10 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
             <span>〜</span>
             <input
               type="number"
-              {...register('preferred_age_max', { valueAsNumber: true })}
+              {...register('preferred_age_max', { 
+                setValueAs: v => v === "" ? undefined : parseInt(v),
+                valueAsNumber: true 
+              })}
               className="w-20 p-2 border rounded-md"
               min={20}
               max={60}
@@ -522,4 +565,4 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
   );
 };
 
-export default PreferencesEditForm; 
+export default PreferencesEditForm;

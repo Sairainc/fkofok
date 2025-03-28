@@ -1,3 +1,4 @@
+// ProfileEditForm.jsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -94,7 +95,7 @@ const womenAppearanceOptions = [
   '個性的でアーティスティック系',
 ];
 
-// プロフィールスキーマ
+// プロフィールスキーマを更新し、ほとんどのフィールドをオプションに変更
 const profileSchema = z.object({
   gender: z.enum(['men', 'women']).optional(),
   phone_number: z
@@ -110,9 +111,9 @@ const profileSchema = z.object({
   dating_experience: z.string().optional(),
   education: z.enum(educationOptions).optional(),
   hometown_prefecture: z.enum(prefectures).optional(),
-  hometown_city: z.string().min(1, '市区町村を入力してください').optional(),
+  hometown_city: z.string().optional(),
   prefecture: z.enum(prefectures).optional(),
-  current_city: z.string().min(1, '市区町村を入力してください').optional(),
+  current_city: z.string().optional(),
   birth_date: z.string()
     .regex(/^\d{4}\/\d{2}\/\d{2}$/, '正しい形式で入力してください（例：2000/01/01）')
     .refine((date) => {
@@ -124,6 +125,7 @@ const profileSchema = z.object({
     .optional(),
   occupation: z.enum(occupations).optional(),
   income: z.enum(incomeRanges).optional(),
+  // メールアドレスは必須フィールドとして残す
   email: z.string().email('正しいメールアドレスを入力してください'),
 });
 
@@ -137,6 +139,7 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [gender, setGender] = useState<'men' | 'women'>('men');
+  const [originalData, setOriginalData] = useState<any>(null); // 元のデータを保存
   const router = useRouter();
 
   const {
@@ -171,6 +174,9 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
         }
 
         if (data) {
+          // 元のデータを保存
+          setOriginalData(data);
+          
           // 性別の設定（存在する場合のみ）
           if (data.gender) {
             setGender(data.gender);
@@ -208,8 +214,6 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
     try {
       setSubmitting(true);
 
-      // 性別のエラーチェックを削除（常に送信する）
-
       // 送信データを準備
       const updatedData: Record<string, unknown> = { 
         gender: gender, // 性別は常に含める
@@ -221,20 +225,23 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
         // genderキーはすでに設定済みのためスキップ
         if (key === 'gender') return;
         
-        // 配列の場合は空配列でなければ含める
+        // 配列の場合（パーソナリティなど）
         if (Array.isArray(value)) {
+          // 空でなければデータに含める
           if (value.length > 0) {
             updatedData[key] = value;
           }
         } 
-        // 文字列の場合は空文字でなければ含める
+        // 文字列の場合
         else if (typeof value === 'string') {
-          if (value.trim() !== '') {
+          // トリムして空でなければデータに含める
+          const trimmedValue = value.trim();
+          if (trimmedValue !== '') {
             // birth_dateフィールドの場合は形式を変換
             if (key === 'birth_date') {
-              updatedData['birthdate'] = value.replace(/\//g, '-');
+              updatedData['birthdate'] = trimmedValue.replace(/\//g, '-');
             } else {
-              updatedData[key] = value;
+              updatedData[key] = trimmedValue;
             }
           }
         }
@@ -244,8 +251,6 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
         }
       });
 
-      // 性別に関するフォールバックチェックを削除
-      
       console.log('Updating profile with data:', updatedData);
       
       // データ更新処理
@@ -614,4 +619,4 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
   );
 };
 
-export default ProfileEditForm; 
+export default ProfileEditForm;
