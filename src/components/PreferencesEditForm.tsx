@@ -253,7 +253,7 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
       });
       
       // 既存のデータを確認
-      const { data, error: checkError } = await supabase
+      const { data: _data, error: checkError } = await supabase
         .from(tableName)
         .select('*')
         .eq('line_id', userId)
