@@ -31,7 +31,7 @@ const menPreferencesSchema = z.object({
       ])
     )
     .min(1, '少なくとも1つ選択してください'),
-  preferred_body_type: z.enum(['スリム', '普通', 'グラマー', '気にしない'], {
+  preferred_body_type: z.enum(['グラマー', '普通', 'スリム', '気にしない'], {
     errorMap: () => ({ message: '体型を選択してください' })
   }),
   restaurant_preference: z
@@ -65,7 +65,7 @@ const womenPreferencesSchema = z.object({
       ])
     )
     .min(1, '少なくとも1つ選択してください'),
-  preferred_body_type: z.enum(['筋肉質', '普通', 'スリム', '気にしない'], {
+  preferred_body_type: z.enum(['筋肉質', 'がっしり', 'スリム', '普通', '気にしない'], {
     errorMap: () => ({ message: '体型を選択してください' })
   }),
   restaurant_preference: z
