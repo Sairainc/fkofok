@@ -90,7 +90,7 @@ type WomenPreferencesData = z.infer<typeof womenPreferencesSchema>;
 type PreferenceData = MenPreferencesData | WomenPreferencesData;
 
 // データベースレコードの型定義
-interface PreferenceRecord {
+interface _PreferenceRecord {
   id?: number;
   line_id: string;
   [key: string]: any; // データベースの他のフィールド用
@@ -253,7 +253,7 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
       });
       
       // 既存のデータを確認
-      const { data: existingData, error: checkError } = await supabase
+      const { data, error: checkError } = await supabase
         .from(tableName)
         .select('*')
         .eq('line_id', userId)
@@ -275,14 +275,12 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
         updateError = error;
       } else {
         // データが存在する場合はUPDATE
-        const updatedData = {
-          ...processedData,
-          updated_at: new Date().toISOString()
-        };
-        
         const { error } = await supabase
           .from(tableName)
-          .update(updatedData)
+          .update({
+            ...processedData,
+            updated_at: new Date().toISOString()
+          })
           .eq('line_id', userId);
         
         updateError = error;
