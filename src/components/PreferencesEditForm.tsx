@@ -92,16 +92,16 @@ interface _PreferenceRecord {
 
 type PreferencesEditFormProps = {
   userId: string;
-  userGender: 'men' | 'women';
 };
 
-const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) => {
+const PreferencesEditForm = ({ userId }: PreferencesEditFormProps) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [gender, setGender] = useState<'men' | 'women'>('men'); // デフォルト値を設定
   const router = useRouter();
 
-  // 女性用か男性用かでスキーマを切り替え
-  const preferencesSchema = userGender === 'men' ? menPreferencesSchema : womenPreferencesSchema;
+  // 性別に基づいてスキーマを切り替え
+  const preferencesSchema = gender === 'men' ? menPreferencesSchema : womenPreferencesSchema;
 
   const {
     register,
@@ -118,14 +118,40 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
   });
 
   // パーソナリティオプション（男性／女性で異なる）
-  const personalityOptions = userGender === 'men' 
+  const personalityOptions = gender === 'men' 
     ? ['明るい盛り上げタイプ', '気遣いできる', '天然いじられタイプ', 'クールなタイプ', '小悪魔'] 
     : ['明るい盛り上げタイプ', '気遣いできる', '天然いじられタイプ', 'クールなタイプ'];
   
   // 体型オプション（男性／女性で異なる）
-  const bodyTypeOptions = userGender === 'men'
+  const bodyTypeOptions = gender === 'men'
     ? ['グラマー', '普通', 'スリム', '気にしない'] 
     : ['筋肉質','がっしり', 'スリム', '普通', '気にしない'];
+
+  // ユーザーの性別を取得
+  useEffect(() => {
+    const fetchUserGender = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('gender')
+          .eq('line_id', userId)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching user gender:', error);
+          return;
+        }
+        
+        if (data && data.gender) {
+          setGender(data.gender);
+        }
+      } catch (error) {
+        console.error('Error loading gender:', error);
+      }
+    };
+    
+    fetchUserGender();
+  }, [userId]);
 
   // 希望条件をロード
   useEffect(() => {
@@ -133,7 +159,7 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
       try {
         setLoading(true);
         
-        const tableName = userGender === 'men' ? 'men_preferences' : 'women_preferences';
+        const tableName = gender === 'men' ? 'men_preferences' : 'women_preferences';
         
         const { data, error } = await supabase
           .from(tableName)
@@ -169,15 +195,17 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
       }
     };
 
-    fetchPreferences();
-  }, [userId, userGender, setValue]);
+    if (gender) {
+      fetchPreferences();
+    }
+  }, [userId, gender, setValue]);
 
   const onSubmit = async (formData: PreferenceData) => {
     try {
       setSubmitting(true);
       console.log('送信データ:', formData);
       
-      const tableName = userGender === 'men' ? 'men_preferences' : 'women_preferences';
+      const tableName = gender === 'men' ? 'men_preferences' : 'women_preferences';
       
       // 送信データを準備
       const processedData: Record<string, any> = {};

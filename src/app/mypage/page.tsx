@@ -100,7 +100,7 @@ export default function MyPage() {
           {activeTab === 'preferences' && (
             <>
               <h2 className="text-2xl font-semibold mb-6">希望条件編集</h2>
-              <PreferencesEditForm userId={user.id} userGender={mappedGender} />
+              <PreferencesEditForm userId={user.id} />
             </>
           )}
         </div>
