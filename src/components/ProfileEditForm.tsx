@@ -210,11 +210,8 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
 
       // 性別のエラーチェックを削除（常に送信する）
 
-      // birthdate形式の変換
-      const formattedBirthDate = data.birth_date?.replace(/\//g, '-');
-
       // 送信データを準備
-      const updatedData: Record<string, any> = { 
+      const updatedData: Record<string, unknown> = { 
         gender: gender, // 性別は常に含める
         updated_at: new Date().toISOString()
       };
