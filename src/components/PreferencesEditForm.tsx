@@ -113,6 +113,7 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
     defaultValues: {
       preferred_personality: [],
       restaurant_preference: [],
+      preferred_body_type: [],
     },
   });
 
@@ -123,8 +124,8 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
   
   // 体型オプション（男性／女性で異なる）
   const bodyTypeOptions = userGender === 'men'
-    ? ['筋肉質','がっしり', 'スリム', '普通', '気にしない']
-    : ['グラマー', '普通', 'スリム', '気にしない'];
+    ? ['グラマー', '普通', 'スリム', '気にしない'] 
+    : ['筋肉質','がっしり', 'スリム', '普通', '気にしない'];
 
   // 希望条件をロード
   useEffect(() => {
@@ -155,7 +156,7 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
           setValue('preferred_age_min', data.preferred_age_min);
           setValue('preferred_age_max', data.preferred_age_max);
           setValue('preferred_personality', data.preferred_personality || []);
-          setValue('preferred_body_type', data.preferred_body_type as any);
+          setValue('preferred_body_type', Array.isArray(data.preferred_body_type) ? data.preferred_body_type : [data.preferred_body_type].filter(Boolean));
           setValue('restaurant_preference', data.restaurant_preference || []);
           setValue('preferred_1areas', data.preferred_1areas as any || 'どちらでもOK');
           setValue('preferred_2areas', data.preferred_2areas as any || 'どちらでもOK');
@@ -174,6 +175,7 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
   const onSubmit = async (formData: PreferenceData) => {
     try {
       setSubmitting(true);
+      console.log('送信データ:', formData);
       
       const tableName = userGender === 'men' ? 'men_preferences' : 'women_preferences';
       
@@ -184,6 +186,10 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
       Object.entries(formData).forEach(([key, value]) => {
         // 配列の場合（パーソナリティ、レストラン選択など）
         if (Array.isArray(value)) {
+          if (value.length === 0 && key === 'preferred_body_type') {
+            console.error('体型が選択されていません');
+            throw new Error('体型を選択してください');
+          }
           processedData[key] = value;
         } 
         // 数値の場合
@@ -200,6 +206,13 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
         }
       });
       
+      console.log('処理後データ:', processedData);
+
+      // 必須フィールドの検証
+      if (!processedData.preferred_body_type || processedData.preferred_body_type.length === 0) {
+        throw new Error('体型を選択してください');
+      }
+      
       // 既存のデータを確認
       const { data: _data, error: checkError } = await supabase
         .from(tableName)
@@ -211,6 +224,7 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
       
       if (checkError && checkError.code === 'PGRST116') {
         // データが存在しない場合はINSERT
+        console.log('新規データ挿入');
         const { error } = await supabase
           .from(tableName)
           .insert({
@@ -223,6 +237,7 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
         updateError = error;
       } else {
         // データが存在する場合はUPDATE
+        console.log('既存データ更新');
         const { error } = await supabase
           .from(tableName)
           .update({
@@ -235,6 +250,7 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
       }
 
       if (updateError) {
+        console.error('更新エラー:', updateError);
         throw updateError;
       }
 
@@ -242,7 +258,7 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
       router.refresh();
     } catch (error) {
       console.error('希望条件の更新中にエラーが発生しました:', error);
-      alert('エラーが発生しました。すべての項目を入力してください。');
+      alert('エラーが発生しました: ' + (error instanceof Error ? error.message : 'すべての項目を入力してください。'));
     } finally {
       setSubmitting(false);
     }
@@ -351,22 +367,23 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
         {/* 体型 */}
         <div className="space-y-2">
           <label className="block font-medium">希望する体型（複数選択可）</label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 border p-3 rounded-md bg-gray-50">
             {bodyTypeOptions.map(option => (
-              <label key={option} className="flex items-center">
+              <label key={option} className="flex items-center p-2 hover:bg-gray-100 rounded">
                 <input
                   type="checkbox"
                   value={option}
                   {...register('preferred_body_type')}
-                  className="mr-2"
+                  className="mr-2 w-4 h-4 accent-primary"
                 />
                 {option}
               </label>
             ))}
           </div>
           {errors.preferred_body_type && (
-            <p className="text-red-500 text-sm">{errors.preferred_body_type.message}</p>
+            <p className="text-red-500 text-sm mt-1">{errors.preferred_body_type.message}</p>
           )}
+          <p className="text-xs text-gray-500 mt-1">※少なくとも1つ選択してください</p>
         </div>
       </div>
 
