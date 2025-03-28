@@ -176,7 +176,7 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', userId)
+          .eq('line_id', userId)
           .single();
 
         if (error) {
@@ -253,7 +253,7 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
       const { error } = await supabase
         .from('profiles')
         .update(updatedData)
-        .eq('id', userId);
+        .eq('line_id', userId);
 
       if (error) throw error;
 
