@@ -204,7 +204,7 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
           setValue('hometown_prefecture', data.hometown_prefecture as any || '');
           setValue('hometown_city', data.hometown_city || '');
           setValue('prefecture', data.prefecture as any || '');
-          setValue('current_city', data.current_city || '');
+          setValue('current_city', data.city || '');
           setValue('birth_date', data.birth_date?.replace(/-/g, '/') || '');
           setValue('occupation', data.occupation as any || '');
           setValue('income', data.income as any || '');
@@ -224,33 +224,56 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
     try {
       setSubmitting(true);
 
-      // 送信データを準備
+      // 送信データを準備（DBに存在するカラム名のみを使用）
+      const dbFieldMap: Record<string, string> = {
+        // フォームフィールド名: DBカラム名
+        'birth_date': 'birth_date',
+        'phone_number': 'phone_number',
+        'personality': 'personality',
+        'mbti': 'mbti',
+        'appearance': 'appearance',
+        'style': 'style',
+        'dating_experience': 'dating_experience',
+        'education': 'education',
+        'hometown_prefecture': 'hometown_prefecture',
+        'hometown_city': 'hometown_city', 
+        'prefecture': 'prefecture',
+        'current_city': 'city', // current_cityがcityになっている可能性
+        'occupation': 'occupation',
+        'income': 'income',
+        'email': 'email'
+      };
+
       const updatedData: Record<string, unknown> = { 
         gender: gender, // 性別は常に含める
         updated_at: new Date().toISOString()
       };
 
-      // すべてのフィールドを送信データに含める
+      // すべてのフィールドを送信データに含める（DBカラム名にマッピング）
       Object.entries(data).forEach(([key, value]) => {
         // genderキーはすでに設定済みのためスキップ
         if (key === 'gender') return;
         
+        // DBに対応するフィールド名があるか確認
+        const dbField = dbFieldMap[key];
+        if (!dbField) return; // 対応するDBフィールドが見つからない場合はスキップ
+        
         // 配列の場合（パーソナリティなど）
         if (Array.isArray(value)) {
-          updatedData[key] = value;
+          updatedData[dbField] = value;
         } 
         // 文字列の場合
         else if (typeof value === 'string') {
-          // birth_dateフィールドの場合は形式を変換して別のキー名で保存
+          // birth_dateフィールドの場合は形式を変換
           if (key === 'birth_date') {
-            updatedData['birth_date'] = value.replace(/\//g, '-');
+            updatedData[dbField] = value.replace(/\//g, '-');
           } else {
-            updatedData[key] = value;
+            updatedData[dbField] = value;
           }
         }
         // その他の値タイプ
         else if (value !== null && value !== undefined) {
-          updatedData[key] = value;
+          updatedData[dbField] = value;
         }
       });
 
