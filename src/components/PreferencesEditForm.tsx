@@ -31,9 +31,7 @@ const menPreferencesSchema = z.object({
       ])
     )
     .min(1, '少なくとも1つ選択してください'),
-  preferred_body_type: z.enum(['グラマー', '普通', 'スリム', '気にしない'], {
-    errorMap: () => ({ message: '体型を選択してください' })
-  }),
+  preferred_body_type: z.array(z.enum(['グラマー', '普通', 'スリム', '気にしない'])).min(1, '体型を選択してください'),
   restaurant_preference: z
     .array(z.enum(restaurantOptions))
     .min(1, '少なくとも1つ選択してください'),
@@ -65,9 +63,7 @@ const womenPreferencesSchema = z.object({
       ])
     )
     .min(1, '少なくとも1つ選択してください'),
-  preferred_body_type: z.enum(['筋肉質', 'がっしり', 'スリム', '普通', '気にしない'], {
-    errorMap: () => ({ message: '体型を選択してください' })
-  }),
+  preferred_body_type: z.array(z.enum(['筋肉質', 'がっしり', 'スリム', '普通', '気にしない'])).min(1, '体型を選択してください'),
   restaurant_preference: z
     .array(z.enum(restaurantOptions))
     .min(1, '少なくとも1つ選択してください'),
@@ -354,21 +350,20 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
 
         {/* 体型 */}
         <div className="space-y-2">
-          <label htmlFor="preferred_body_type" className="block font-medium">
-            希望する体型
-          </label>
-          <select
-            id="preferred_body_type"
-            {...register('preferred_body_type')}
-            className="w-full p-2 border rounded-md"
-          >
-            <option value="">選択してください</option>
+          <label className="block font-medium">希望する体型（複数選択可）</label>
+          <div className="grid grid-cols-2 gap-2">
             {bodyTypeOptions.map(option => (
-              <option key={option} value={option}>
+              <label key={option} className="flex items-center">
+                <input
+                  type="checkbox"
+                  value={option}
+                  {...register('preferred_body_type')}
+                  className="mr-2"
+                />
                 {option}
-              </option>
+              </label>
             ))}
-          </select>
+          </div>
           {errors.preferred_body_type && (
             <p className="text-red-500 text-sm">{errors.preferred_body_type.message}</p>
           )}
