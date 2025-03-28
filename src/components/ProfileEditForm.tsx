@@ -224,58 +224,29 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
     try {
       setSubmitting(true);
 
-      // 送信データを準備（DBに存在するカラム名のみを使用）
-      const dbFieldMap: Record<string, string> = {
-        // フォームフィールド名: DBカラム名
-        'birth_date': 'birth_date',
-        'phone_number': 'phone_number',
-        'personality': 'personality',
-        'mbti': 'mbti',
-        'appearance': 'appearance',
-        'style': 'style',
-        'dating_experience': 'dating_experience',
-        'education': 'education',
-        'hometown_prefecture': 'hometown_prefecture',
-        'hometown_city': 'hometown_city', 
-        'prefecture': 'prefecture',
-        'current_city': 'city', // current_cityがcityになっている可能性
-        'occupation': 'occupation',
-        'income': 'income',
-        'email': 'email'
-      };
-
+      // データベース上で実際に存在するフィールドのみを更新
       const updatedData: Record<string, unknown> = { 
-        gender: gender, // 性別は常に含める
+        gender: gender,
         updated_at: new Date().toISOString()
       };
 
-      // すべてのフィールドを送信データに含める（DBカラム名にマッピング）
-      Object.entries(data).forEach(([key, value]) => {
-        // genderキーはすでに設定済みのためスキップ
-        if (key === 'gender') return;
-        
-        // DBに対応するフィールド名があるか確認
-        const dbField = dbFieldMap[key];
-        if (!dbField) return; // 対応するDBフィールドが見つからない場合はスキップ
-        
-        // 配列の場合（パーソナリティなど）
-        if (Array.isArray(value)) {
-          updatedData[dbField] = value;
-        } 
-        // 文字列の場合
-        else if (typeof value === 'string') {
-          // birth_dateフィールドの場合は形式を変換
-          if (key === 'birth_date') {
-            updatedData[dbField] = value.replace(/\//g, '-');
-          } else {
-            updatedData[dbField] = value;
-          }
-        }
-        // その他の値タイプ
-        else if (value !== null && value !== undefined) {
-          updatedData[dbField] = value;
-        }
-      });
+      // フォームから有効なフィールドのみを抽出
+      if (data.phone_number) updatedData.phone_number = data.phone_number;
+      if (data.email) updatedData.email = data.email;
+      if (data.birth_date) updatedData.birth_date = data.birth_date.replace(/\//g, '-');
+      
+      // DBに存在するフィールドのみを送信
+      if (data.personality && data.personality.length > 0) updatedData.personality = data.personality;
+      if (data.mbti) updatedData.mbti = data.mbti;
+      if (data.appearance) updatedData.appearance = data.appearance;
+      if (data.style) updatedData.style = data.style;
+      if (data.dating_experience) updatedData.dating_experience = data.dating_experience;
+      
+      // city フィールド
+      if (data.current_city) updatedData.city = data.current_city;
+      
+      // DETAILSから省略するフィールド
+      // 'education', 'hometown_prefecture', 'hometown_city', 'prefecture', 'occupation', 'income'
 
       console.log('Updating profile with data:', updatedData);
       
@@ -291,7 +262,7 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
       router.refresh();
     } catch (error) {
       console.error('プロフィールの更新中にエラーが発生しました:', error);
-      alert('プロフィールの更新中にエラーが発生しました。すべての項目を入力してください。');
+      alert('プロフィールの更新中にエラーが発生しました。詳細はコンソールを確認してください。');
     } finally {
       setSubmitting(false);
     }
