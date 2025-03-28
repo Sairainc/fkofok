@@ -13,11 +13,13 @@ const areaOptions = ['恵比寿', '新橋・銀座', 'どちらでもOK'] as con
 // レストラン選択
 const restaurantOptions = ['安旨居酒屋', 'おしゃれダイニング'] as const;
 
-// 男性用好み用スキーマ - すべてオプショナルに変更
+// 男性用好み用スキーマ - すべて必須に変更
 const menPreferencesSchema = z.object({
-  party_type: z.enum(['fun', 'serious']).optional(),
-  preferred_age_min: z.number().min(20).max(60).optional(),
-  preferred_age_max: z.number().min(20).max(60).optional(),
+  party_type: z.enum(['fun', 'serious'], {
+    errorMap: () => ({ message: '合コンタイプを選択してください' })
+  }),
+  preferred_age_min: z.number().min(20, '20歳以上を選択してください').max(60, '60歳以下を選択してください'),
+  preferred_age_max: z.number().min(20, '20歳以上を選択してください').max(60, '60歳以下を選択してください'),
   preferred_personality: z
     .array(
       z.enum([
@@ -28,22 +30,32 @@ const menPreferencesSchema = z.object({
         '小悪魔',
       ])
     )
-    .optional(),
-  preferred_body_type: z.enum(['スリム', '普通', 'グラマー', '気にしない']).optional(),
+    .min(1, '少なくとも1つ選択してください'),
+  preferred_body_type: z.enum(['スリム', '普通', 'グラマー', '気にしない'], {
+    errorMap: () => ({ message: '体型を選択してください' })
+  }),
   restaurant_preference: z
     .array(z.enum(restaurantOptions))
-    .optional(),
-  preferred_1areas: z.enum(areaOptions).optional(),
-  preferred_2areas: z.enum(areaOptions).optional(),
-  preferred_3areas: z.enum(areaOptions).optional(),
-  datetime: z.string().optional(),
+    .min(1, '少なくとも1つ選択してください'),
+  preferred_1areas: z.enum(areaOptions, {
+    errorMap: () => ({ message: '第1希望エリアを選択してください' })
+  }),
+  preferred_2areas: z.enum(areaOptions, {
+    errorMap: () => ({ message: '第2希望エリアを選択してください' })
+  }),
+  preferred_3areas: z.enum(areaOptions, {
+    errorMap: () => ({ message: '第3希望エリアを選択してください' })
+  }),
+  datetime: z.string().min(1, '日時を選択してください'),
 });
 
-// 女性用好み用スキーマ - すべてオプショナルに変更
+// 女性用好み用スキーマ - すべて必須に変更
 const womenPreferencesSchema = z.object({
-  party_type: z.enum(['fun', 'serious']).optional(),
-  preferred_age_min: z.number().min(20).max(60).optional(),
-  preferred_age_max: z.number().min(20).max(60).optional(),
+  party_type: z.enum(['fun', 'serious'], {
+    errorMap: () => ({ message: '合コンタイプを選択してください' })
+  }),
+  preferred_age_min: z.number().min(20, '20歳以上を選択してください').max(60, '60歳以下を選択してください'),
+  preferred_age_max: z.number().min(20, '20歳以上を選択してください').max(60, '60歳以下を選択してください'),
   preferred_personality: z
     .array(
       z.enum([
@@ -53,15 +65,23 @@ const womenPreferencesSchema = z.object({
         'クールなタイプ',
       ])
     )
-    .optional(),
-  preferred_body_type: z.enum(['筋肉質', '普通', 'スリム', '気にしない']).optional(),
+    .min(1, '少なくとも1つ選択してください'),
+  preferred_body_type: z.enum(['筋肉質', '普通', 'スリム', '気にしない'], {
+    errorMap: () => ({ message: '体型を選択してください' })
+  }),
   restaurant_preference: z
     .array(z.enum(restaurantOptions))
-    .optional(),
-  preferred_1areas: z.enum(areaOptions).optional(),
-  preferred_2areas: z.enum(areaOptions).optional(),
-  preferred_3areas: z.enum(areaOptions).optional(),
-  datetime: z.string().optional(),
+    .min(1, '少なくとも1つ選択してください'),
+  preferred_1areas: z.enum(areaOptions, {
+    errorMap: () => ({ message: '第1希望エリアを選択してください' })
+  }),
+  preferred_2areas: z.enum(areaOptions, {
+    errorMap: () => ({ message: '第2希望エリアを選択してください' })
+  }),
+  preferred_3areas: z.enum(areaOptions, {
+    errorMap: () => ({ message: '第3希望エリアを選択してください' })
+  }),
+  datetime: z.string().min(1, '日時を選択してください'),
 });
 
 // 型定義
@@ -209,30 +229,24 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
       
       const tableName = userGender === 'men' ? 'men_preferences' : 'women_preferences';
       
-      // 入力されたデータを処理
+      // 送信データを準備
       const processedData: Record<string, any> = {};
       
-      // フォームデータから入力されたフィールドのみを抽出
+      // すべてのフィールドを送信データに含める
       Object.entries(formData).forEach(([key, value]) => {
         // 配列の場合（パーソナリティ、レストラン選択など）
         if (Array.isArray(value)) {
-          if (value.length > 0) {
-            processedData[key] = value;
-          }
+          processedData[key] = value;
         } 
         // 数値の場合
         else if (typeof value === 'number') {
-          if (!isNaN(value)) {
-            processedData[key] = value;
-          }
+          processedData[key] = value;
         }
         // 文字列の場合
         else if (typeof value === 'string') {
-          if (value.trim() !== '') {
-            processedData[key] = value.trim();
-          }
+          processedData[key] = value;
         }
-        // その他の値タイプ（nullやundefined以外）
+        // その他の値タイプ
         else if (value !== null && value !== undefined) {
           processedData[key] = value;
         }
@@ -261,19 +275,14 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
         updateError = error;
       } else {
         // データが存在する場合はUPDATE
-        // 既存データとマージして入力されていないフィールドを保持
-        const mergedData = { 
-          ...(existingData as PreferenceRecord), 
-          ...processedData, 
-          updated_at: new Date().toISOString() 
+        const updatedData = {
+          ...processedData,
+          updated_at: new Date().toISOString()
         };
-        
-        // IDとline_idフィールドはUPDATEに含めない
-        delete mergedData.id;
         
         const { error } = await supabase
           .from(tableName)
-          .update(mergedData)
+          .update(updatedData)
           .eq('line_id', userId);
         
         updateError = error;
@@ -286,8 +295,8 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
       alert('希望条件が更新されました');
       router.refresh();
     } catch (error) {
-      console.error('Error updating preferences:', error);
-      alert('エラーが発生しました。もう一度お試しください。');
+      console.error('希望条件の更新中にエラーが発生しました:', error);
+      alert('エラーが発生しました。すべての項目を入力してください。');
     } finally {
       setSubmitting(false);
     }

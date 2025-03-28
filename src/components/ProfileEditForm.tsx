@@ -95,37 +95,47 @@ const womenAppearanceOptions = [
   '個性的でアーティスティック系',
 ];
 
-// プロフィールスキーマを更新し、ほとんどのフィールドをオプションに変更
+// プロフィールスキーマを更新し、全てのフィールドを必須に変更
 const profileSchema = z.object({
-  gender: z.enum(['men', 'women']).optional(),
+  gender: z.enum(['men', 'women']),
   phone_number: z
     .string()
     .min(10, '電話番号が短すぎます')
     .max(11, '電話番号が長すぎます')
-    .regex(/^[0-9]+$/, '数字のみ入力してください')
-    .optional(),
-  personality: z.array(z.string()).optional(),
-  mbti: z.enum(mbtiOptions).optional(),
-  appearance: z.string().optional(),
-  style: z.string().optional(),
-  dating_experience: z.string().optional(),
-  education: z.enum(educationOptions).optional(),
-  hometown_prefecture: z.enum(prefectures).optional(),
-  hometown_city: z.string().optional(),
-  prefecture: z.enum(prefectures).optional(),
-  current_city: z.string().optional(),
+    .regex(/^[0-9]+$/, '数字のみ入力してください'),
+  personality: z.array(z.string()).min(1, '少なくとも1つ選択してください'),
+  mbti: z.enum(mbtiOptions, {
+    errorMap: () => ({ message: 'MBTIタイプを選択してください' })
+  }),
+  appearance: z.string().min(1, '外見タイプを選択してください'),
+  style: z.string().min(1, '体型を選択してください'),
+  dating_experience: z.string().min(1, '合コン経験を入力してください'),
+  education: z.enum(educationOptions, {
+    errorMap: () => ({ message: '学歴を選択してください' })
+  }),
+  hometown_prefecture: z.enum(prefectures, {
+    errorMap: () => ({ message: '出身都道府県を選択してください' })
+  }),
+  hometown_city: z.string().min(1, '出身市区町村を入力してください'),
+  prefecture: z.enum(prefectures, {
+    errorMap: () => ({ message: '現在の都道府県を選択してください' })
+  }),
+  current_city: z.string().min(1, '現在の市区町村を入力してください'),
   birth_date: z.string()
+    .min(1, '生年月日を入力してください')
     .regex(/^\d{4}\/\d{2}\/\d{2}$/, '正しい形式で入力してください（例：2000/01/01）')
     .refine((date) => {
-      if (!date) return true; // 空の場合は検証をスキップ
+      if (!date) return false;
       const [year, month, day] = date.split('/').map(Number);
       const inputDate = new Date(year, month - 1, day);
       return inputDate instanceof Date && !isNaN(inputDate.getTime());
-    }, '正しい日付を入力してください')
-    .optional(),
-  occupation: z.enum(occupations).optional(),
-  income: z.enum(incomeRanges).optional(),
-  // メールアドレスは必須フィールドとして残す
+    }, '正しい日付を入力してください'),
+  occupation: z.enum(occupations, {
+    errorMap: () => ({ message: '職業を選択してください' })
+  }),
+  income: z.enum(incomeRanges, {
+    errorMap: () => ({ message: '年収を選択してください' })
+  }),
   email: z.string().email('正しいメールアドレスを入力してください'),
 });
 
@@ -214,55 +224,35 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
     try {
       setSubmitting(true);
 
-      // 元のデータを取得
-      const { data: originalData, error: fetchError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-        
-      if (fetchError) throw fetchError;
-
-      // 送信データを準備（元のデータをベースにする）
+      // 送信データを準備
       const updatedData: Record<string, unknown> = { 
-        ...originalData,
         gender: gender, // 性別は常に含める
         updated_at: new Date().toISOString()
       };
 
-      // フォームから入力されたデータで上書き
+      // すべてのフィールドを送信データに含める
       Object.entries(data).forEach(([key, value]) => {
         // genderキーはすでに設定済みのためスキップ
         if (key === 'gender') return;
         
         // 配列の場合（パーソナリティなど）
         if (Array.isArray(value)) {
-          // 空でない場合のみ上書き
-          if (value.length > 0) {
-            updatedData[key] = value;
-          }
+          updatedData[key] = value;
         } 
         // 文字列の場合
         else if (typeof value === 'string') {
-          // トリムして空でない場合のみ上書き
-          const trimmedValue = value.trim();
-          if (trimmedValue !== '') {
-            // birth_dateフィールドの場合は形式を変換
-            if (key === 'birth_date') {
-              updatedData['birthdate'] = trimmedValue.replace(/\//g, '-');
-            } else {
-              updatedData[key] = trimmedValue;
-            }
+          // birth_dateフィールドの場合は形式を変換
+          if (key === 'birth_date') {
+            updatedData['birthdate'] = value.replace(/\//g, '-');
+          } else {
+            updatedData[key] = value;
           }
         }
-        // その他の値タイプ（null/undefined以外）
+        // その他の値タイプ
         else if (value !== null && value !== undefined) {
           updatedData[key] = value;
         }
       });
-
-      // idフィールドが存在する場合は削除（更新時に問題が出る可能性があるため）
-      delete updatedData.id;
 
       console.log('Updating profile with data:', updatedData);
       
