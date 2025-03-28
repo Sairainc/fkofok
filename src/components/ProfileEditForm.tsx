@@ -200,15 +200,15 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
           setValue('appearance', data.appearance || '');
           setValue('style', data.style || '');
           setValue('dating_experience', data.dating_experience || '');
-          setValue('education', data.education as any || '');
-          setValue('hometown_prefecture', data.hometown_prefecture as any || '');
-          setValue('hometown_city', data.hometown_city || '');
+          setValue('education', data.study as any || '');
+          setValue('hometown_prefecture', data.from as any || '');
+          setValue('hometown_city', '');
           setValue('prefecture', data.prefecture as any || '');
           setValue('current_city', data.city || '');
           setValue('birth_date', data.birth_date?.replace(/-/g, '/') || '');
           setValue('occupation', data.occupation as any || '');
           setValue('income', data.income as any || '');
-          setValue('email', data.email || '');
+          setValue('email', data.mail || '');
         }
       } catch (error) {
         console.error('Error loading profile:', error);
@@ -224,29 +224,28 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
     try {
       setSubmitting(true);
 
-      // データベース上で実際に存在するフィールドのみを更新
+      // 実際のデータベース構造に合わせてマッピング
       const updatedData: Record<string, unknown> = { 
         gender: gender,
         updated_at: new Date().toISOString()
       };
 
-      // フォームから有効なフィールドのみを抽出
+      // 実際のDBのフィールドに合わせて設定
       if (data.phone_number) updatedData.phone_number = data.phone_number;
-      if (data.email) updatedData.email = data.email;
       if (data.birth_date) updatedData.birth_date = data.birth_date.replace(/\//g, '-');
-      
-      // DBに存在するフィールドのみを送信
+      if (data.email) updatedData.mail = data.email; // mailフィールドに設定
       if (data.personality && data.personality.length > 0) updatedData.personality = data.personality;
       if (data.mbti) updatedData.mbti = data.mbti;
       if (data.appearance) updatedData.appearance = data.appearance;
       if (data.style) updatedData.style = data.style;
       if (data.dating_experience) updatedData.dating_experience = data.dating_experience;
-      
-      // city フィールド
       if (data.current_city) updatedData.city = data.current_city;
-      
-      // DETAILSから省略するフィールド
-      // 'education', 'hometown_prefecture', 'hometown_city', 'prefecture', 'occupation', 'income'
+      if (data.prefecture) updatedData.prefecture = data.prefecture;
+      if (data.occupation) updatedData.occupation = data.occupation;
+      if (data.income) updatedData.income = data.income;
+      if (data.education) updatedData.study = data.education; // studyフィールドに設定
+      if (data.hometown_prefecture) updatedData.from = data.hometown_prefecture; // fromフィールドに設定
+      // hometown_cityは保存先フィールドがないようです
 
       console.log('Updating profile with data:', updatedData);
       
