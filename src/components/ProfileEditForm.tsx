@@ -214,27 +214,37 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
     try {
       setSubmitting(true);
 
-      // 送信データを準備
+      // 元のデータを取得
+      const { data: originalData, error: fetchError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+        
+      if (fetchError) throw fetchError;
+
+      // 送信データを準備（元のデータをベースにする）
       const updatedData: Record<string, unknown> = { 
+        ...originalData,
         gender: gender, // 性別は常に含める
         updated_at: new Date().toISOString()
       };
 
-      // 未入力でないフィールドのみを送信データに含める
+      // フォームから入力されたデータで上書き
       Object.entries(data).forEach(([key, value]) => {
         // genderキーはすでに設定済みのためスキップ
         if (key === 'gender') return;
         
         // 配列の場合（パーソナリティなど）
         if (Array.isArray(value)) {
-          // 空でなければデータに含める
+          // 空でない場合のみ上書き
           if (value.length > 0) {
             updatedData[key] = value;
           }
         } 
         // 文字列の場合
         else if (typeof value === 'string') {
-          // トリムして空でなければデータに含める
+          // トリムして空でない場合のみ上書き
           const trimmedValue = value.trim();
           if (trimmedValue !== '') {
             // birth_dateフィールドの場合は形式を変換
@@ -245,11 +255,14 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
             }
           }
         }
-        // その他の値タイプ（null以外）
+        // その他の値タイプ（null/undefined以外）
         else if (value !== null && value !== undefined) {
           updatedData[key] = value;
         }
       });
+
+      // idフィールドが存在する場合は削除（更新時に問題が出る可能性があるため）
+      delete updatedData.id;
 
       console.log('Updating profile with data:', updatedData);
       
