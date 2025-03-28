@@ -205,7 +205,7 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
           setValue('hometown_city', data.hometown_city || '');
           setValue('prefecture', data.prefecture as any || '');
           setValue('current_city', data.current_city || '');
-          setValue('birth_date', data.birthdate?.replace(/-/g, '/') || '');
+          setValue('birth_date', data.birth_date?.replace(/-/g, '/') || '');
           setValue('occupation', data.occupation as any || '');
           setValue('income', data.income as any || '');
           setValue('email', data.email || '');
@@ -241,9 +241,9 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
         } 
         // 文字列の場合
         else if (typeof value === 'string') {
-          // birth_dateフィールドの場合は形式を変換
+          // birth_dateフィールドの場合は形式を変換して別のキー名で保存
           if (key === 'birth_date') {
-            updatedData['birthdate'] = value.replace(/\//g, '-');
+            updatedData['birth_date'] = value.replace(/\//g, '-');
           } else {
             updatedData[key] = value;
           }
@@ -267,8 +267,8 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
       alert('プロフィールが更新されました！');
       router.refresh();
     } catch (error) {
-      console.error('Error updating profile:', error);
-      alert('プロフィールの更新中にエラーが発生しました。');
+      console.error('プロフィールの更新中にエラーが発生しました:', error);
+      alert('プロフィールの更新中にエラーが発生しました。すべての項目を入力してください。');
     } finally {
       setSubmitting(false);
     }
