@@ -46,7 +46,6 @@ const menPreferencesSchema = z.object({
   preferred_3areas: z.enum(areaOptions, {
     errorMap: () => ({ message: '第3希望エリアを選択してください' })
   }),
-  datetime: z.string().min(1, '日時を選択してください'),
 });
 
 // 女性用好み用スキーマ - すべて必須に変更
@@ -81,7 +80,6 @@ const womenPreferencesSchema = z.object({
   preferred_3areas: z.enum(areaOptions, {
     errorMap: () => ({ message: '第3希望エリアを選択してください' })
   }),
-  datetime: z.string().min(1, '日時を選択してください'),
 });
 
 // 型定義
@@ -101,40 +99,10 @@ type PreferencesEditFormProps = {
   userGender: 'men' | 'women';
 };
 
-// 時間帯のオプション
-const timeOptions = [
-  '17:00 - 19:00',
-  '19:00 - 21:00',
-  '21:00 - 23:00',
-];
-
-// 日付オプションを生成（今日から2ヶ月分）
-const generateDateOptions = () => {
-  const dateOptions = [];
-  const today = new Date();
-  for (let i = 0; i < 60; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
-    
-    // 週末（土日）だけをフィルタリング
-    if (date.getDay() === 0 || date.getDay() === 6) {
-      const formattedDate = date.toISOString().split('T')[0];
-      dateOptions.push({
-        value: formattedDate,
-        label: new Date(formattedDate).toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' }),
-      });
-    }
-  }
-  return dateOptions;
-};
-
 const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
   const router = useRouter();
-  const dateOptions = generateDateOptions();
 
   // 女性用か男性用かでスキーマを切り替え
   const preferencesSchema = userGender === 'men' ? menPreferencesSchema : womenPreferencesSchema;
@@ -196,15 +164,6 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
           setValue('preferred_1areas', data.preferred_1areas as any || 'どちらでもOK');
           setValue('preferred_2areas', data.preferred_2areas as any || 'どちらでもOK');
           setValue('preferred_3areas', data.preferred_3areas as any || 'どちらでもOK');
-          
-          // 日時の処理
-          if (data.datetime) {
-            setValue('datetime', data.datetime);
-            
-            const [date, time] = data.datetime.split(' ');
-            setSelectedDate(date);
-            setSelectedTime(time);
-          }
         }
       } catch (error) {
         console.error('Error loading preferences:', error);
@@ -215,13 +174,6 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
 
     fetchPreferences();
   }, [userId, userGender, setValue]);
-
-  // 日時の変更を処理
-  useEffect(() => {
-    if (selectedDate && selectedTime) {
-      setValue('datetime', `${selectedDate} ${selectedTime}`);
-    }
-  }, [selectedDate, selectedTime, setValue]);
 
   const onSubmit = async (formData: PreferenceData) => {
     try {
@@ -509,58 +461,6 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
               <p className="text-red-500 text-sm">{errors.preferred_3areas.message}</p>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* 希望日時 */}
-      <div className="space-y-6">
-        <h3 className="text-xl font-semibold border-b pb-2">希望日時</h3>
-        
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="date" className="block font-medium">
-              日付
-            </label>
-            <select
-              id="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full p-2 border rounded-md"
-            >
-              <option value="">選択してください</option>
-              {dateOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="time" className="block font-medium">
-              時間帯
-            </label>
-            <select
-              id="time"
-              value={selectedTime}
-              onChange={(e) => setSelectedTime(e.target.value)}
-              className="w-full p-2 border rounded-md"
-            >
-              <option value="">選択してください</option>
-              {timeOptions.map(option => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          {/* 非表示フィールド - 日時の組み合わせ用 */}
-          <input type="hidden" {...register('datetime')} />
-          
-          {errors.datetime && (
-            <p className="text-red-500 text-sm">{errors.datetime.message}</p>
-          )}
         </div>
       </div>
 
