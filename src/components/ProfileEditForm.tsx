@@ -139,7 +139,7 @@ const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [gender, setGender] = useState<'men' | 'women'>('men');
-  const [originalData, setOriginalData] = useState<any>(null); // 元のデータを保存
+  const [_originalData, setOriginalData] = useState<any>(null); // 元のデータを保存
   const router = useRouter();
 
   const {
