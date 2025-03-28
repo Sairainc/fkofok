@@ -127,8 +127,8 @@ const PreferencesEditForm = ({ userId, userGender }: PreferencesEditFormProps) =
   
   // 体型オプション（男性／女性で異なる）
   const bodyTypeOptions = userGender === 'men'
-    ? ['スリム', '普通', 'グラマー', '気にしない']
-    : ['筋肉質', '普通', 'スリム', '気にしない'];
+    ? ['筋肉質','がっしり', 'スリム', '普通', '気にしない']
+    : ['グラマー', '普通', 'スリム', '気にしない'];
 
   // 希望条件をロード
   useEffect(() => {
