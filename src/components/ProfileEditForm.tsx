@@ -1,6 +1,7 @@
 // ProfileEditForm.jsx
 'use client';
 
+import React from 'react';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -145,7 +146,7 @@ type ProfileEditFormProps = {
   userId: string;
 };
 
-const ProfileEditForm = ({ userId }: ProfileEditFormProps) => {
+const ProfileEditForm: React.FC<ProfileEditFormProps> = ({ userId }) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [gender, setGender] = useState<'men' | 'women'>('men');

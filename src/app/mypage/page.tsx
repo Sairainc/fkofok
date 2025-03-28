@@ -31,7 +31,7 @@ export default function MyPage() {
   if (!user) return null;
 
   // 性別の変換（型アサーション追加）
-  const mappedGender = (user.gender as string) === 'male' || (user.gender as string) === 'メンズ' ? 'men' : 'women';
+  const _mappedGender = (user.gender as string) === 'male' || (user.gender as string) === 'メンズ' ? 'men' : 'women';
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
