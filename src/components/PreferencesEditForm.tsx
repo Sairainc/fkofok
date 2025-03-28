@@ -99,6 +99,8 @@ const PreferencesEditForm: React.FC<PreferencesEditFormProps> = ({ userId }) => 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [gender, setGender] = useState<'men' | 'women'>('men'); // デフォルト値を設定
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
 
   // 性別に基づいてスキーマを切り替え
@@ -283,11 +285,11 @@ const PreferencesEditForm: React.FC<PreferencesEditFormProps> = ({ userId }) => 
         throw updateError;
       }
 
-      alert('希望条件が更新されました');
+      setShowSuccessPopup(true);
       router.refresh();
     } catch (error) {
       console.error('希望条件の更新中にエラーが発生しました:', error);
-      alert('エラーが発生しました: ' + (error instanceof Error ? error.message : 'すべての項目を入力してください。'));
+      setErrorMessage(error instanceof Error ? error.message : 'すべての項目を入力してください。');
     } finally {
       setSubmitting(false);
     }
@@ -302,220 +304,266 @@ const PreferencesEditForm: React.FC<PreferencesEditFormProps> = ({ userId }) => 
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      {/* 合コンタイプ */}
-      <div className="space-y-6">
-        <h3 className="text-xl font-semibold border-b pb-2">希望する合コンタイプ</h3>
-        <div className="space-y-2">
-          <label className="block font-medium">合コンタイプ</label>
-          <div className="flex space-x-4">
-            <label className="flex items-center">
-              <input
-                type="radio"
-                value="fun"
-                {...register('party_type')}
-                className="mr-2"
-              />
-              盛り上がり重視
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                value="serious"
-                {...register('party_type')}
-                className="mr-2"
-              />
-              真剣度重視
-            </label>
+    <>
+      {showSuccessPopup && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 shadow-xl max-w-sm w-full">
+            <div className="text-center">
+              <div className="bg-green-100 rounded-full p-2 mx-auto w-16 h-16 flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">完了しました！</h3>
+              <p className="text-gray-500 mb-6">希望条件が正常に更新されました。</p>
+              <button
+                onClick={() => setShowSuccessPopup(false)}
+                className="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-2 px-4 rounded-md transition duration-200"
+              >
+                閉じる
+              </button>
+            </div>
           </div>
-          {errors.party_type && (
-            <p className="text-red-500 text-sm">{errors.party_type.message}</p>
-          )}
         </div>
-      </div>
+      )}
 
-      {/* 好みの条件 */}
-      <div className="space-y-6">
-        <h3 className="text-xl font-semibold border-b pb-2">好みの条件</h3>
-        
-        {/* 年齢 */}
-        <div className="space-y-2">
-          <label className="block font-medium">希望年齢層</label>
-          <div className="flex items-center space-x-2">
-            <input
-              type="number"
-              {...register('preferred_age_min', { 
-                setValueAs: v => v === "" ? undefined : parseInt(v),
-                valueAsNumber: true 
-              })}
-              className="w-20 p-2 border rounded-md"
-              min={20}
-              max={60}
-            />
-            <span>〜</span>
-            <input
-              type="number"
-              {...register('preferred_age_max', { 
-                setValueAs: v => v === "" ? undefined : parseInt(v),
-                valueAsNumber: true 
-              })}
-              className="w-20 p-2 border rounded-md"
-              min={20}
-              max={60}
-            />
-            <span>歳</span>
+      {errorMessage && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 shadow-xl max-w-sm w-full">
+            <div className="text-center">
+              <div className="bg-red-100 rounded-full p-2 mx-auto w-16 h-16 flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">エラーが発生しました</h3>
+              <p className="text-gray-500 mb-6">{errorMessage}</p>
+              <button
+                onClick={() => setErrorMessage(null)}
+                className="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-2 px-4 rounded-md transition duration-200"
+              >
+                閉じる
+              </button>
+            </div>
           </div>
-          {(errors.preferred_age_min || errors.preferred_age_max) && (
-            <p className="text-red-500 text-sm">
-              {errors.preferred_age_min?.message || errors.preferred_age_max?.message}
-            </p>
-          )}
         </div>
+      )}
 
-        {/* パーソナリティ */}
-        <div className="space-y-2">
-          <label className="block font-medium">希望するパーソナリティ（複数選択可）</label>
-          <div className="grid grid-cols-2 gap-2">
-            {personalityOptions.map(option => (
-              <label key={option} className="flex items-center">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        {/* 合コンタイプ */}
+        <div className="space-y-6">
+          <h3 className="text-xl font-semibold border-b pb-2">希望する合コンタイプ</h3>
+          <div className="space-y-2">
+            <label className="block font-medium">合コンタイプ</label>
+            <div className="flex space-x-4">
+              <label className="flex items-center">
                 <input
-                  type="checkbox"
-                  value={option}
-                  {...register('preferred_personality')}
+                  type="radio"
+                  value="fun"
+                  {...register('party_type')}
                   className="mr-2"
                 />
-                {option}
+                盛り上がり重視
               </label>
-            ))}
-          </div>
-          {errors.preferred_personality && (
-            <p className="text-red-500 text-sm">{errors.preferred_personality.message}</p>
-          )}
-        </div>
-
-        {/* 体型 */}
-        <div className="space-y-2">
-          <label className="block font-medium">希望する体型（複数選択可）</label>
-          <div className="grid grid-cols-2 gap-2 border p-3 rounded-md bg-gray-50">
-            {bodyTypeOptions.map(option => (
-              <label key={option} className="flex items-center p-2 hover:bg-gray-100 rounded">
+              <label className="flex items-center">
                 <input
-                  type="checkbox"
-                  value={option}
-                  {...register('preferred_body_type')}
-                  className="mr-2 w-4 h-4 accent-primary"
-                />
-                {option}
-              </label>
-            ))}
-          </div>
-          {errors.preferred_body_type && (
-            <p className="text-red-500 text-sm mt-1">{errors.preferred_body_type.message}</p>
-          )}
-          <p className="text-xs text-gray-500 mt-1">※少なくとも1つ選択してください</p>
-        </div>
-      </div>
-
-      {/* レストラン・場所 */}
-      <div className="space-y-6">
-        <h3 className="text-xl font-semibold border-b pb-2">レストラン・場所の希望</h3>
-        
-        {/* レストランタイプ */}
-        <div className="space-y-2">
-          <label className="block font-medium">希望するレストランタイプ（複数選択可）</label>
-          <div className="grid grid-cols-2 gap-2">
-            {restaurantOptions.map(option => (
-              <label key={option} className="flex items-center">
-                <input
-                  type="checkbox"
-                  value={option}
-                  {...register('restaurant_preference')}
+                  type="radio"
+                  value="serious"
+                  {...register('party_type')}
                   className="mr-2"
                 />
-                {option}
+                真剣度重視
               </label>
-            ))}
-          </div>
-          {errors.restaurant_preference && (
-            <p className="text-red-500 text-sm">{errors.restaurant_preference.message}</p>
-          )}
-        </div>
-
-        {/* エリア */}
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="preferred_1areas" className="block font-medium">
-              第1希望エリア
-            </label>
-            <select
-              id="preferred_1areas"
-              {...register('preferred_1areas')}
-              className="w-full p-2 border rounded-md"
-            >
-              {areaOptions.map(option => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            {errors.preferred_1areas && (
-              <p className="text-red-500 text-sm">{errors.preferred_1areas.message}</p>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="preferred_2areas" className="block font-medium">
-              第2希望エリア
-            </label>
-            <select
-              id="preferred_2areas"
-              {...register('preferred_2areas')}
-              className="w-full p-2 border rounded-md"
-            >
-              {areaOptions.map(option => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            {errors.preferred_2areas && (
-              <p className="text-red-500 text-sm">{errors.preferred_2areas.message}</p>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="preferred_3areas" className="block font-medium">
-              第3希望エリア
-            </label>
-            <select
-              id="preferred_3areas"
-              {...register('preferred_3areas')}
-              className="w-full p-2 border rounded-md"
-            >
-              {areaOptions.map(option => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            {errors.preferred_3areas && (
-              <p className="text-red-500 text-sm">{errors.preferred_3areas.message}</p>
+            </div>
+            {errors.party_type && (
+              <p className="text-red-500 text-sm">{errors.party_type.message}</p>
             )}
           </div>
         </div>
-      </div>
 
-      {/* 送信ボタン */}
-      <div className="pt-6">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-4 rounded-lg transition duration-200 disabled:opacity-50"
-        >
-          {submitting ? '更新中...' : '希望条件を更新する'}
-        </button>
-      </div>
-    </form>
+        {/* 好みの条件 */}
+        <div className="space-y-6">
+          <h3 className="text-xl font-semibold border-b pb-2">好みの条件</h3>
+          
+          {/* 年齢 */}
+          <div className="space-y-2">
+            <label className="block font-medium">希望年齢層</label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="number"
+                {...register('preferred_age_min', { 
+                  setValueAs: v => v === "" ? undefined : parseInt(v),
+                  valueAsNumber: true 
+                })}
+                className="w-20 p-2 border rounded-md"
+                min={20}
+                max={60}
+              />
+              <span>〜</span>
+              <input
+                type="number"
+                {...register('preferred_age_max', { 
+                  setValueAs: v => v === "" ? undefined : parseInt(v),
+                  valueAsNumber: true 
+                })}
+                className="w-20 p-2 border rounded-md"
+                min={20}
+                max={60}
+              />
+              <span>歳</span>
+            </div>
+            {(errors.preferred_age_min || errors.preferred_age_max) && (
+              <p className="text-red-500 text-sm">
+                {errors.preferred_age_min?.message || errors.preferred_age_max?.message}
+              </p>
+            )}
+          </div>
+
+          {/* パーソナリティ */}
+          <div className="space-y-2">
+            <label className="block font-medium">希望するパーソナリティ（複数選択可）</label>
+            <div className="grid grid-cols-2 gap-2">
+              {personalityOptions.map(option => (
+                <label key={option} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    value={option}
+                    {...register('preferred_personality')}
+                    className="mr-2"
+                  />
+                  {option}
+                </label>
+              ))}
+            </div>
+            {errors.preferred_personality && (
+              <p className="text-red-500 text-sm">{errors.preferred_personality.message}</p>
+            )}
+          </div>
+
+          {/* 体型 */}
+          <div className="space-y-2">
+            <label className="block font-medium">希望する体型（複数選択可）</label>
+            <div className="grid grid-cols-2 gap-2 border p-3 rounded-md bg-gray-50">
+              {bodyTypeOptions.map(option => (
+                <label key={option} className="flex items-center p-2 hover:bg-gray-100 rounded">
+                  <input
+                    type="checkbox"
+                    value={option}
+                    {...register('preferred_body_type')}
+                    className="mr-2 w-4 h-4 accent-primary"
+                  />
+                  {option}
+                </label>
+              ))}
+            </div>
+            {errors.preferred_body_type && (
+              <p className="text-red-500 text-sm mt-1">{errors.preferred_body_type.message}</p>
+            )}
+            <p className="text-xs text-gray-500 mt-1">※少なくとも1つ選択してください</p>
+          </div>
+        </div>
+
+        {/* レストラン・場所 */}
+        <div className="space-y-6">
+          <h3 className="text-xl font-semibold border-b pb-2">レストラン・場所の希望</h3>
+          
+          {/* レストランタイプ */}
+          <div className="space-y-2">
+            <label className="block font-medium">希望するレストランタイプ（複数選択可）</label>
+            <div className="grid grid-cols-2 gap-2">
+              {restaurantOptions.map(option => (
+                <label key={option} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    value={option}
+                    {...register('restaurant_preference')}
+                    className="mr-2"
+                  />
+                  {option}
+                </label>
+              ))}
+            </div>
+            {errors.restaurant_preference && (
+              <p className="text-red-500 text-sm">{errors.restaurant_preference.message}</p>
+            )}
+          </div>
+
+          {/* エリア */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="preferred_1areas" className="block font-medium">
+                第1希望エリア
+              </label>
+              <select
+                id="preferred_1areas"
+                {...register('preferred_1areas')}
+                className="w-full p-2 border rounded-md"
+              >
+                {areaOptions.map(option => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              {errors.preferred_1areas && (
+                <p className="text-red-500 text-sm">{errors.preferred_1areas.message}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="preferred_2areas" className="block font-medium">
+                第2希望エリア
+              </label>
+              <select
+                id="preferred_2areas"
+                {...register('preferred_2areas')}
+                className="w-full p-2 border rounded-md"
+              >
+                {areaOptions.map(option => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              {errors.preferred_2areas && (
+                <p className="text-red-500 text-sm">{errors.preferred_2areas.message}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="preferred_3areas" className="block font-medium">
+                第3希望エリア
+              </label>
+              <select
+                id="preferred_3areas"
+                {...register('preferred_3areas')}
+                className="w-full p-2 border rounded-md"
+              >
+                {areaOptions.map(option => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              {errors.preferred_3areas && (
+                <p className="text-red-500 text-sm">{errors.preferred_3areas.message}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 送信ボタン */}
+        <div className="pt-6">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-4 rounded-lg transition duration-200 disabled:opacity-50"
+          >
+            {submitting ? '更新中...' : '希望条件を更新する'}
+          </button>
+        </div>
+      </form>
+    </>
   );
 };
 
