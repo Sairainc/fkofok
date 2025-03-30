@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 
 const FlowPage = () => {
   const steps = [
@@ -9,10 +10,10 @@ const FlowPage = () => {
       title: '集合場所の確認',
       description: 'LINEで集合場所を確認します。',
       icon: (
-        <div className="w-full h-64 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center">
+        <div className="w-full h-64 bg-gradient-to-br from-primary/20 to-primary/40 rounded-lg flex items-center justify-center">
           <div className="text-center">
             <div className="text-6xl mb-4">📍</div>
-            <div className="text-2xl font-bold text-blue-800">集合場所</div>
+            <div className="text-2xl font-bold text-primary-dark">集合場所</div>
           </div>
         </div>
       )
@@ -22,10 +23,10 @@ const FlowPage = () => {
       title: '集合時間の5分前に待機',
       description: '集合時間の5分前に指定された場所で待機します。',
       icon: (
-        <div className="w-full h-64 bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center">
+        <div className="w-full h-64 bg-gradient-to-br from-primary/20 to-primary/40 rounded-lg flex items-center justify-center">
           <div className="text-center">
             <div className="text-6xl mb-4">⏰</div>
-            <div className="text-2xl font-bold text-green-800">5分前待機</div>
+            <div className="text-2xl font-bold text-primary-dark">5分前待機</div>
           </div>
         </div>
       )
@@ -35,10 +36,10 @@ const FlowPage = () => {
       title: '合コン開始',
       description: 'マッチした相手と合コンをお楽しみください。',
       icon: (
-        <div className="w-full h-64 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex items-center justify-center">
+        <div className="w-full h-64 bg-gradient-to-br from-primary/20 to-primary/40 rounded-lg flex items-center justify-center">
           <div className="text-center">
             <div className="text-6xl mb-4">🎉</div>
-            <div className="text-2xl font-bold text-purple-800">合コン開始</div>
+            <div className="text-2xl font-bold text-primary-dark">合コン開始</div>
           </div>
         </div>
       )
@@ -46,7 +47,7 @@ const FlowPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -70,7 +71,7 @@ const FlowPage = () => {
               </div>
               <div className="w-full lg:w-1/2">
                 <div className="bg-white p-8 rounded-lg shadow-lg">
-                  <div className="text-4xl font-bold text-blue-600 mb-4">
+                  <div className="text-4xl font-bold text-primary mb-4">
                     {step.number}
                   </div>
                   <h2 className="text-2xl font-semibold text-gray-900 mb-4">
@@ -83,10 +84,15 @@ const FlowPage = () => {
           ))}
         </div>
 
-        <div className="mt-16 text-center">
-          <button className="bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-blue-700 transition-colors">
-            無料で始める
-          </button>
+        <div className="mt-16 text-center space-y-4">
+          <Link href="/" className="inline-block text-primary hover:text-primary-dark transition-colors mb-4">
+            ← トップページに戻る
+          </Link>
+          <div>
+            <button className="bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary-dark transition-colors">
+              無料で始める
+            </button>
+          </div>
         </div>
       </div>
     </div>
