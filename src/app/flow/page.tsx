@@ -11,9 +11,18 @@ const FlowPage = () => {
       description: 'LINEで集合場所を確認します。',
       icon: (
         <div className="w-full h-64 bg-gradient-to-br from-primary/20 to-primary/40 rounded-lg flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-6xl mb-4">📍</div>
-            <div className="text-2xl font-bold text-primary-dark">集合場所</div>
+          <div className="w-80 bg-white rounded-2xl shadow-lg p-4 transform -rotate-3">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="w-8 h-8 bg-[#00B900] rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-bold">L</span>
+              </div>
+              <div className="text-sm font-semibold text-gray-800">LINE</div>
+            </div>
+            <div className="bg-gray-100 rounded-lg p-3">
+              <div className="text-sm text-gray-600 mb-1">集合場所のご案内</div>
+              <div className="text-sm font-medium text-gray-800">渋谷駅 ハチ公前広場</div>
+              <div className="text-xs text-gray-500 mt-1">集合時間: 19:00</div>
+            </div>
           </div>
         </div>
       )
@@ -85,9 +94,10 @@ const FlowPage = () => {
         </div>
 
         <div className="mt-16 text-center space-y-4">
-          <Link href="/" className="inline-block text-primary hover:text-primary-dark transition-colors mb-4">
-            ← トップページに戻る
-          </Link>
+          {React.createElement(Link, {
+            href: "/",
+            className: "inline-block text-primary hover:text-primary-dark transition-colors mb-4"
+          }, "← トップページに戻る")}
           <div>
             <button className="bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary-dark transition-colors">
               無料で始める
