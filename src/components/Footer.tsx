@@ -10,6 +10,7 @@ export const Footer: React.FC = () => {
           <a href="#" className="text-sm text-gray-500 hover:text-gray-900">利用規約</a>
           <a href="#" className="text-sm text-gray-500 hover:text-gray-900">特商法に基づく表記</a>
           <a href="#" className="text-sm text-gray-500 hover:text-gray-900">プライバシーポリシー</a>
+          <a href="https://mammoth-jackal-f4e.notion.site/1c62a372cdb5803b91faf6f074e6fdd1?pvs=4" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-500 hover:text-gray-900">よくある質問</a>
         </nav>
         <p className="text-sm text-gray-500">© 2024 コンパる All rights reserved.</p>
       </div>
