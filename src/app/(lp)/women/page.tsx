@@ -145,7 +145,7 @@ export default function WomenLP() {
     },
     {
       id: 2,
-      image: "/images/24歳 CEO.jpg",
+      image: "/images/男性経営者.jpg",
       age: 32,
       occupation: "経営者",
       location: "中央区"
