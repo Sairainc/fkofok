@@ -1,24 +1,33 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useUser } from '@/hooks/useUser'
+import liff from '@line/liff'
 
 export default function Payment() {
-  const { user, loading } = useUser()
+  const { user, loading } = useUser({ skipMatchCheck: true })
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const liffId = process.env.NEXT_PUBLIC_LIFF_ID
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        // ユーザーがログインしていない場合は認証ページへ
-        router.push('/auth')
-      } else {
-        // ユーザーの性別に基づいて適切な支払いページ（men/women）にリダイレクト
-        router.push(user.gender === 'men' ? '/payment/men' : '/payment/women')
+    const initPayment = async () => {
+      if (!loading) {
+        if (!user) {
+          // ログインしていない場合、LINEログインを実行
+          await liff.login({ redirectUri: window.location.href })
+          return
+        }
+
+        // ユーザーの性別に基づいて適切な支払いページにリダイレクト
+        const paymentUrl = `https://liff.line.me/${liffId}/payment/${user.gender}`
+        window.location.href = paymentUrl
       }
     }
-  }, [user, loading, router])
+
+    initPayment()
+  }, [user, loading, liffId])
 
   if (loading) {
     return (
@@ -28,10 +37,9 @@ export default function Payment() {
     )
   }
 
-  // ローディング中やリダイレクト中の表示
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div>リダイレクト中...</div>
+      <div>支払い処理を開始しています...</div>
     </div>
   )
 } 
