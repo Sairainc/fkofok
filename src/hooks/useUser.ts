@@ -56,17 +56,20 @@ export const useUser = ({ skipMatchCheck = false }: { skipMatchCheck?: boolean }
           console.error("❌ Supabaseエラー:", error);
         }
 
-        // **マッチングテーブルをチェック**
-        const { data: matchData } = await supabase
-          .from('matches')
-          .select('*')
-          .or(`male_user_1_id.eq."${profile.userId}",male_user_2_id.eq."${profile.userId}",female_user_1_id.eq."${profile.userId}",female_user_2_id.eq."${profile.userId}"`)
-          .limit(1);
+        // skipMatchCheckがtrueでない場合のみマッチングチェックを実行
+        if (!skipMatchCheck) {
+          // **マッチングテーブルをチェック**
+          const { data: matchData } = await supabase
+            .from('matches')
+            .select('*')
+            .or(`male_user_1_id.eq."${profile.userId}",male_user_2_id.eq."${profile.userId}",female_user_1_id.eq."${profile.userId}",female_user_2_id.eq."${profile.userId}"`)
+            .limit(1);
 
-        if (matchData && matchData.length > 0) {
-          setHasMatch(true);
-          if (process.env.NODE_ENV === 'development') {
-            console.log("✅ マッチが見つかりました:", matchData);
+          if (matchData && matchData.length > 0) {
+            setHasMatch(true);
+            if (process.env.NODE_ENV === 'development') {
+              console.log("✅ マッチが見つかりました:", matchData);
+            }
           }
         }
 
