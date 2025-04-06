@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useUser } from '@/hooks/useUser'
 import { createSquarePayment } from '@/lib/square'
 
@@ -32,7 +32,6 @@ const MEN_PLANS = {
 
 export default function MenPayment() {
   const { user, loading } = useUser({ skipMatchCheck: true })
-  const [selectedPlan, setSelectedPlan] = useState<'subscription' | 'oneTime'>('subscription')
 
   const handlePayment = async (paymentType: 'subscription' | 'one_time') => {
     if (!user) {
