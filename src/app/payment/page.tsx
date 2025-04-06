@@ -1,14 +1,11 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
 import { useUser } from '@/hooks/useUser'
 import liff from '@line/liff'
 
 export default function Payment() {
   const { user, loading } = useUser({ skipMatchCheck: true })
-  const router = useRouter()
-  const searchParams = useSearchParams()
   const liffId = process.env.NEXT_PUBLIC_LIFF_ID
 
   useEffect(() => {

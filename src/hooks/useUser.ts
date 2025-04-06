@@ -9,7 +9,7 @@ type User = {
   gender: "men" | "women";
 };
 
-export const useUser = (options?: { skipMatchCheck?: boolean }) => {
+export const useUser = ({ skipMatchCheck = false }: { skipMatchCheck?: boolean } = {}) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasMatch, setHasMatch] = useState(false);
