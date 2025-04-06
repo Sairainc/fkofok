@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { useUser } from '@/hooks/useUser'
 import { createSquarePayment } from '@/lib/square'
 
