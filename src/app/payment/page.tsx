@@ -2,29 +2,23 @@
 
 import { useEffect } from 'react'
 import { useUser } from '@/hooks/useUser'
-import liff from '@line/liff'
 
 export default function Payment() {
   const { user, loading } = useUser({ skipMatchCheck: true })
-  const liffId = process.env.NEXT_PUBLIC_LIFF_ID
 
   useEffect(() => {
-    const initPayment = async () => {
-      if (!loading) {
-        if (!user) {
-          // ログインしていない場合、LINEログインを実行
-          await liff.login({ redirectUri: window.location.href })
-          return
-        }
-
-        // ユーザーの性別に基づいて適切な支払いページにリダイレクト
-        const paymentUrl = `https://liff.line.me/${liffId}/payment/${user.gender}`
-        window.location.href = paymentUrl
+    if (!loading) {
+      if (!user) {
+        // ログインしていない場合は認証ページへ
+        window.location.href = '/auth'
+        return
       }
-    }
 
-    initPayment()
-  }, [user, loading, liffId])
+      // ユーザーの性別に基づいて適切な支払いページにリダイレクト
+      const paymentPath = user.gender === 'men' ? '/payment/men' : '/payment/women'
+      window.location.href = `${window.location.origin}${paymentPath}`
+    }
+  }, [user, loading])
 
   if (loading) {
     return (
