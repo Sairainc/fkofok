@@ -1,7 +1,6 @@
 'use client'
 
 import { useUser } from '@/hooks/useUser'
-import { createSquarePayment } from '@/lib/square'
 
 const WOMEN_PLANS = {
   subscription: {
@@ -44,13 +43,7 @@ export default function WomenPayment() {
     }
 
     try {
-      const plan = paymentType === 'subscription' ? WOMEN_PLANS.subscription : WOMEN_PLANS.oneTime
-      const { paymentUrl } = await createSquarePayment(
-        user.id,
-        plan.amount,
-        paymentType,
-        plan.planId
-      )
+      const paymentUrl = process.env.NEXT_PUBLIC_SQUARE_WOMEN_PAYMENT_LINK || ''
       window.location.href = paymentUrl
     } catch (error) {
       console.error('Failed to create payment:', error)

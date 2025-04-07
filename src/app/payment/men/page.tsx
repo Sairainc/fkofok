@@ -1,7 +1,6 @@
 'use client'
 
 import { useUser } from '@/hooks/useUser'
-import { createSquarePayment } from '@/lib/square'
 
 const MEN_PLANS = {
   subscription: {
@@ -44,13 +43,7 @@ export default function MenPayment() {
     }
 
     try {
-      const plan = paymentType === 'subscription' ? MEN_PLANS.subscription : MEN_PLANS.oneTime
-      const { paymentUrl } = await createSquarePayment(
-        user.id,
-        plan.amount,
-        paymentType,
-        plan.planId
-      )
+      const paymentUrl = process.env.NEXT_PUBLIC_SQUARE_MEN_PAYMENT_LINK || ''
       window.location.href = paymentUrl
     } catch (error) {
       console.error('Failed to create payment:', error)
@@ -90,12 +83,47 @@ export default function MenPayment() {
                 ))}
               </ul>
 
-              <button
-                onClick={() => handlePayment('subscription')}
-                className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-              >
-                サブスクリプションで始める
-              </button>
+              <div style={{
+                overflow: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                width: '259px',
+                background: '#FFFFFF',
+                border: '1px solid rgba(0, 0, 0, 0.1)',
+                boxShadow: '-2px 10px 5px rgba(0, 0, 0, 0)',
+                borderRadius: '10px',
+                fontFamily: 'SQ Market, SQ Market, Helvetica, Arial, sans-serif',
+                margin: '0 auto'
+              }}>
+                <div style={{ padding: '20px' }}>
+                  <p style={{
+                    fontSize: '18px',
+                    lineHeight: '20px',
+                    fontWeight: '600'
+                  }}>¥4,980</p>
+                  <a 
+                    target="_blank" 
+                    href="https://square.link/u/TnAY3XNt?src=embed" 
+                    style={{
+                      display: 'inline-block',
+                      fontSize: '18px',
+                      lineHeight: '48px',
+                      height: '48px',
+                      color: '#ffffff',
+                      minWidth: '212px',
+                      background: '#006aff',
+                      textAlign: 'center',
+                      boxShadow: '0 0 0 1px rgba(0,0,0,.1) inset',
+                      borderRadius: '50px',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    今すぐ購入する
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
 
