@@ -1,4 +1,4 @@
-import { Client, Environment } from 'square'
+import { ApiResponse, Client, Environment } from '@square/web-payments-sdk-types'
 
 // Square APIクライアントの初期化
 export const squareClient = new Client({
