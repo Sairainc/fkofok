@@ -21,7 +21,7 @@ export const getSquarePaymentLink = (gender: 'men' | 'women', liffId?: string) =
 type PaymentType = 'subscription' | 'one_time'
 
 export const createSquarePayment = async (
-  userId: string,
+  lineId: string,
   amount: number,
   paymentType: PaymentType,
   planId: string
@@ -34,7 +34,7 @@ export const createSquarePayment = async (
       .from('payment_requests')
       .insert({
         id: orderId,
-        user_id: userId,
+        line_id: lineId,
         amount,
         status: 'pending',
         payment_provider: 'square',
@@ -89,7 +89,7 @@ export const handleSquareWebhook = async (event: any) => {
       const { error: historyError } = await supabase
         .from('payment_history')
         .insert({
-          user_id: paymentRequest.user_id,
+          line_id: paymentRequest.line_id,
           amount,
           status: 'completed',
           payment_provider: 'square',
