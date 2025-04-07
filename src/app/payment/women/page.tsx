@@ -31,7 +31,7 @@ const WOMEN_PLANS = {
 export default function WomenPayment() {
   const { user, loading } = useUser({ skipMatchCheck: true })
 
-  const handlePayment = async (paymentType: 'subscription' | 'one_time') => {
+  const handlePayment = async () => {
     if (!user) {
       window.location.href = '/auth'
       return
@@ -84,7 +84,7 @@ export default function WomenPayment() {
               </ul>
 
               <button
-                onClick={() => handlePayment('subscription')}
+                onClick={handlePayment}
                 className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
               >
                 サブスクリプションで始める
@@ -111,7 +111,7 @@ export default function WomenPayment() {
               </ul>
 
               <button
-                onClick={() => handlePayment('one_time')}
+                onClick={handlePayment}
                 className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
               >
                 都度払いで始める

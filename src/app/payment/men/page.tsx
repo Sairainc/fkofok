@@ -31,7 +31,7 @@ const MEN_PLANS = {
 export default function MenPayment() {
   const { user, loading } = useUser({ skipMatchCheck: true })
 
-  const handlePayment = async (paymentType: 'subscription' | 'one_time') => {
+  const handlePayment = async () => {
     if (!user) {
       window.location.href = '/auth'
       return
@@ -146,7 +146,7 @@ export default function MenPayment() {
               </ul>
 
               <button
-                onClick={() => handlePayment('one_time')}
+                onClick={handlePayment}
                 className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
               >
                 都度払いで始める
