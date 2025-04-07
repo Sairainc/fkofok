@@ -2,6 +2,8 @@
 // 注: 決済リンクだけを使用するので、Square SDKは必要ありません
 
 import { supabase } from './supabase'
+import { createPaymentLink } from './square-client'
+import { v4 as uuidv4 } from 'uuid'
 
 export const getSquarePaymentLink = (gender: 'men' | 'women', liffId?: string) => {
   const baseUrl = gender === 'men'
@@ -25,10 +27,13 @@ export const createSquarePayment = async (
   planId: string
 ) => {
   try {
+    const orderId = uuidv4()
+
     // 支払いリクエストをDBに保存
     const { data: paymentRequest, error: dbError } = await supabase
       .from('payment_requests')
       .insert({
+        id: orderId,
         user_id: userId,
         amount,
         status: 'pending',
@@ -42,11 +47,11 @@ export const createSquarePayment = async (
     if (dbError) throw dbError
 
     // Squareの支払いリンクを生成
-    const paymentUrl = paymentType === 'subscription'
-      ? process.env.NEXT_PUBLIC_SQUARE_SUBSCRIPTION_URL
-      : process.env.NEXT_PUBLIC_SQUARE_ONE_TIME_URL
-
-    if (!paymentUrl) throw new Error('Square payment URL is not configured')
+    const paymentUrl = await createPaymentLink(
+      amount,
+      orderId,
+      paymentType === 'subscription'
+    )
 
     return {
       paymentRequest,
