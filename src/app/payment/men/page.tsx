@@ -102,10 +102,10 @@ export default function MenPayment() {
                     fontSize: '18px',
                     lineHeight: '20px',
                     fontWeight: '600'
-                  }}>¥4,980</p>
+                  }}>¥100</p>
                   <a 
                     target="_blank" 
-                    href="https://square.link/u/TnAY3XNt?src=embed" 
+                    href="https://square.link/u/bPoG8JjD?src=embed" 
                     style={{
                       display: 'inline-block',
                       fontSize: '18px',
