@@ -154,6 +154,52 @@ export default function MenPayment() {
             </div>
           </div>
         </div>
+
+        {/* テスト用お会計ボタン */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold mb-4">テスト用お会計</h2>
+          <div style={{
+            overflow: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            width: '259px',
+            background: '#FFFFFF',
+            border: '1px solid rgba(0, 0, 0, 0.1)',
+            boxShadow: '-2px 10px 5px rgba(0, 0, 0, 0)',
+            borderRadius: '10px',
+            fontFamily: 'SQ Market, SQ Market, Helvetica, Arial, sans-serif',
+            margin: '0 auto'
+          }}>
+            <div style={{ padding: '20px' }}>
+              <p style={{
+                fontSize: '18px',
+                lineHeight: '20px',
+                fontWeight: '600'
+              }}>¥100</p>
+              <a 
+                target="_blank" 
+                href="https://square.link/u/bPoG8JjD?src=embed" 
+                style={{
+                  display: 'inline-block',
+                  fontSize: '18px',
+                  lineHeight: '48px',
+                  height: '48px',
+                  color: '#ffffff',
+                  minWidth: '212px',
+                  background: '#006aff',
+                  textAlign: 'center',
+                  boxShadow: '0 0 0 1px rgba(0,0,0,.1) inset',
+                  borderRadius: '50px',
+                  textDecoration: 'none'
+                }}
+              >
+                今すぐ購入する
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
