@@ -1,8 +1,8 @@
 // 支払いリンクを生成する関数
 export const createPaymentLink = async (
-  amount: number,
-  orderId: string,
-  isSubscription: boolean
+  _amount: number,
+  _orderId: string,
+  _isSubscription: boolean
 ) => {
   try {
     // 支払いリンクの生成処理
