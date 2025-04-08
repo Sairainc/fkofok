@@ -53,7 +53,7 @@ export default function CancellationPolicy() {
 
           <div className="mt-8">
             <button
-              onClick={() => router.back()}
+              onClick={() => router.push('/')}
               className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark"
             >
               戻る
