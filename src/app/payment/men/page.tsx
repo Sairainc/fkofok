@@ -17,10 +17,10 @@ const MEN_PLANS = {
     ]
   },
   oneTime: {
-    amount: 3000,
+    amount: 4980,
     planId: 'men_one_time',
     title: '男性都度払いプラン',
-    description: '1回3,000円でプレミアム機能を利用',
+    description: '1回4,980円でプレミアム機能を利用',
     features: [
       'プロフィール審査済みの女性会員とマッチング',
       '優先的なマッチング',
