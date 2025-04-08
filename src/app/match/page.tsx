@@ -176,15 +176,18 @@ export default function MatchConfirmation() {
           
           <div className="text-center space-y-4">
             <p className="text-sm text-gray-600">
-              詳細については、LINEにてご連絡いたします。<br />
-              当日をお楽しみに！
+              マッチングが確定しました！<br />
+              決済を完了すると、LINEにて詳細をご連絡いたします。
+            </p>
+            <p className="text-sm text-primary">
+              ※決済完了後のキャンセルには、キャンセル料が発生する場合があります。
             </p>
             
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.push('/payment')}
               className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark w-full"
             >
-              ホームに戻る
+              決済に進む
             </button>
           </div>
         </div>

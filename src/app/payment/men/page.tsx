@@ -4,11 +4,11 @@ import { useUser } from '@/hooks/useUser'
 
 const MEN_PLANS = {
   subscription: {
-    amount: 4980,
-    cancelProtection: 5000,
+    amount: 5500,
+    cancelProtection: 9000,
     planId: 'men_subscription',
     title: '男性サブスクリプションプラン',
-    description: '月額4,980円でプレミアム機能が使い放題',
+    description: '月額5,500円でプレミアム機能が使い放題',
     features: [
       'プロフィール審査済みの女性会員とマッチング',
       '優先的なマッチング',
@@ -17,10 +17,10 @@ const MEN_PLANS = {
     ]
   },
   oneTime: {
-    amount: 4980,
+    amount: 3000,
     planId: 'men_one_time',
     title: '男性都度払いプラン',
-    description: '1回4,980円でプレミアム機能を利用',
+    description: '1回3,000円でプレミアム機能を利用',
     features: [
       'プロフィール審査済みの女性会員とマッチング',
       '優先的なマッチング',
@@ -57,10 +57,10 @@ export default function MenPayment() {
                 <div className="text-3xl font-bold">¥{MEN_PLANS.subscription.amount.toLocaleString()}</div>
                 <div className="mt-2 text-lg text-gray-600">
                   + キャンセルプロテクト ¥{MEN_PLANS.subscription.cancelProtection.toLocaleString()}
-                  <p className="text-sm text-gray-500 mt-1">※合コンに出席した場合は返金されます</p>
+                  <p className="text-sm text-gray-500 mt-1">※合コン後に返金されます</p>
                 </div>
                 <div className="mt-4 text-2xl font-bold text-green-600">
-                  合計: ¥{(MEN_PLANS.subscription.amount + MEN_PLANS.subscription.cancelProtection).toLocaleString()}
+                  合計: ¥14,500
                 </div>
               </div>
               
