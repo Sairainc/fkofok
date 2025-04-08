@@ -414,7 +414,7 @@ export default function MenLP() {
               <div className="bg-[rgba(255,108,180,0.05)] rounded-2xl p-8 shadow-sm border-2 border-[rgba(255,108,180,0.2)] relative mx-auto max-w-md">
                 <div className="absolute -top-3 -right-3 bg-[rgba(255,108,180,0.8)] text-white px-4 py-1 rounded-full text-sm">おすすめ</div>
                 <h3 className="text-xl font-bold mb-4">月額プラン</h3>
-                <div className="text-3xl font-bold mb-4">¥4,980<span className="text-base font-normal text-gray-600">/月（税込）</span></div>
+                <div className="text-3xl font-bold mb-4">¥5,500<span className="text-base font-normal text-gray-600">/月（税込）</span></div>
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-center gap-2">
                     {React.createElement(CheckCircleIcon, { className: "w-5 h-5 text-[rgba(255,108,180,0.8)]" })}
