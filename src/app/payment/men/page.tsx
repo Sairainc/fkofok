@@ -30,27 +30,7 @@ const MEN_PLANS = {
 }
 
 export default function MenPayment() {
-  const { user, loading } = useUser({ skipMatchCheck: true })
-
-  const handlePayment = async () => {
-    if (!user) {
-      window.location.href = '/auth'
-      return
-    }
-
-    if (user.gender !== 'men') {
-      window.location.href = '/payment/women'
-      return
-    }
-
-    try {
-      const paymentUrl = process.env.NEXT_PUBLIC_SQUARE_MEN_PAYMENT_LINK || ''
-      window.location.href = paymentUrl
-    } catch (error) {
-      console.error('Failed to create payment:', error)
-      // エラー時の処理を追加
-    }
-  }
+  const { loading } = useUser({ skipMatchCheck: true })
 
   if (loading) {
     return (

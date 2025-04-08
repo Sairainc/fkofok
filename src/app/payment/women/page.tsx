@@ -30,7 +30,7 @@ const WOMEN_PLANS = {
 }
 
 export default function WomenPayment() {
-  const { user, loading } = useUser({ skipMatchCheck: true })
+  const { loading } = useUser({ skipMatchCheck: true })
 
   if (loading) {
     return (
