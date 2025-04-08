@@ -17,10 +17,10 @@ const WOMEN_PLANS = {
     ]
   },
   oneTime: {
-    amount: 2000,
+    amount: 2980,
     planId: 'women_one_time',
     title: '女性都度払いプラン',
-    description: '1回2,000円でプレミアム機能を利用',
+    description: '1回2,980円でプレミアム機能を利用',
     features: [
       'プロフィール審査済みの男性会員とマッチング',
       '優先的なマッチング',
@@ -88,11 +88,6 @@ export default function WomenPayment() {
                 margin: '0 auto'
               }}>
                 <div style={{ padding: '20px' }}>
-                  <p style={{
-                    fontSize: '18px',
-                    lineHeight: '20px',
-                    fontWeight: '600'
-                  }}>¥7,980</p>
                   <a 
                     target="_blank" 
                     href="https://checkout.square.site/merchant/MLXPYMSBZ6XSR/checkout/V7OGKTH2VNN45POQQWYLU6YO" 
@@ -150,11 +145,6 @@ export default function WomenPayment() {
                 margin: '0 auto'
               }}>
                 <div style={{ padding: '20px' }}>
-                  <p style={{
-                    fontSize: '18px',
-                    lineHeight: '20px',
-                    fontWeight: '600'
-                  }}>¥2,980</p>
                   <a 
                     target="_blank" 
                     href="https://square.link/u/Y3gQNeHB" 
