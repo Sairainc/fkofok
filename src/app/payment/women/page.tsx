@@ -4,10 +4,11 @@ import { useUser } from '@/hooks/useUser'
 
 const WOMEN_PLANS = {
   subscription: {
-    amount: 3980,
+    amount: 2980,
+    cancelProtection: 5000,
     planId: 'women_subscription',
     title: '女性サブスクリプションプラン',
-    description: '月額3,980円でプレミアム機能が使い放題',
+    description: '月額2,980円でプレミアム機能が使い放題',
     features: [
       'プロフィール審査済みの男性会員とマッチング',
       '優先的なマッチング',
@@ -31,26 +32,6 @@ const WOMEN_PLANS = {
 export default function WomenPayment() {
   const { user, loading } = useUser({ skipMatchCheck: true })
 
-  const handlePayment = async () => {
-    if (!user) {
-      window.location.href = '/auth'
-      return
-    }
-
-    if (user.gender !== 'women') {
-      window.location.href = '/payment/men'
-      return
-    }
-
-    try {
-      const paymentUrl = process.env.NEXT_PUBLIC_SQUARE_WOMEN_PAYMENT_LINK || ''
-      window.location.href = paymentUrl
-    } catch (error) {
-      console.error('Failed to create payment:', error)
-      // エラー時の処理を追加
-    }
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -72,7 +53,16 @@ export default function WomenPayment() {
                 <h2 className="text-2xl font-semibold">{WOMEN_PLANS.subscription.title}</h2>
                 <p className="text-gray-600 mt-2">{WOMEN_PLANS.subscription.description}</p>
               </div>
-              <div className="text-3xl font-bold">¥{WOMEN_PLANS.subscription.amount.toLocaleString()}</div>
+              <div>
+                <div className="text-3xl font-bold">¥{WOMEN_PLANS.subscription.amount.toLocaleString()}</div>
+                <div className="mt-2 text-lg text-gray-600">
+                  + キャンセルプロテクト ¥{WOMEN_PLANS.subscription.cancelProtection.toLocaleString()}
+                  <p className="text-sm text-gray-500 mt-1">※合コンに出席した場合は返金されます</p>
+                </div>
+                <div className="mt-4 text-2xl font-bold text-green-600">
+                  合計: ¥{(WOMEN_PLANS.subscription.amount + WOMEN_PLANS.subscription.cancelProtection).toLocaleString()}
+                </div>
+              </div>
               
               <ul className="space-y-3">
                 {WOMEN_PLANS.subscription.features.map((feature, index) => (
@@ -83,12 +73,47 @@ export default function WomenPayment() {
                 ))}
               </ul>
 
-              <button
-                onClick={handlePayment}
-                className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-              >
-                サブスクリプションで始める
-              </button>
+              <div style={{
+                overflow: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                width: '259px',
+                background: '#FFFFFF',
+                border: '1px solid rgba(0, 0, 0, 0.1)',
+                boxShadow: '-2px 10px 5px rgba(0, 0, 0, 0)',
+                borderRadius: '10px',
+                fontFamily: 'SQ Market, SQ Market, Helvetica, Arial, sans-serif',
+                margin: '0 auto'
+              }}>
+                <div style={{ padding: '20px' }}>
+                  <p style={{
+                    fontSize: '18px',
+                    lineHeight: '20px',
+                    fontWeight: '600'
+                  }}>¥7,980</p>
+                  <a 
+                    target="_blank" 
+                    href="https://checkout.square.site/merchant/MLXPYMSBZ6XSR/checkout/V7OGKTH2VNN45POQQWYLU6YO" 
+                    style={{
+                      display: 'inline-block',
+                      fontSize: '18px',
+                      lineHeight: '48px',
+                      height: '48px',
+                      color: '#ffffff',
+                      minWidth: '212px',
+                      backgroundColor: '#006aff',
+                      textAlign: 'center',
+                      boxShadow: '0 0 0 1px rgba(0,0,0,.1) inset',
+                      borderRadius: '50px',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    今すぐ購入する
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -110,12 +135,47 @@ export default function WomenPayment() {
                 ))}
               </ul>
 
-              <button
-                onClick={handlePayment}
-                className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
-              >
-                都度払いで始める
-              </button>
+              <div style={{
+                overflow: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                width: '259px',
+                background: '#FFFFFF',
+                border: '1px solid rgba(0, 0, 0, 0.1)',
+                boxShadow: '-2px 10px 5px rgba(0, 0, 0, 0)',
+                borderRadius: '10px',
+                fontFamily: 'SQ Market, SQ Market, Helvetica, Arial, sans-serif',
+                margin: '0 auto'
+              }}>
+                <div style={{ padding: '20px' }}>
+                  <p style={{
+                    fontSize: '18px',
+                    lineHeight: '20px',
+                    fontWeight: '600'
+                  }}>¥2,980</p>
+                  <a 
+                    target="_blank" 
+                    href="https://square.link/u/Y3gQNeHB" 
+                    style={{
+                      display: 'inline-block',
+                      fontSize: '18px',
+                      lineHeight: '48px',
+                      height: '48px',
+                      color: '#ffffff',
+                      minWidth: '212px',
+                      backgroundColor: '#006aff',
+                      textAlign: 'center',
+                      boxShadow: '0 0 0 1px rgba(0,0,0,.1) inset',
+                      borderRadius: '50px',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    今すぐ購入する
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>

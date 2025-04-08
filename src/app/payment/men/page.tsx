@@ -5,6 +5,7 @@ import { useUser } from '@/hooks/useUser'
 const MEN_PLANS = {
   subscription: {
     amount: 4980,
+    cancelProtection: 5000,
     planId: 'men_subscription',
     title: '男性サブスクリプションプラン',
     description: '月額4,980円でプレミアム機能が使い放題',
@@ -72,7 +73,16 @@ export default function MenPayment() {
                 <h2 className="text-2xl font-semibold">{MEN_PLANS.subscription.title}</h2>
                 <p className="text-gray-600 mt-2">{MEN_PLANS.subscription.description}</p>
               </div>
-              <div className="text-3xl font-bold">¥{MEN_PLANS.subscription.amount.toLocaleString()}</div>
+              <div>
+                <div className="text-3xl font-bold">¥{MEN_PLANS.subscription.amount.toLocaleString()}</div>
+                <div className="mt-2 text-lg text-gray-600">
+                  + キャンセルプロテクト ¥{MEN_PLANS.subscription.cancelProtection.toLocaleString()}
+                  <p className="text-sm text-gray-500 mt-1">※合コンに出席した場合は返金されます</p>
+                </div>
+                <div className="mt-4 text-2xl font-bold text-green-600">
+                  合計: ¥{(MEN_PLANS.subscription.amount + MEN_PLANS.subscription.cancelProtection).toLocaleString()}
+                </div>
+              </div>
               
               <ul className="space-y-3">
                 {MEN_PLANS.subscription.features.map((feature, index) => (
@@ -102,10 +112,10 @@ export default function MenPayment() {
                     fontSize: '18px',
                     lineHeight: '20px',
                     fontWeight: '600'
-                  }}>¥100</p>
+                  }}>¥9,980</p>
                   <a 
                     target="_blank" 
-                    href="https://square.link/u/bPoG8JjD?src=embed" 
+                    href="https://checkout.square.site/merchant/MLXPYMSBZ6XSR/checkout/MVQASD6HINKGHJORXT6GUCM7" 
                     style={{
                       display: 'inline-block',
                       fontSize: '18px',
@@ -113,7 +123,7 @@ export default function MenPayment() {
                       height: '48px',
                       color: '#ffffff',
                       minWidth: '212px',
-                      background: '#006aff',
+                      backgroundColor: '#006aff',
                       textAlign: 'center',
                       boxShadow: '0 0 0 1px rgba(0,0,0,.1) inset',
                       borderRadius: '50px',
@@ -145,58 +155,47 @@ export default function MenPayment() {
                 ))}
               </ul>
 
-              <button
-                onClick={handlePayment}
-                className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
-              >
-                都度払いで始める
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* テスト用お会計ボタン */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4">テスト用お会計</h2>
-          <div style={{
-            overflow: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            width: '259px',
-            background: '#FFFFFF',
-            border: '1px solid rgba(0, 0, 0, 0.1)',
-            boxShadow: '-2px 10px 5px rgba(0, 0, 0, 0)',
-            borderRadius: '10px',
-            fontFamily: 'SQ Market, SQ Market, Helvetica, Arial, sans-serif',
-            margin: '0 auto'
-          }}>
-            <div style={{ padding: '20px' }}>
-              <p style={{
-                fontSize: '18px',
-                lineHeight: '20px',
-                fontWeight: '600'
-              }}>¥100</p>
-              <a 
-                target="_blank" 
-                href="https://square.link/u/bPoG8JjD?src=embed" 
-                style={{
-                  display: 'inline-block',
-                  fontSize: '18px',
-                  lineHeight: '48px',
-                  height: '48px',
-                  color: '#ffffff',
-                  minWidth: '212px',
-                  background: '#006aff',
-                  textAlign: 'center',
-                  boxShadow: '0 0 0 1px rgba(0,0,0,.1) inset',
-                  borderRadius: '50px',
-                  textDecoration: 'none'
-                }}
-              >
-                今すぐ購入する
-              </a>
+              <div style={{
+                overflow: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                width: '259px',
+                background: '#FFFFFF',
+                border: '1px solid rgba(0, 0, 0, 0.1)',
+                boxShadow: '-2px 10px 5px rgba(0, 0, 0, 0)',
+                borderRadius: '10px',
+                fontFamily: 'SQ Market, SQ Market, Helvetica, Arial, sans-serif',
+                margin: '0 auto'
+              }}>
+                <div style={{ padding: '20px' }}>
+                  <p style={{
+                    fontSize: '18px',
+                    lineHeight: '20px',
+                    fontWeight: '600'
+                  }}>¥4,980</p>
+                  <a 
+                    target="_blank" 
+                    href="https://square.link/u/dFxGMdFC" 
+                    style={{
+                      display: 'inline-block',
+                      fontSize: '18px',
+                      lineHeight: '48px',
+                      height: '48px',
+                      color: '#ffffff',
+                      minWidth: '212px',
+                      backgroundColor: '#006aff',
+                      textAlign: 'center',
+                      boxShadow: '0 0 0 1px rgba(0,0,0,.1) inset',
+                      borderRadius: '50px',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    今すぐ購入する
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
